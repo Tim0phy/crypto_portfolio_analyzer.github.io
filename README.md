@@ -23,7 +23,7 @@ Exchange-native portfolio views and third-party tax tools (e.g. CoinLedger, Koin
 
 No build step, no dependencies to install. This is a static HTML file.
 
-1. Download `index.html` from this repository or open the website.
+1. Download `index.html` from this repository or [open the website](https://tim0phy.github.io/crypto_portfolio_analyzer.github.io/).
 2. Open it directly in any modern browser.
 3. Export your transaction history from Binance: **Orders → Assets History → Transaction History → Export Transaction Records → Generate all statements → CSV**.
 4. Drag the CSV onto the upload zone, or click to browse.
