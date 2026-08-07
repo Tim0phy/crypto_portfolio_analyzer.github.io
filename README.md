@@ -5,7 +5,7 @@ A privacy-first, single-page web app that parses your Binance transaction histor
 > [!NOTE]
 > No backend, no accounts. Your CSV is parsed and processed 100% client-side. The only network calls are to the public [CoinGecko](https://www.coingecko.com/en/api) API for current and historical prices; those lookups transmit coin symbols only, never amounts or account data.
 
-![screenshot-1786129054762.png](..\..\..\timop\Desktop\screenshot-1786129054762.png)
+
 ## Why this exists
 
 Exchange-native portfolio views and third-party tax tools (e.g. CoinLedger, Koinly) often misclassify Binance-specific transaction types - Launchpool subscriptions, Small Assets Exchange, Strategy trading rebates, internal transfers - leading to holdings and cost basis figures that do not match your actual wallet balance. This tool recomputes both from the raw transaction ledger using a transparent, auditable method, so you can verify (or correct) what other tools report.
