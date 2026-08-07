@@ -4,348 +4,399 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
-  try { document.documentElement.dataset.theme = localStorage.getItem('portfolioTheme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); } catch (e) {}
+try {
+  document.documentElement.dataset.theme = localStorage.getItem('portfolioTheme') || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+} catch (e) {}
 </script>
-<title>加密貨幣 Portfolio 分析工具</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<title>Portfolio</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src https://api.coingecko.com; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" crossorigin="anonymous" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js" crossorigin="anonymous" integrity="sha384-Cs3dgUx6+jDxxuqHvVH8Onpyj2LF1gKZurLDlhqzuJmUqVYMJ0THTWpxK5Z086Zm"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.min.js" crossorigin="anonymous" integrity="sha384-dwwI6ICEN/0ZQlS5owhUa/6ZzvwUPmjH45bFVCAcjgjTulbHJvlE+TGU3g1k0N3R"></script>
 <style>
-  :root {
-    --bg: #0C1014;
-    --surface: #141A20;
-    --surface-2: #1B232B;
-    --surface-3: #222C35;
-    --border: rgba(255,255,255,0.07);
-    --border-strong: rgba(255,255,255,0.14);
-    --text: #EEF2F6;
-    --text-2: #98A3AE;
-    --text-3: #5F6B76;
-    --accent: #34D399;
-    --accent-strong: #0FBF8F;
-    --accent-soft: rgba(52,211,153,0.12);
-    --accent-fg: #07231B;
-    --gold: #F5B301;
-    --risk-pos: #34D399;
-    --risk-neg: #F87171;
-    --risk-pos-soft: rgba(52,211,153,0.12);
-    --risk-neg-soft: rgba(248,113,113,0.12);
-    --ring: rgba(52,211,153,0.45);
-    --radius-card: 16px;
-    --radius-md: 12px;
-    --radius-sm: 10px;
-    --radius-full: 999px;
-    --shadow-1: 0 1px 2px rgba(0,0,0,0.35);
-    --shadow-2: 0 12px 32px rgba(0,0,0,0.35);
-    --font-sans: -apple-system, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
-    --font-mono: "SF Mono", "Cascadia Mono", Consolas, "Roboto Mono", monospace;
-    --bg-top: #0D1318;
-    --bg-glow: rgba(52,211,153,0.08);
-    --glyph-glow: rgba(52,211,153,0.28);
-    color-scheme: dark;
-  }
-  :root[data-theme="light"] {
-    --bg: #F5F7FA;
-    --bg-top: #FDFEFF;
-    --bg-glow: rgba(15,191,143,0.10);
-    --glyph-glow: rgba(15,191,143,0.20);
-    --surface: #FFFFFF;
-    --surface-2: #EEF2F6;
-    --surface-3: #E1E7EE;
-    --border: rgba(15,23,42,0.08);
-    --border-strong: rgba(15,23,42,0.16);
-    --text: #0F172A;
-    --text-2: #475569;
-    --text-3: #94A3B8;
-    --accent: #0FBF8F;
-    --accent-strong: #0CA37C;
-    --accent-soft: rgba(15,191,143,0.12);
-    --accent-fg: #07231B;
-    --gold: #D97706;
-    --risk-pos: #059669;
-    --risk-neg: #E11D48;
-    --risk-pos-soft: rgba(5,150,105,0.12);
-    --risk-neg-soft: rgba(225,29,72,0.10);
-    --ring: rgba(15,191,143,0.35);
-    --shadow-1: 0 1px 2px rgba(15,23,42,0.06);
-    --shadow-2: 0 12px 32px rgba(15,23,42,0.10);
-    color-scheme: light;
-  }
-  * { box-sizing: border-box; }
-  html {
-    -webkit-text-size-adjust: 100%;
-    background-color: var(--bg);
-    background-image: radial-gradient(1100px 520px at 85% -10%, var(--bg-glow), transparent 60%);
-    background-attachment: fixed;
-  }
-  body {
-    font-family: var(--font-sans);
-    color: var(--text);
-    margin: 0;
-    padding: 0;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
-  .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 4px 24px 64px; }
+:root {
+  --bg:#0C1014; --surface:#141A20; --surface-2:#1B232B; --surface-3:#222C35;
+  --border:rgba(255,255,255,0.07); --border-strong:rgba(255,255,255,0.14);
+  --text:#EEF2F6; --text-2:#98A3AE; --text-3:#5F6B76;
+  --accent:#34D399; --accent-strong:#0FBF8F; --accent-soft:rgba(52,211,153,0.12); --accent-fg:#07231B;
+  --gold:#F5B301; --risk-pos:#34D399; --risk-neg:#F87171;
+  --risk-pos-soft:rgba(52,211,153,0.12); --risk-neg-soft:rgba(248,113,113,0.12);
+  --ring:rgba(52,211,153,0.45);
+  --radius-card:16px; --radius-md:12px; --radius-sm:10px; --radius-full:999px;
+  --shadow-1:0 1px 2px rgba(0,0,0,0.35); --shadow-2:0 12px 32px rgba(0,0,0,0.35);
+  --font-sans:-apple-system,"Segoe UI",Roboto,"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+  --bg-top:#0D1318; --bg-glow:rgba(52,211,153,0.08); --glyph-glow:rgba(52,211,153,0.28);
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg:#F5F7FA; --bg-top:#FDFEFF; --bg-glow:rgba(15,191,143,0.10); --glyph-glow:rgba(15,191,143,0.20);
+  --surface:#FFFFFF; --surface-2:#EEF2F6; --surface-3:#E1E7EE;
+  --border:rgba(15,23,42,0.08); --border-strong:rgba(15,23,42,0.16);
+  --text:#0F172A; --text-2:#475569; --text-3:#94A3B8;
+  --accent:#0FBF8F; --accent-strong:#0CA37C; --accent-soft:rgba(15,191,143,0.12); --accent-fg:#07231B;
+  --gold:#D97706; --risk-pos:#059669; --risk-neg:#E11D48;
+  --risk-pos-soft:rgba(5,150,105,0.12); --risk-neg-soft:rgba(225,29,72,0.10);
+  --ring:rgba(15,191,143,0.35);
+  --shadow-1:0 1px 2px rgba(15,23,42,0.06); --shadow-2:0 12px 32px rgba(15,23,42,0.10);
+  color-scheme: light;
+}
+* { box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; background-color:var(--bg); background-image:radial-gradient(1100px 520px at 85% -10%, var(--bg-glow), transparent 60%); background-attachment:fixed; }
+body { font-family:var(--font-sans); color:var(--text); margin:0; padding:0; line-height:1.5; -webkit-font-smoothing:antialiased; }
+.container { width:100%; max-width:1200px; margin:0 auto; padding:4px 24px 64px; }
+.app-header { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; max-width:1200px; margin:0 auto; padding:22px 24px 8px; }
+.brand { display:flex; align-items:center; gap:14px; min-width:0; }
+.brand-glyph { width:42px; height:42px; flex:none; display:grid; place-items:center; border-radius:14px; background:linear-gradient(135deg, var(--accent-strong), #17E6AE); color:#07231B; box-shadow:0 6px 18px var(--glyph-glow); }
+.brand-glyph svg { width:24px; height:24px; }
+.brand h1 { font-size:21px; font-weight:700; letter-spacing:-.2px; margin:0; }
+.brand-sub { font-size:13px; color:var(--text-2); margin:3px 0 0; }
+.btn { appearance:none; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:inherit; font-size:14px; font-weight:550; line-height:1; padding:10px 16px; border-radius:var(--radius-sm); border:1px solid transparent; cursor:pointer; margin:0; transition:background .18s,border-color .18s,color .18s,box-shadow .18s; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.btn:focus-visible { outline:none; box-shadow:0 0 0 3px var(--ring); }
+.btn-primary { background:var(--accent); color:var(--accent-fg); }
+.btn-primary:hover:not(:disabled) { background:var(--accent-strong); }
+.btn-secondary { background:var(--surface-2); color:var(--text); border-color:var(--border-strong); }
+.btn-secondary:hover:not(:disabled) { border-color:var(--accent); color:var(--accent); }
+.btn-ghost { background:transparent; color:var(--text-2); }
+.btn-ghost:hover:not(:disabled) { color:var(--text); }
+.header-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.theme-toggle svg { width:18px; height:18px; }
+.theme-toggle .icon-sun { display:none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display:block; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display:none; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-card); padding:24px; margin-bottom:20px; box-shadow:var(--shadow-1); overflow:hidden; }
+.card-header { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
+.card-title { font-size:16px; font-weight:650; margin:0; letter-spacing:.2px; }
+.card-subtitle { font-size:12px; color:var(--text-2); margin-top:2px; }
+.upload-zone { border:2px dashed var(--border-strong); border-radius:var(--radius-md); padding:44px 24px; text-align:center; cursor:pointer; touch-action:manipulation; transition:border-color .2s,background .2s; }
+.upload-zone:hover, .upload-zone.dragover { border-color:var(--accent); background:var(--accent-soft); }
+.upload-zone:focus-visible { outline:none; box-shadow:0 0 0 3px var(--ring); }
+.upload-zone input { display:none; }
+.upload-zone .icon { font-size:36px; margin-bottom:10px; display:block; line-height:1; }
+.upload-zone strong { font-weight:600; font-size:15px; }
+.upload-zone .hint { font-size:12px; color:var(--text-3); margin-top:8px; }
+.upload-row { display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap; margin-top:14px; }
+.upload-row .btn { flex:none; }
+.saved-banner { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; background:var(--accent-soft); border:1px solid var(--border); border-radius:var(--radius-md); padding:12px 16px; margin-bottom:14px; font-size:13px; color:var(--text-2); }
+.saved-banner strong { color:var(--text); }
+.status-msg { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-2); margin-top:14px; min-height:20px; transition:color .2s; }
+.status-msg.loading { color:var(--accent); }
+.status-msg.loading::before { content:''; width:14px; height:14px; flex:none; border:2px solid var(--accent); border-top-color:transparent; border-radius:50%; animation:spin .8s linear infinite; }
+.status-msg.success { color:var(--risk-pos); }
+.status-msg.error { color:var(--risk-neg); }
+@keyframes spin { to { transform:rotate(360deg); } }
+.summary-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(190px,1fr)); gap:16px; margin-bottom:20px; }
+.stat-box { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:18px; box-shadow:var(--shadow-1); }
+.stat-box .label { font-size:12px; font-weight:550; color:var(--text-2); margin-bottom:10px; text-transform:uppercase; letter-spacing:.5px; }
+.stat-box .value { font-size:24px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.3px; }
+.stat-box .subvalue { font-size:12px; color:var(--text-3); margin-top:4px; }
+.table-wrap { width:100%; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th, td { text-align:right; padding:10px 12px; border-bottom:1px solid var(--border); font-variant-numeric:tabular-nums; white-space:nowrap; }
+th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align:left; }
+th { color:var(--text-2); font-weight:550; font-size:12px; text-transform:uppercase; letter-spacing:.4px; }
+tbody tr { transition:background .15s; }
+tbody tr:hover { background:var(--surface-2); }
+.positive { color:var(--risk-pos); font-weight:600; }
+.negative { color:var(--risk-neg); font-weight:600; }
+.coin-icon-badge { display:inline-grid; place-items:center; width:22px; height:22px; border-radius:50%; background:var(--surface-3); color:var(--text); font-size:10px; font-weight:700; margin-right:8px; vertical-align:-4px; }
+.price-input { width:92px; background:var(--surface-2); border:1px solid var(--border-strong); color:var(--text); border-radius:8px; padding:6px 8px; text-align:right; font-size:13px; font-family:inherit; font-variant-numeric:tabular-nums; transition:border-color .18s,box-shadow .18s; }
+.price-input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--ring); }
+.footnote { font-size:12px; color:var(--text-3); margin-top:18px; line-height:1.7; }
+.app-disclaimer { font-size:11px; color:var(--text-3); margin-top:-6px; padding:16px 0; border-top:1px solid var(--border); line-height:1.7; text-align:center; max-width:900px; margin-left:auto; margin-right:auto; }
+.holdings-layout { display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap; }
+.holdings-table-wrap { flex:1 1 auto; min-width:0; }
+.pie-chart-container { width:min(340px,100%); flex-shrink:0; margin:0 auto; }
+.pie-chart-container h4 { color:var(--text-2); font-weight:500; font-size:13px; text-align:center; margin:0 0 6px; }
+.pie-chart-inner { position:relative; height:clamp(220px,36vh,300px); }
+.pie-mode-tabs { display:flex; gap:6px; justify-content:center; margin-top:10px; flex-wrap:wrap; }
+.chart-container { position:relative; height:clamp(280px,42vh,460px); }
+.chart-container canvas { cursor:grab; }
+.chart-container canvas:active { cursor:grabbing; }
+.range-tabs { display:flex; gap:8px; flex-wrap:wrap; }
+.range-btn { appearance:none; font-family:inherit; background:transparent; border:1px solid var(--border-strong); color:var(--text-2); padding:7px 15px; border-radius:var(--radius-full); cursor:pointer; font-size:13px; font-weight:550; margin:0; transition:border-color .18s,color .18s,background .18s; }
+.range-btn:hover { border-color:var(--accent); color:var(--text); }
+.range-btn.active { background:var(--accent); border-color:var(--accent); color:var(--accent-fg); font-weight:650; }
+.range-btn:focus-visible { outline:none; box-shadow:0 0 0 3px var(--ring); }
+details.advanced { border:1px solid var(--border); border-radius:var(--radius-md); background:var(--surface); padding:14px 18px; margin-top:6px; }
+details.advanced summary { cursor:pointer; font-weight:550; color:var(--text-2); font-size:13px; list-style:none; user-select:none; }
+details.advanced summary::-webkit-details-marker { display:none; }
+details.advanced summary::after { content:'▾'; margin-left:8px; transition:transform .18s; }
+details.advanced[open] summary::after { transform:rotate(180deg); }
+details.advanced[open] summary { color:var(--text); }
+a { color:var(--accent); }
+.zero-cost-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.zero-cost-chip { display:inline-flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--border-strong); border-radius:var(--radius-full); padding:6px 12px; font-size:12px; color:var(--text-2); }
+.zero-cost-chip strong { color:var(--text); font-size:12px; }
+.action-row { display:flex; gap:10px; flex-wrap:wrap; }
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); display:none; align-items:center; justify-content:center; z-index:50; padding:20px; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:var(--surface); border:1px solid var(--border-strong); border-radius:var(--radius-card); padding:24px; max-width:420px; width:100%; box-shadow:var(--shadow-2); }
+.modal-box h4 { margin:0 0 10px; font-size:16px; }
+.modal-box p { font-size:13px; color:var(--text-2); line-height:1.6; margin:0 0 18px; }
+.modal-actions { display:flex; justify-content:flex-end; gap:10px; }
+/* ==================== Landing page ==================== */
+.landing { display:block; max-width:1200px; margin:0 auto; padding:6px 24px 0; }
+.landing-hero { padding:56px 0 44px; text-align:center; }
+.landing-badge { display:inline-flex; align-items:center; gap:8px; background:var(--accent-soft); color:var(--accent); border:1px solid var(--border); border-radius:var(--radius-full); padding:7px 15px; font-size:13px; font-weight:550; margin-bottom:24px; }
+.landing-badge .dot { width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent); }
+.landing-title { font-size:clamp(34px,6vw,58px); line-height:1.14; font-weight:800; letter-spacing:-1.5px; margin:0 0 20px; }
+.landing-title .accent { background:linear-gradient(120deg,var(--accent),#17E6AE); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.landing-sub { font-size:clamp(15px,2vw,18px); color:var(--text-2); max-width:660px; margin:0 auto 34px; line-height:1.75; }
+.landing-cta-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+.btn-lg { padding:14px 28px; font-size:15px; border-radius:var(--radius-md); }
+.landing-strip { display:flex; justify-content:center; gap:30px; flex-wrap:wrap; margin-top:34px; color:var(--text-2); font-size:13px; }
+.landing-strip > span { display:inline-flex; align-items:center; gap:7px; }
+.landing-preview { max-width:880px; margin:52px auto 0; text-align:left; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-card); box-shadow:var(--shadow-2); overflow:hidden; }
+.preview-head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:15px 20px; border-bottom:1px solid var(--border); }
+.preview-dots { display:flex; gap:6px; }
+.preview-dots i { width:10px; height:10px; border-radius:50%; background:var(--surface-3); }
+.preview-dots i:nth-child(1) { background:#F87171; }
+.preview-dots i:nth-child(2) { background:#F5B301; }
+.preview-dots i:nth-child(3) { background:#34D399; }
+.preview-title { font-size:13px; font-weight:600; color:var(--text-2); }
+.preview-tag { font-size:11px; font-weight:600; color:var(--text-3); letter-spacing:.5px; text-transform:uppercase; }
+.preview-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; padding:20px 20px 14px; }
+.preview-stat { background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 16px; }
+.preview-stat .k { display:block; font-size:11.5px; color:var(--text-3); margin-bottom:6px; font-weight:550; }
+.preview-stat .v { font-size:clamp(16px,2.4vw,21px); font-weight:750; font-variant-numeric:tabular-nums; letter-spacing:-.3px; }
+.preview-stat .v.pos { color:var(--risk-pos); }
+.preview-chart { display:block; width:100%; height:150px; padding:0 20px; }
+.spark-area { fill:var(--accent-soft); }
+.spark-line { fill:none; stroke:var(--accent); stroke-width:2.5; stroke-linejoin:round; stroke-linecap:round; }
+.spark-line-2 { fill:none; stroke:var(--text-3); stroke-width:2; stroke-dasharray:5 5; }
+.preview-rows { padding:0 20px 20px; }
+.p-row { display:grid; grid-template-columns:1.2fr 1fr 1fr 1fr; gap:12px; align-items:center; padding:10px 4px; border-top:1px solid var(--border); font-size:12.5px; font-variant-numeric:tabular-nums; }
+.p-row.p-head { padding:8px 4px; font-size:11px; font-weight:550; color:var(--text-3); text-transform:uppercase; letter-spacing:.4px; border-top:none; }
+.p-row .p-coin { font-weight:700; }
+.p-row .p-amt { color:var(--text-2); text-align:right; }
+.p-row .p-val { text-align:right; }
+.p-row .p-ret { text-align:right; font-weight:650; }
+.p-row .p-ret.pos { color:var(--risk-pos); }
+.p-row .p-ret.neg { color:var(--risk-neg); }
+.landing-section { padding:58px 0 6px; }
+.landing-h2 { font-size:clamp(24px,4vw,34px); font-weight:750; letter-spacing:-.6px; text-align:center; margin:0 0 10px; }
+.landing-h2-sub { text-align:center; color:var(--text-2); font-size:15px; margin:0 0 38px; }
+.feature-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:16px; }
+.feature-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-card); padding:22px; transition:border-color .2s,transform .2s,box-shadow .2s; }
+.feature-card:hover { border-color:var(--border-strong); transform:translateY(-2px); box-shadow:var(--shadow-2); }
+.feature-icon { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; background:var(--accent-soft); color:var(--accent); margin-bottom:14px; }
+.feature-icon svg { width:22px; height:22px; }
+.feature-card h3 { font-size:16px; font-weight:650; margin:0 0 8px; }
+.feature-card p { margin:0; font-size:13.5px; color:var(--text-2); line-height:1.7; }
+.steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; max-width:940px; margin:0 auto; }
+.step { text-align:center; padding:28px 20px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-card); }
+.step-num { width:38px; height:38px; margin:0 auto 14px; border-radius:50%; display:grid; place-items:center; background:var(--accent); color:var(--accent-fg); font-weight:750; font-size:15px; }
+.step h3 { font-size:16px; font-weight:650; margin:0 0 8px; }
+.step p { margin:0; color:var(--text-2); font-size:13.5px; line-height:1.7; }
+.landing-privacy { margin-top:14px; background:linear-gradient(135deg,var(--accent-soft),transparent 72%); border:1px solid var(--border); border-radius:var(--radius-card); padding:32px 30px; display:flex; gap:22px; align-items:center; flex-wrap:wrap; }
+.landing-privacy .shield { width:54px; height:54px; flex:none; border-radius:14px; background:var(--accent); color:var(--accent-fg); display:grid; place-items:center; }
+.landing-privacy .shield svg { width:28px; height:28px; }
+.landing-privacy h3 { margin:0 0 8px; font-size:19px; font-weight:700; }
+.landing-privacy p { margin:0; color:var(--text-2); font-size:14px; line-height:1.75; max-width:720px; }
+.landing-footer-cta { text-align:center; padding:52px 0 8px; }
+.landing-footer-cta h2 { font-size:clamp(22px,3.6vw,32px); font-weight:750; margin:0 0 10px; }
+.landing-footer-cta p { color:var(--text-2); margin:0 0 26px; font-size:15px; }
+.landing-footer { border-top:1px solid var(--border); margin-top:44px; padding:22px 0 44px; display:flex; flex-direction:column; gap:16px; color:var(--text-3); font-size:12.5px; }
+.landing-footer-top { display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; }
+.landing-footer-brand { display:flex; flex-direction:column; gap:4px; }
+.landing-footer-name { font-size:18px; font-weight:750; color:var(--accent); letter-spacing:0.5px; }
+.landing-footer-creator { font-size:13px; color:var(--text-2); }
+.landing-footer-socials { display:flex; gap:10px; }
+.social-btn { width:38px; height:38px; border-radius:10px; background:var(--surface-2); color:var(--text-2); display:grid; place-items:center; transition:background .2s,color .2s; text-decoration:none; }
+.social-btn:hover { background:var(--surface-3); color:var(--text); }
+.landing-footer-divider { height:1px; background:var(--border); width:100%; }
+.landing-footer-copyright { text-align:center; font-size:12px; color:var(--text-3); }
 
-  /* Header / brand */
-  .app-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 22px 24px 8px;
-  }
-  .brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
-  .brand-glyph {
-    width: 42px; height: 42px; flex: none;
-    display: grid; place-items: center;
-    border-radius: 14px;
-    background: linear-gradient(135deg, var(--accent-strong), #17E6AE);
-    color: #07231B;
-    box-shadow: 0 6px 18px var(--glyph-glow);
-  }
-  .brand-glyph svg { width: 24px; height: 24px; }
-  .brand h1 { font-size: 21px; font-weight: 700; letter-spacing: .2px; margin: 0; }
-  .brand-sub { font-size: 13px; color: var(--text-2); margin: 3px 0 0; }
-
-  /* Buttons */
-  .btn {
-    appearance: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 550;
-    line-height: 1;
-    padding: 10px 16px;
-    border-radius: var(--radius-sm);
-    border: 1px solid transparent;
-    cursor: pointer;
-    margin: 0;
-    transition: background .18s, border-color .18s, color .18s, box-shadow .18s;
-  }
-  .btn:disabled { opacity: .5; cursor: not-allowed; }
-  .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
-  .btn-primary { background: var(--accent); color: var(--accent-fg); }
-  .btn-primary:hover:not(:disabled) { background: var(--accent-strong); }
-  .btn-secondary { background: var(--surface-2); color: var(--text); border-color: var(--border-strong); }
-  .btn-secondary:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-  .btn-ghost { background: transparent; color: var(--text-2); }
-  .btn-ghost:hover:not(:disabled) { color: var(--text); }
-  .header-actions { display: flex; align-items: center; gap: 8px; }
-  .theme-toggle svg { width: 18px; height: 18px; }
-  .theme-toggle .icon-sun { display: none; }
-  :root[data-theme="light"] .theme-toggle .icon-sun { display: block; }
-  :root[data-theme="light"] .theme-toggle .icon-moon { display: none; }
-
-  /* Cards */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    padding: 24px;
-    margin-bottom: 20px;
-    box-shadow: var(--shadow-1);
-  }
-  .card-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
-  .card-title { font-size: 16px; font-weight: 650; margin: 0; letter-spacing: .2px; }
-
-  /* Upload zone */
-  .upload-zone {
-    border: 2px dashed var(--border-strong);
-    border-radius: var(--radius-md);
-    padding: 44px 24px;
-    text-align: center;
-    cursor: pointer;
-    touch-action: manipulation;
-    transition: border-color .2s, background .2s;
-  }
-  .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: var(--accent-soft); }
-  .upload-zone:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
-  .upload-zone input { display: none; }
-  .upload-zone .icon { font-size: 36px; margin-bottom: 10px; display: block; line-height: 1; }
-  .upload-zone strong { font-weight: 600; font-size: 15px; }
-  .upload-zone .hint { font-size: 12px; color: var(--text-3); margin-top: 8px; }
-
-  /* Status message */
-  .status-msg {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--text-2);
-    margin-top: 14px;
-    min-height: 20px;
-    transition: color .2s;
-  }
-  .status-msg.loading { color: var(--accent); }
-  .status-msg.loading::before {
-    content: "";
-    width: 14px; height: 14px; flex: none;
-    border: 2px solid var(--accent);
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin .8s linear infinite;
-  }
-  .status-msg.success { color: var(--risk-pos); }
-  .status-msg.error { color: var(--risk-neg); }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* Summary stats */
-  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-bottom: 20px; }
-  .stat-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 18px;
-    box-shadow: var(--shadow-1);
-  }
-  .stat-box .label { font-size: 12px; font-weight: 550; color: var(--text-2); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .5px; }
-  .stat-box .value { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.3px; }
-
-  /* Tables */
-  .table-wrap { width: 100%; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th, td {
-    text-align: right;
-    padding: 13px 14px;
-    border-bottom: 1px solid var(--border);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-  th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
-  th { color: var(--text-2); font-weight: 550; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; }
-  tbody tr { transition: background .15s; }
-  tbody tr:hover { background: var(--surface-2); }
-  .positive { color: var(--risk-pos); font-weight: 600; }
-  .negative { color: var(--risk-neg); font-weight: 600; }
-  .coin-icon-badge {
-    display: inline-grid;
-    place-items: center;
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    background: var(--surface-3);
-    color: var(--text);
-    font-size: 10px;
-    font-weight: 700;
-    margin-right: 8px;
-    vertical-align: -4px;
-  }
-  .price-input {
-    width: 92px;
-    background: var(--surface-2);
-    border: 1px solid var(--border-strong);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 6px 8px;
-    text-align: right;
-    font-size: 13px;
-    font-family: inherit;
-    font-variant-numeric: tabular-nums;
-    transition: border-color .18s, box-shadow .18s;
-  }
-  .price-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); }
-
-  .footnote { font-size: 12px; color: var(--text-3); margin-top: 18px; line-height: 1.7; }
-  .holdings-layout { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
-  .holdings-table-wrap { flex: 1 1 auto; min-width: 0; }
-  .pie-chart-container { width: min(340px, 100%); height: clamp(240px, 38vh, 320px); flex-shrink: 0; margin: 0 auto; }
-  .pie-chart-container h4 { color: var(--text-2); font-weight: 500; font-size: 13px; text-align: center; margin: 0 0 6px; }
-  .chart-container { position: relative; height: clamp(280px, 42vh, 460px); }
-  .range-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
-  .range-btn {
-    appearance: none;
-    font-family: inherit;
-    background: transparent;
-    border: 1px solid var(--border-strong);
-    color: var(--text-2);
-    padding: 7px 15px;
-    border-radius: var(--radius-full);
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 550;
-    margin: 0;
-    transition: border-color .18s, color .18s, background .18s;
-  }
-  .range-btn:hover { border-color: var(--accent); color: var(--text); }
-  .range-btn.active { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); font-weight: 650; }
-  .range-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
-
-  /* Advanced collapsible (debug ops) */
-  details.advanced {
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    background: var(--surface);
-    padding: 14px 18px;
-    margin-top: 6px;
-  }
-  details.advanced summary {
-    cursor: pointer;
-    font-weight: 550;
-    color: var(--text-2);
-    font-size: 13px;
-    list-style: none;
-    user-select: none;
-  }
-  details.advanced summary::-webkit-details-marker { display: none; }
-  details.advanced summary::after { content: "▾"; margin-left: 8px; transition: transform .18s; }
-  details.advanced[open] summary::after { transform: rotate(180deg); }
-  details.advanced[open] summary { color: var(--text); }
-
-  a { color: var(--accent); }
-
-  /* Responsive */
-  @media (max-width: 900px) {
-    .holdings-layout { flex-direction: column; }
-    .holdings-table-wrap { width: 100%; }
-    .pie-chart-container { width: 100%; }
-  }
-  @media (max-width: 760px) {
-    .app-header { padding: 18px 16px 6px; }
-    .container { padding: 4px 16px 48px; }
-    .summary-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    .card { padding: 18px; }
-    .holdings-layout { flex-direction: column; }
-    .pie-chart-container { width: 100%; height: clamp(240px, 42vh, 320px); }
-    .brand h1 { font-size: 19px; }
-  }
-  @media (max-width: 480px) {
-    .summary-grid { grid-template-columns: 1fr; }
-  }
+.landing-footer-disclaimer { text-align:center; font-size:11px; color:var(--text-3); line-height:1.6; max-width:900px; margin:0 auto; }
+@keyframes pulseRing { 0% { box-shadow:0 0 0 0 var(--ring); } 100% { box-shadow:0 0 0 14px transparent; } }
+.upload-zone.pulse { border-color:var(--accent); animation:pulseRing .9s ease-out 2; }
+@media (max-width:900px) {
+  .holdings-layout { flex-direction:column; }
+  .holdings-table-wrap { width:100%; }
+  .pie-chart-container { width:100%; }
+}
+@media (max-width:760px) {
+  .app-header { padding:18px 16px 6px; }
+  .container { padding:4px 16px 48px; }
+  .summary-grid { grid-template-columns:repeat(2,1fr); gap:12px; }
+  .card { padding:18px; }
+  .brand h1 { font-size:19px; }
+  .landing { padding:6px 16px 0; }
+  .landing-hero { padding:42px 0 30px; }
+  .landing-strip { gap:16px; }
+  .preview-stats { grid-template-columns:repeat(2,1fr); }
+}
+@media (max-width:480px) {
+  .summary-grid { grid-template-columns:1fr; }
+  .preview-stats { grid-template-columns:1fr; }
+}
 </style>
 </head>
 <body>
 <header class="app-header">
   <div class="brand">
     <span class="brand-glyph" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 17l5-6 4 3 6-8"/><path d="M15 6h5v5"/>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 6-8"/><path d="M15 6h5v5"/></svg>
     </span>
     <div>
-      <h1 data-i18n="pageTitle">加密貨幣 Portfolio 分析工具</h1>
-      <p class="brand-sub" data-i18n="subtitle">上載 Binance 交易紀錄 CSV，自動計算各幣種持倉數量、成本基礎與市值對比</p>
+      <h1 data-i18n="pageTitle">Portfolio</h1>
+      <p class="brand-sub" data-i18n="subtitle">Binance CSV</p>
     </div>
   </div>
   <div class="header-actions">
-    <button id="themeToggle" class="theme-toggle btn btn-ghost" type="button" aria-label="切換深淺主題" title="切換深淺主題">
+    <button id="homeBtn" class="btn btn-ghost" type="button" style="display:none;" data-i18n="home">首頁</button>
+    <button id="themeToggle" class="theme-toggle btn btn-ghost" type="button" aria-label="theme" title="theme">
       <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
     </button>
-    <button id="langToggle" class="lang-toggle btn btn-ghost" type="button" aria-label="切換語言">EN</button>
+    <button id="langToggle" class="btn btn-ghost" type="button" aria-label="EN">EN</button>
   </div>
 </header>
-<div class="container">
+
+<section id="landing" class="landing">
+  <div class="landing-hero">
+    <span class="landing-badge"><span class="dot"></span><span data-i18n="landingBadge">Binance CSV 持倉分析工具</span></span>
+    <h1 class="landing-title"><span data-i18n="landingTitleA">你的幣安交易紀錄，</span><br><span class="accent" data-i18n="landingTitleB">一頁清晰持倉。</span></h1>
+    <p class="landing-sub" data-i18n="landingSub">把 Binance 匯出的交易紀錄 CSV 拖入瀏覽器，即時重構持倉、成本基礎與盈虧——所有計算 100% 在您的瀏覽器本機完成，資料不會上傳。</p>
+    <div class="landing-cta-row">
+      <button class="btn btn-primary btn-lg" type="button" data-cta="enter" data-i18n="landingCtaStart">開始分析</button>
+      <button class="btn btn-secondary btn-lg" type="button" data-scroll="landingFeatures" data-i18n="landingCtaMore">了解更多</button>
+    </div>
+    <div class="landing-strip">
+      <span>🔒 <span data-i18n="landingStripLocal">100% 本機運算</span></span>
+      <span>⚡ <span data-i18n="landingStripMerge">多檔案自動合併</span></span>
+      <span>📊 <span data-i18n="landingStripPnl">FIFO 已實現盈虧</span></span>
+    </div>
+  </div>
+
+  <div class="landing-preview" aria-hidden="true">
+    <div class="preview-head">
+      <div class="preview-dots"><i></i><i></i><i></i></div>
+      <span class="preview-title" data-i18n="landingPreviewTitle">持倉總覽</span>
+      <span class="preview-tag">Portfolio</span>
+    </div>
+    <div class="preview-stats">
+      <div class="preview-stat"><span class="k" data-i18n="landingStatValue">總市值</span><span class="v">$74,812.40</span></div>
+      <div class="preview-stat"><span class="k" data-i18n="landingStatCost">總成本基礎</span><span class="v">$52,300.00</span></div>
+      <div class="preview-stat"><span class="k" data-i18n="landingStatPnl">未實現盈虧</span><span class="v pos">+$22,512.40</span></div>
+      <div class="preview-stat"><span class="k" data-i18n="landingStatRealized">累計已實現盈虧</span><span class="v pos">+$8,140.75</span></div>
+    </div>
+    <svg class="preview-chart" viewBox="0 0 800 150" preserveAspectRatio="none" focusable="false">
+      <path class="spark-area" d="M0,118 C60,110 90,92 130,98 C180,106 210,72 260,74 C320,77 350,112 400,98 C450,84 480,46 530,50 C590,54 620,86 670,62 C720,40 760,32 800,24 L800,150 L0,150 Z"/>
+      <path class="spark-line" d="M0,118 C60,110 90,92 130,98 C180,106 210,72 260,74 C320,77 350,112 400,98 C450,84 480,46 530,50 C590,54 620,86 670,62 C720,40 760,32 800,24"/>
+      <path class="spark-line-2" d="M0,126 C70,124 100,112 150,114 C210,116 240,98 300,102 C360,106 390,120 440,106 C500,88 540,74 600,72 C660,70 720,54 800,46"/>
+    </svg>
+    <div class="preview-rows">
+      <div class="p-row p-head"><span data-i18n="colCoin">幣種</span><span class="p-amt" data-i18n="colAmount">持倉數量</span><span class="p-val" data-i18n="colValue">市值 (USD)</span><span class="p-ret" data-i18n="colReturn">回報率</span></div>
+      <div class="p-row"><span class="p-coin">BTC</span><span class="p-amt">0.4821</span><span class="p-val">$32,412.00</span><span class="p-ret pos">+42.1%</span></div>
+      <div class="p-row"><span class="p-coin">ETH</span><span class="p-amt">4.2150</span><span class="p-val">$14,352.60</span><span class="p-ret pos">+18.7%</span></div>
+      <div class="p-row"><span class="p-coin">SOL</span><span class="p-amt">128.4000</span><span class="p-val">$18,402.60</span><span class="p-ret neg">-6.2%</span></div>
+      <div class="p-row"><span class="p-coin">USDT</span><span class="p-amt">9,645.20</span><span class="p-val">$9,645.20</span><span class="p-ret pos">+0.0%</span></div>
+    </div>
+  </div>
+
+  <section class="landing-section" id="landingFeatures">
+    <h2 class="landing-h2" data-i18n="landingFeaturesTitle">為什麼用 Crypto Portfolio Analyzer？</h2>
+    <p class="landing-h2-sub" data-i18n="landingFeaturesSub">專為 Binance 交易紀錄設計，計算方法透明、可覆核。</p>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>
+        <h3 data-i18n="featImportTitle">多檔案拖放匯入</h3>
+        <p data-i18n="featImportDesc">一次拖入多個 Binance CSV，自動合併、去重並按時間排序。</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span>
+        <h3 data-i18n="featHoldingsTitle">準確持倉計算</h3>
+        <p data-i18n="featHoldingsDesc">將每筆 Change 加總，與交易所真實餘額對齊，手續費、空投與獎勵全部計入。</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>
+        <h3 data-i18n="featCostTitle">成本基礎配對</h3>
+        <p data-i18n="featCostDesc">同一秒內的 Buy 與 Spend 自動配對並按比例分攤成本，避免第三方工具誤判 Launchpool 等交易。</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+        <h3 data-i18n="featChartTitle">實時市價與圖表</h3>
+        <p data-i18n="featChartDesc">CoinGecko 現價，配合成本基礎 vs 市值增長圖與持倉分佈圖，走勢一目了然。</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>
+        <h3 data-i18n="featPnlTitle">已實現盈虧與年度總結</h3>
+        <p data-i18n="featPnlDesc">以 FIFO 計算每次賣出的已實現盈虧，並按年份分組，方便報稅參考。</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        <h3 data-i18n="featPrivacyTitle">私隱至上，無需註冊</h3>
+        <p data-i18n="featPrivacyDesc">全部在本機瀏覽器運算，不上傳任何資料；結果存入本機儲存，下次自動還原。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="landing-section">
+    <h2 class="landing-h2" data-i18n="landingStepsTitle">三步開始</h2>
+    <p class="landing-h2-sub" data-i18n="landingStepsSub">從 Binance 匯出到完整分析，只需幾分鐘。</p>
+    <div class="steps">
+      <div class="step"><span class="step-num">1</span><h3 data-i18n="step1Title">匯出交易紀錄</h3><p data-i18n="step1Desc">在 Binance「訂單 → 資產記錄 → 交易記錄」匯出 CSV 檔案。</p></div>
+      <div class="step"><span class="step-num">2</span><h3 data-i18n="step2Title">拖入瀏覽器</h3><p data-i18n="step2Desc">把 CSV 拖到上傳區，多個檔案會自動合併與去重。</p></div>
+      <div class="step"><span class="step-num">3</span><h3 data-i18n="step3Title">即時查看分析</h3><p data-i18n="step3Desc">持倉、成本基礎、盈虧與圖表即刻生成，全部本地計算。</p></div>
+    </div>
+  </section>
+
+  <section class="landing-section">
+    <div class="landing-privacy">
+      <span class="shield" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+      <div>
+        <h3 data-i18n="privacyTitle">你的資料，留在你的裝置</h3>
+        <p data-i18n="privacyDesc">除了向 CoinGecko 查詢公開幣價外，此工具不會把任何資料發送到伺服器。你的交易紀錄只會在瀏覽器本機處理，並儲存在本機儲存（localStorage），不會上傳。</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="landing-footer-cta">
+    <h2 data-i18n="footerCtaTitle">準備好重構你的持倉？</h2>
+    <p data-i18n="footerCtaSub">拖入第一份 CSV，幾秒內就能看到完整的持倉分析。</p>
+    <button class="btn btn-primary btn-lg" type="button" data-cta="enter" data-i18n="landingCtaStart">開始分析</button>
+  </div>
+  <footer class="landing-footer">
+    <div class="landing-footer-top">
+      <div class="landing-footer-brand">
+        <div class="landing-footer-name" data-i18n="landingFooterName">Crypto Portfolio Analyzer</div>
+        <div class="landing-footer-creator" data-i18n="landingFooterCreator">Created by Tim0phy</div>
+      </div>
+      <div class="landing-footer-socials">
+        <a href="https://github.com/Tim0phy" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="GitHub">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.52 2.87 8.36 6.84 9.71.5.09.68-.22.68-.48 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.1-1.5-1.1-1.5-.9-.63.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.57 2.34 1.12 2.91.85.09-.66.35-1.12.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.3 9.3 0 012.5-.34c.85.01 1.71.11 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.89 0 1.37-.01 2.47-.01 2.8 0 .27.18.58.69.48A10.26 10.26 0 0022 12.26C22 6.58 17.52 2 12 2z"/></svg>
+        </a>
+        <a href="https://linktr.ee/tim0phy" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Linktree">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M10 2h4v8h8v4h-8v8h-4v-8H2v-4h8V2z"/></svg>
+        </a>
+      </div>
+    </div>
+    <div class="landing-footer-divider"></div>
+    <div class="landing-footer-disclaimer" data-i18n="landingFooterDisclaimer">本工具僅供個人參考之用，不構成任何投資建議。所有計算均於使用者裝置本地執行，幣價數據來自第三方（CoinGecko），可能存在延遲或偏差。使用者應以交易所官方紀錄為準，自行核實原始數據並評估分析結果之合理性。如因依賴本工具之輸出而作出投資決定並招致損失，本項目開發者不承擔任何法律或賠償責任。使用者須自行承擔一切風險。</div>
+    <div class="landing-footer-copyright" data-i18n="landingFooterCopyright">© 2026 Crypto Portfolio Analyzer. All rights reserved.</div>
+  </footer>
+</section>
+
+<div class="container" id="appView" style="display:none;">
+
+  <div class="saved-banner" id="savedBanner" style="display:none;">
+    <span><span data-i18n="savedBannerText">已載入上次儲存的分析結果</span> · <span id="savedTimestamp"></span></span>
+    <div class="action-row">
+      <button id="clearDataBtn" class="btn btn-secondary" type="button" data-i18n="clearData">清除資料</button>
+    </div>
+  </div>
+
   <div class="card">
-    <div class="upload-zone" id="dropZone" tabindex="0" role="button" aria-label="選擇或拖放 CSV 檔案">
+    <div class="upload-zone" id="dropZone" tabindex="0" role="button" aria-label="upload CSV">
       <div class="icon">📄</div>
       <strong data-i18n="uploadMain">點擊或拖放 Binance CSV 交易紀錄檔案</strong>
-      <div class="hint" data-i18n="uploadHint">支援格式：User ID, Time, Account, Operation, Coin, Change, Remark</div>
-      <input type="file" id="fileInput" accept=".csv">
+      <div class="hint" data-i18n="uploadHint">支援格式：User ID, Time, Account, Operation, Coin, Change, Remark（可一次選取多個檔案自動合併；重複上載完全相同的檔案會自動略過，不會重複計算）</div>
+      <input type="file" id="fileInput" accept=".csv" multiple>
+    </div>
+    <div class="upload-row">
+      <button id="mergeMoreBtn" class="btn btn-secondary" type="button" data-i18n="mergeMore" style="display:none;">＋ 新增更多CSV合併分析</button>
     </div>
     <div class="status-msg" id="statusMsg" aria-live="polite"></div>
   </div>
@@ -355,8 +406,11 @@
 
     <div class="card">
       <div class="card-header">
-        <h3 class="card-title" data-i18n="growthTitle">成本基礎與市值增長</h3>
+        <div>
+          <h3 class="card-title" data-i18n="growthTitle">成本基礎與市值增長</h3>
+        </div>
         <div class="range-tabs">
+          <button class="range-btn" id="resetZoomBtn" type="button" data-i18n="resetZoom" style="display:none;">↺ 重設縮放</button>
           <button class="range-btn active" data-range="all" data-i18n="rangeAll">ALL</button>
           <button class="range-btn" data-range="1y" data-i18n="range1y">一年</button>
           <button class="range-btn" data-range="1m" data-i18n="range1m">一個月</button>
@@ -365,17 +419,51 @@
         </div>
       </div>
       <div class="chart-container"><canvas id="growthChart"></canvas></div>
+      <div data-i18n="zoomHint" style="font-size:11px;color:var(--text-3);margin-top:6px;text-align:center;">💡 滾輪縮放，拖曳平移</div>
+      <div class="action-row" style="margin-top:14px;">
+        <button id="exportCsvBtn" class="btn btn-secondary" type="button" data-i18n="exportCsv">匯出 CSV</button>
+        <button id="exportPngBtn" class="btn btn-secondary" type="button" data-i18n="exportPng">匯出 PNG 報告</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title" data-i18n="yearlyPnlTitle">年度已實現盈虧（報稅參考）</h3>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-i18n="colYear">年份</th>
+              <th data-i18n="colCoin">幣種</th>
+              <th data-i18n="colRealizedYear">已實現盈虧 (USD)</th>
+            </tr>
+          </thead>
+          <tbody id="yearlyPnlBody"></tbody>
+        </table>
+      </div>
+      <div class="footnote" data-i18n="yearlyPnlNote">以 FIFO 先進先出法計算每次賣出的已實現盈虧，並按賣出年份分組；每年小計與累計總額可作報稅參考。</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title" data-i18n="feeTitle">手續費與零成本資產</h3>
+      </div>
+      <div class="summary-grid" id="feeSummaryGrid" style="margin-bottom:0;"></div>
+      <div class="zero-cost-list" id="zeroCostList"></div>
     </div>
 
     <div class="card">
       <div class="card-header">
         <h3 class="card-title" data-i18n="holdingsTitle">持倉明細</h3>
-        <button id="refreshPricesBtn" class="btn btn-secondary" data-i18n="refreshPrices">🔄 更新市價 (CoinGecko)</button>
+        <div class="action-row">
+          <button id="refreshPricesBtn" class="btn btn-secondary" type="button" data-i18n="refreshPrices">🔄 更新市價 (CoinGecko)</button>
+        </div>
       </div>
       <div class="holdings-layout">
         <div class="holdings-table-wrap">
           <div class="table-wrap">
-            <table id="holdingsTable">
+            <table>
               <thead>
                 <tr>
                   <th data-i18n="colCoin">幣種</th>
@@ -384,7 +472,8 @@
                   <th data-i18n="colAvg">平均成本</th>
                   <th data-i18n="colPrice">現價 (USD)</th>
                   <th data-i18n="colValue">市值 (USD)</th>
-                  <th data-i18n="colPnl">未實現盈虧</th>
+                  <th data-i18n="colUnrealized">未實現盈虧</th>
+                  <th data-i18n="colRealized">已實現盈虧</th>
                   <th data-i18n="colReturn">回報率</th>
                 </tr>
               </thead>
@@ -394,187 +483,388 @@
         </div>
         <div class="pie-chart-container">
           <h4 data-i18n="pieTitle">持倉分佈（按市值）</h4>
-          <canvas id="allocationPie"></canvas>
+          <div class="pie-chart-inner"><canvas id="allocationPie"></canvas></div>
+          <div class="pie-mode-tabs" id="pieModeTabs">
+            <button class="range-btn active" data-mode="coin" data-i18n="pieByCoin">按幣種</button>
+            <button class="range-btn" data-mode="category" data-i18n="pieByCategory">按類別</button>
+          </div>
         </div>
       </div>
       <div class="footnote" data-i18n="footnote">
         說明：持倉數量 = 該幣種所有紀錄變動量加總（含買入、賣出、手續費、空投、獎勵等），與交易所實際餘額應一致。
         成本基礎採用「配對法」：將同一秒內發生的 Transaction Buy 與對應的 Transaction Spend（以 USDT/USDC/BUSD/FDUSD 計價）互相配對加總；
-        單純存入（Deposit）或空投（Airdrop）因無對應花費，成本基礎計為 0。此工具所有計算均在您的瀏覽器本機完成，不會上傳任何資料到伺服器。
+        單純存入（Deposit）或空投（Airdrop）因無對應花費，成本基礎計為 0。已實現盈虧採用先進先出法（FIFO）計算所有 Transaction Sold 事件。
+        重複上載完全相同的檔案會被自動偵測並略過（採用整份檔案內容比對，而非逐行比對，避免誤刪真實但欄位數值相同的交易，例如同一秒內執行的多筆定投）。
+        若市價更新失敗且該幣種沒有任何先前成功抓取的快取價格，畫面會以 ⚠ 標示並顯示「(N/A)」，代表該筆市值暫時以 $0 計算，並非真實市值。
+        此工具所有計算均在您的瀏覽器本機完成，不會上傳任何資料到伺服器；分析結果會儲存在本機瀏覽器（localStorage）方便下次開啟直接查看。
       </div>
     </div>
 
     <details class="advanced">
       <summary data-i18n="opsTitle">操作類型統計（除錯用）</summary>
       <div class="table-wrap">
-        <table id="opsTable">
+        <table>
           <thead><tr><th data-i18n="opsColOp">操作類型 (Operation)</th><th data-i18n="opsColCount">筆數</th></tr></thead>
           <tbody id="opsBody"></tbody>
         </table>
       </div>
     </details>
   </div>
+  <div class="app-disclaimer" data-i18n="appDisclaimer">本工具僅供個人參考之用，不構成任何投資建議。所有計算均於使用者裝置本地執行，幣價數據來自第三方（CoinGecko），可能存在延遲或偏差。使用者應以交易所官方紀錄為準，自行核實原始數據並評估分析結果之合理性。如因依賴本工具之輸出而作出投資決定並招致損失，本項目開發者不承擔任何法律或賠償責任。使用者須自行承擔一切風險。</div>
+</div>
+
+<div class="modal-overlay" id="clearModal">
+  <div class="modal-box">
+    <h4 data-i18n="clearConfirmTitle">確認清除已儲存的資料？</h4>
+    <p data-i18n="clearConfirmBody">這會刪除瀏覽器本機儲存的分析結果與交易紀錄，需要重新上載 CSV 才能再次查看分析。此動作無法復原。</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="clearCancelBtn" data-i18n="cancel">取消</button>
+      <button class="btn btn-primary" id="clearConfirmBtn" data-i18n="confirmClear">確認清除</button>
+    </div>
+  </div>
 </div>
 
 <script>
-const STABLE_COINS = ['USDT','USDC','BUSD','FDUSD'];
-const COIN_ID_MAP = {
-  BTC: 'bitcoin', ETH: 'ethereum', BNB: 'binancecoin', ADA: 'cardano',
-  DOGE: 'dogecoin', XRP: 'ripple', SOL: 'solana', USDT: 'tether',
-  USDC: 'usd-coin', PAXG: 'pax-gold', FDUSD: 'first-digital-usd',
-  USUAL: 'usual', VANA: 'vana', BIO: 'bio-protocol'
-};
-const PIE_COLORS = ['#34D399','#F5B301','#4FC3F7','#F87171','#A78BFA','#22D3EE','#FBBF24','#F472B6','#A3E635','#E2E8F0'];
-function cssVar(name, fallback) {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+const STABLECOINS = ['USDT','USDC','BUSD','FDUSD'];
+const COINIDMAP = { BTC:'bitcoin', ETH:'ethereum', BNB:'binancecoin', ADA:'cardano', DOGE:'dogecoin', XRP:'ripple', SOL:'solana', USDT:'tether', USDC:'usd-coin', PAXG:'pax-gold', FDUSD:'first-digital-usd', USUAL:'usual', VANA:'vana', BIO:'bio-protocol', XLM:'stellar', PEPE:'pepe', DAI:'dai', LTC:'litecoin', DOT:'polkadot', LINK:'chainlink', TRX:'tron', SHIB:'shiba-inu' };
+const COIN_ID_CACHE_KEY = 'cryptoPortfolioCoinIds_v1';
+const MAJOR_COINS = ['BTC','ETH'];
+// Keys must match both zh-Hant and en labels returned by classifyCoin
+const CATEGORY_COLORS = { '主流幣':'#34D399', 'Major':'#34D399', '穩定幣':'#F5B301', 'Stablecoin':'#F5B301', '小幣':'#7DA6FF', 'Altcoin':'#7DA6FF' };
+const PIECOLORS = ['#34D399','#F5B301','#4FC3F7','#F87171','#A78BFA','#22D3EE','#FBBF24','#F472B6','#A3E635','#E2E8F0'];
+const STORAGE_KEY = 'cryptoPortfolioAnalyzer_v2';
+const STORAGE_PREFIX = 'v2.';
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
+const MAX_TOTAL_SIZE = 200 * 1024 * 1024;
+const MAX_FILES_PER_BATCH = 100;
+const MAX_ROWS = 250000;
+const MAX_FIELD_LENGTH = 4096;
+const COINGECKO_ID_RE = /^[a-z0-9-]{1,128}$/i;
+
+/**
+ * Escape HTML special characters to prevent XSS from untrusted CSV fields.
+ * @param {string} str
+ * @returns {string}
+ */
+function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
-function arrow(v) { return v >= 0 ? '▲' : '▼'; }
+
+/**
+ * Escape CSV cell values: neutralize formula injection and quote fields
+ * containing commas, quotes, or newlines.
+ * @param {string} val
+ * @returns {string}
+ */
+function escapeCsvCell(val) {
+    let str = String(val == null ? '' : val);
+    if (/^[=+\-@\t\r ]/.test(str)) str = '\t' + str;
+    if (/[",\r\n]/.test(str)) str = '"' + str.replace(/"/g, '""') + '"';
+    return str;
+}
+
+/**
+ * Normalize a Binance coin symbol to trimmed uppercase so BTC/btc/ ETH  collapse to BTC/ETH.
+ * @param {*} coin
+ * @returns {string}
+ */
+function normalizeCoinSymbol(coin) {
+  return String(coin == null ? '' : coin).trim().toUpperCase();
+}
+
+/**
+ * Parse a value as a finite number, falling back when it is missing or non-finite.
+ * @param {*} v
+ * @param {*} fallback
+ * @returns {number|*}
+ */
+function finiteNumber(v, fallback) {
+  const n = typeof v === 'number' ? v : parseFloat(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+/**
+ * Read a CSS custom property value, falling back to a default.
+ * @param {string} name
+ * @param {string} fallback
+ * @returns {string}
+ */
+function cssVar(name, fallback) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback; }
+/**
+ * Return a directional arrow based on value sign.
+ * @param {number} v
+ * @returns {string}
+ */
+function arrow(v) { return v >= 0 ? '+' : ''; }
+
+/**
+ * Reduce the number of chart data points to stay performant.
+ * @param {Array} points
+ * @param {number} limit
+ * @returns {Array}
+ */
 function decimatePoints(points, max) {
   if (points.length <= max) return points;
-  const step = Math.max(1, Math.floor(points.length / max));
   const out = [];
-  for (let i = 0; i < points.length; i += step) out.push(points[i]);
-  if (out[out.length - 1] !== points[points.length - 1]) out.push(points[points.length - 1]);
-  return out;
+  const taken = new Set();
+  const take = (i) => {
+    if (taken.has(i)) return;
+    out.push(points[i]);
+    taken.add(i);
+  };
+  take(0);
+  points.forEach((p, i) => { if (p.events && p.events.length) take(i); });
+  take(points.length - 1);
+  const remaining = max - out.length;
+  if (remaining > 0) {
+    const candidates = [];
+    for (let i = 1; i < points.length - 1; i++) {
+      if (!taken.has(i)) candidates.push(i);
+    }
+    const step = Math.max(1, Math.floor(candidates.length / remaining));
+    for (let i = 0; i < candidates.length && out.length < max; i += step) take(candidates[i]);
+  }
+  return out.sort((a, b) => a.t - b.t);
 }
+
+/**
+ * Execute an array of tasks with a concurrency limit.
+ * @param {Array} items
+ * @param {number} limit
+ * @param {Function} fn
+ */
 async function runPool(items, limit, worker) {
   const total = items.length;
   if (total === 0) return;
-  let next = 0;
-  let done = 0;
+  let next = 0, done = 0;
   const statusMsg = document.getElementById('statusMsg');
-  const tick = () => {
-    done++;
-    if (statusMsg) {
-      try { statusMsg.textContent = t('statusLoadingChart') + '  (' + done + '/' + total + ')'; } catch (e) {}
-    }
-  };
+  const tick = () => { done++; if (statusMsg) { try { statusMsg.textContent = t('statusLoadingChart') + ` (${done}/${total})`; } catch(e){} } };
   const n = Math.min(limit, total);
   const runners = [];
   for (let i = 0; i < n; i++) {
-    runners.push((async () => {
-      while (next < items.length) {
-        const idx = next++;
-        await worker(items[idx]);
-        tick();
-      }
-    })());
+    runners.push((async () => { while (next < items.length) { const idx = next++; await worker(items[idx]); tick(); } })());
   }
   await Promise.all(runners);
 }
-let holdingsData = {};
-let currentPrices = {};
+
+let holdingsData = Object.create(null);
+let currentPrices = Object.create(null);
 let growthTimeline = [];
+let allRawRows = [];
+let importedFileHashes = [];
 let growthChartInstance = null;
 let pieChartInstance = null;
 let currentRange = 'all';
+let currentPieMode = 'coin';
 let chartRequestId = 0;
 let lastPriceFetchOk = true;
-const marketCache = {};
-const priceCache = {};
+const marketCache = Object.create(null);
+const priceCache = Object.create(null);
 let lastGrowthPoints = [];
-let LANG = 'zh';
-try { LANG = localStorage.getItem('portfolioLang') || 'zh'; } catch (e) {}
-let THEME = 'dark';
-try { THEME = localStorage.getItem('portfolioTheme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); } catch (e) {}
+const coinIdCache = Object.create(null);
+const unresolvedCoinIds = new Set();
+let coinIdCacheLoaded = false;
+let feeTotals = Object.create(null);
+let zeroCostAssets = [];
+let realizedPnl = Object.create(null);
+let realizedPnlByYear = Object.create(null);
+let operationCounts = Object.create(null);
+let missingPriceCoins = [];
+
+let LANG = 'zh'; try { LANG = localStorage.getItem('portfolioLang') || 'zh'; } catch(e) {}
+let THEME = 'dark'; try { THEME = localStorage.getItem('portfolioTheme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); } catch(e) {}
+
 const I18N = {
   zh: {
-    pageTitle: '加密貨幣 Portfolio 分析工具',
-    subtitle: '上載 Binance 交易紀錄 CSV，自動計算各幣種持倉數量、成本基礎與市值對比',
-    uploadMain: '點擊或拖放 Binance CSV 交易紀錄檔案',
-    uploadHint: '支援格式：User ID, Time, Account, Operation, Coin, Change, Remark',
-    growthTitle: '成本基礎與市值增長',
-    rangeAll: 'ALL', range1y: '一年', range1m: '一個月', range1w: '一週', range1d: '一日',
-    holdingsTitle: '持倉明細',
-    refreshPrices: '🔄 更新市價 (CoinGecko)',
-    colCoin: '幣種', colAmount: '持倉數量', colCost: '成本基礎 (USDT)', colAvg: '平均成本',
-    colPrice: '現價 (USD)', colValue: '市值 (USD)', colPnl: '未實現盈虧', colReturn: '回報率',
-    pieTitle: '持倉分佈（按市值）',
-    opsTitle: '操作類型統計（除錯用）', opsColOp: '操作類型 (Operation)', opsColCount: '筆數',
-    summaryValueLabel: '總市值', summaryCostLabel: '總成本基礎',
-    summaryPnlLabel: '未實現盈虧（所選期間）', summaryPctLabel: '整體回報率（所選期間）',
-    costLabel: '累計成本基礎', valueLabel: '總市值',
-    footnote: '說明：持倉數量 = 該幣種所有紀錄變動量加總（含買入、賣出、手續費、空投、獎勵等），與交易所實際餘額應一致。成本基礎採用「配對法」：將同一秒內發生的 Transaction Buy 與對應的 Transaction Spend（以 USDT/USDC/BUSD/FDUSD 計價）互相配對加總；單純存入（Deposit）或空投（Airdrop）因無對應花費，成本基礎計為 0。此工具所有計算均在您的瀏覽器本機完成，不會上傳任何資料到伺服器。',
-    statusParsing: '正在解析檔案...',
-    statusParsed: '已解析 {n} 筆交易紀錄，正在讀取即時市價...',
-    statusUpdating: '正在更新市價...',
-    statusDone: '完成！共分析 {n} 筆交易，涵蓋 {c} 種幣種。',
-    statusPriceFail: '完成分析 {n} 筆交易，但市價更新失敗，已沿用先前價格；可稍後按「更新市價」再試。',
-    statusPricesUpdated: '市價已更新。',
-    statusPricesFail: '市價更新失敗，已沿用上次價格。',
-    statusLoadingChart: '正在載入歷史價格以建立增長圖表...',
-    statusChartUpdated: '增長圖表已更新。'
+    pageTitle:'Portfolio', subtitle:'Binance CSV 持倉分析',
+    uploadMain:'點擊或拖放 Binance CSV 交易紀錄檔案',
+    uploadHint:'支援格式：User ID, Time, Account, Operation, Coin, Change, Remark（可一次選取多個檔案自動合併；重複上載完全相同的檔案會自動略過，不會重複計算）',
+    mergeMore:'＋ 新增更多CSV合併分析',
+    savedBannerText:'已載入上次儲存的分析結果', clearData:'清除資料',
+    clearConfirmTitle:'確認清除已儲存的資料？',
+    clearConfirmBody:'這會刪除瀏覽器本機儲存的分析結果與交易紀錄，需要重新上載 CSV 才能再次查看分析。此動作無法復原。',
+    cancel:'取消', confirmClear:'確認清除',
+    growthTitle:'成本基礎與市值增長', resetZoom:'↺ 重設縮放', zoomHint:'💡 滾輪縮放，拖曳平移', rangeAll:'ALL', range1y:'一年', range1m:'一個月', range1w:'一週', range1d:'一日',
+    exportPng:'匯出 PNG 報告', exportCsv:'匯出 CSV',
+    feeTitle:'手續費與零成本資產', feeTotalLabel:'累計手續費支出 (約USD)', zeroCostLabel:'零成本資產（空投/獎勵）數量', noPriceDataTitle:'無市價資料，暫以 $0 計算', noPriceDataShort:'無市價資料',
+    holdingsTitle:'持倉明細', refreshPrices:'🔄 更新市價 (CoinGecko)',
+    colCoin:'幣種', colAmount:'持倉數量', colCost:'成本基礎 (USDT)', colAvg:'平均成本', colPrice:'現價 (USD)', colValue:'市值 (USD)',
+    colUnrealized:'未實現盈虧', colRealized:'已實現盈虧', colReturn:'回報率',
+    pieTitle:'持倉分佈（按市值）', pieByCoin:'按幣種', pieByCategory:'按類別',
+    catMajor:'主流幣', catStable:'穩定幣', catAlt:'小幣',
+    opsTitle:'操作類型統計（除錯用）', opsColOp:'操作類型 (Operation)', opsColCount:'筆數',
+    summaryValueLabel:'總市值', summaryCostLabel:'總成本基礎', summaryPnlLabel:'未實現盈虧（所選區間）', summaryPctLabel:'回報率（所選區間）',
+    summaryRealizedLabel:'累計已實現盈虧',
+    yearlyPnlTitle:'年度已實現盈虧（報稅參考）', colYear:'年份', colRealizedYear:'已實現盈虧 (USD)',
+    yearSubtotal:'{year} 小計', yearGrandTotal:'累計', yearlyPnlEmpty:'目前沒有可顯示的已實現盈虧紀錄（未偵測到 Transaction Sold 事件）。',
+    yearlyPnlNote:'以 FIFO 先進先出法計算每次賣出的已實現盈虧，並按賣出年份分組；每年小計與累計總額可作報稅參考。',
+    reportHoldingsTitle:'持倉明細', reportFooter:'資料來源：CoinGecko · 本報告由 Crypto Portfolio Analyzer 產生',
+    costLabel:'累計成本基礎', valueLabel:'市值',
+    eventsBuyLabel:'買入事件', eventsSellLabel:'賣出事件', tooltipEventBuy:'買入', tooltipEventSell:'賣出', perCoinCostLabel:'{coin} 成本',
+    footnote:'說明：持倉數量 = 該幣種所有紀錄變動量加總（含買入、賣出、手續費、空投、獎勵等），與交易所實際餘額應一致。成本基礎採用「配對法」：將同一秒內發生的 Transaction Buy 與對應的 Transaction Spend（以 USDT/USDC/BUSD/FDUSD 計價）互相配對加總；單純存入（Deposit）或空投（Airdrop）因無對應花費，成本基礎計為 0。已實現盈虧採用先進先出法（FIFO）計算所有 Transaction Sold 事件。重複上載完全相同的檔案會被自動偵測並略過（採用整份檔案內容比對，而非逐行比對）。若市價更新失敗且該幣種沒有任何先前成功抓取的快取價格，畫面會以 ⚠ 標示並顯示「(N/A)」，代表該筆市值暫時以 $0 計算，並非真實市值。此工具所有計算均在您的瀏覽器本機完成；除了向 CoinGecko 查詢公開幣價（只傳送幣種代號）外，不會上傳任何資料；分析結果會儲存在本機瀏覽器（localStorage）方便下次開啟直接查看。',
+    statusParsing:'正在解析檔案...', statusParsed:'已解析 {n} 筆交易，正在讀取即時市價...',
+    statusUpdating:'正在更新市價...', statusDone:'完成！共分析 {n} 筆交易，涵蓋 {c} 種幣種。',
+    statusPriceFail:'已分析 {n} 筆交易，但市價更新失敗，使用先前的價格。', statusPricesUpdated:'市價已更新。', statusPricesFail:'市價更新失敗，使用先前的價格。',
+    statusLoadingChart:'正在計算歷史走勢...', statusChartUpdated:'走勢圖已更新。',
+    statusMerged:'已合併 {n} 個新檔案，共 {r} 筆交易。', statusRestored:'已從本機儲存中還原分析結果。',
+    statusExported:'已匯出 CSV 檔案。', statusPngExported:'已匯出 PNG 報告。',
+    statusFileTooLarge:'檔案過大：{name}（上限 50 MB）', statusTotalTooLarge:'檔案總大小過大（上限 200 MB）', statusTooManyFiles:'一次最多上載 {n} 個檔案', statusTooManyRows:'交易筆數過多（上限 {n} 筆），請分批上載或縮小範圍',
+    home:'首頁',
+    landingBadge:'Binance CSV 持倉分析工具',
+    landingTitleA:'你的幣安交易紀錄，', landingTitleB:'一頁清晰持倉。',
+    landingSub:'把 Binance 匯出的交易紀錄 CSV 拖入瀏覽器，即時重構持倉、成本基礎與盈虧——所有計算 100% 在您的瀏覽器本機完成，資料不會上傳（僅向 CoinGecko 查詢公開幣價）。',
+    landingCtaStart:'開始分析', landingCtaMore:'了解更多',
+    landingStripLocal:'100% 本機運算', landingStripMerge:'多檔案自動合併', landingStripPnl:'FIFO 已實現盈虧',
+    landingPreviewTitle:'持倉總覽',
+    landingStatValue:'總市值', landingStatCost:'總成本基礎', landingStatPnl:'未實現盈虧', landingStatRealized:'累計已實現盈虧',
+    landingFeaturesTitle:'為什麼用 Crypto Portfolio Analyzer？',
+    landingFeaturesSub:'專為 Binance 交易紀錄設計，計算方法透明、可覆核。',
+    featImportTitle:'多檔案拖放匯入', featImportDesc:'一次拖入多個 Binance CSV，自動合併、去重並按時間排序。',
+    featHoldingsTitle:'準確持倉計算', featHoldingsDesc:'將每筆 Change 加總，與交易所真實餘額對齊，手續費、空投與獎勵全部計入。',
+    featCostTitle:'成本基礎配對', featCostDesc:'同一秒內的 Buy 與 Spend 自動配對並按比例分攤成本，避免第三方工具誤判 Launchpool 等交易。',
+    featChartTitle:'實時市價與圖表', featChartDesc:'CoinGecko 現價，配合成本基礎 vs 市值增長圖與持倉分佈圖，走勢一目了然。',
+    featPnlTitle:'已實現盈虧與年度總結', featPnlDesc:'以 FIFO 計算每次賣出的已實現盈虧，並按年份分組，方便報稅參考。',
+    featPrivacyTitle:'私隱至上，無需註冊', featPrivacyDesc:'全部在本機瀏覽器運算；除向 CoinGecko 查詢公開幣價（只傳送幣種代號）外，不會上傳任何資料；結果存入本機儲存，下次自動還原。',
+    landingStepsTitle:'三步開始', landingStepsSub:'從 Binance 匯出到完整分析，只需幾分鐘。',
+    step1Title:'匯出交易紀錄', step1Desc:'在 Binance「訂單 → 資產記錄 → 交易記錄」匯出 CSV 檔案。',
+    step2Title:'拖入瀏覽器', step2Desc:'把 CSV 拖到上傳區，多個檔案會自動合併與去重。',
+    step3Title:'即時查看分析', step3Desc:'持倉、成本基礎、盈虧與圖表即刻生成，全部本地計算。',
+    privacyTitle:'你的資料，留在你的裝置', privacyDesc:'除了向 CoinGecko 查詢公開幣價（只傳送幣種代號）外，此工具不會把任何資料發送到伺服器。你的交易紀錄只會在瀏覽器本機處理，並儲存在本機儲存（localStorage），不會上傳。',
+    footerCtaTitle:'準備好重構你的持倉？', footerCtaSub:'拖入第一份 CSV，幾秒內就能看到完整的持倉分析。',
+    landingFooterName:'Crypto Portfolio Analyzer',
+    landingFooterCreator:'Created by Tim0phy',
+    landingFooterCopyright:'© 2026 Crypto Portfolio Analyzer. All rights reserved.',
+    landingFooterDisclaimer:'本工具僅供個人參考之用，不構成任何投資建議。所有計算均於使用者裝置本地執行，幣價數據來自第三方（CoinGecko），可能存在延遲或偏差。使用者應以交易所官方紀錄為準，自行核實原始數據並評估分析結果之合理性。如因依賴本工具之輸出而作出投資決定並招致損失，本項目開發者不承擔任何法律或賠償責任。使用者須自行承擔一切風險。',
+    appDisclaimer:'本工具僅供個人參考之用，不構成任何投資建議。所有計算均於使用者裝置本地執行，幣價數據來自第三方（CoinGecko），可能存在延遲或偏差。使用者應以交易所官方紀錄為準，自行核實原始數據並評估分析結果之合理性。如因依賴本工具之輸出而作出投資決定並招致損失，本項目開發者不承擔任何法律或賠償責任。使用者須自行承擔一切風險。',
+    reportDisclaimer:'本工具僅供個人參考之用，不構成任何投資建議。所有計算均於使用者裝置本地執行，幣價數據來自第三方（CoinGecko），可能存在延遲或偏差。使用者應以交易所官方紀錄為準，自行核實原始數據並評估分析結果之合理性。如因依賴本工具之輸出而作出投資決定並招致損失，本項目開發者不承擔任何法律或賠償責任。使用者須自行承擔一切風險。',
   },
   en: {
-    pageTitle: 'Crypto Portfolio Analyzer',
-    subtitle: 'Upload a Binance trade history CSV to compute holdings, cost basis, and market value per coin',
-    uploadMain: 'Click or drag & drop a Binance CSV trade history file',
-    uploadHint: 'Supported format: User ID, Time, Account, Operation, Coin, Change, Remark',
-    growthTitle: 'Cost Basis & Market Value Growth',
-    rangeAll: 'ALL', range1y: '1Y', range1m: '1M', range1w: '1W', range1d: '1D',
-    holdingsTitle: 'Holdings Detail',
-    refreshPrices: '🔄 Refresh Prices (CoinGecko)',
-    colCoin: 'Coin', colAmount: 'Amount', colCost: 'Cost Basis (USDT)', colAvg: 'Avg. Cost',
-    colPrice: 'Price (USD)', colValue: 'Market Value (USD)', colPnl: 'Unrealized P&L', colReturn: 'Return',
-    pieTitle: 'Allocation by Market Value',
-    opsTitle: 'Operation Type Stats (Debug)', opsColOp: 'Operation', opsColCount: 'Count',
-    summaryValueLabel: 'Total Market Value', summaryCostLabel: 'Total Cost Basis',
-    summaryPnlLabel: 'Unrealized P&L (Selected Period)', summaryPctLabel: 'Return (Selected Period)',
-    costLabel: 'Cumulative Cost Basis', valueLabel: 'Market Value',
-    footnote: 'Note: Amount = sum of all recorded changes for a coin (buys, sells, fees, airdrops, rewards, etc.) and should match your exchange balance. Cost basis uses the pairing method: Transaction Buy events are paired with corresponding Transaction Spend events (in USDT/USDC/BUSD/FDUSD) within the same second; pure deposits or airdrops have no matching spend, so their cost basis is 0. All calculations run locally in your browser; nothing is uploaded.',
-    statusParsing: 'Parsing file...',
-    statusParsed: 'Parsed {n} transactions, fetching live prices...',
-    statusUpdating: 'Updating prices...',
-    statusDone: 'Done! Analyzed {n} transactions across {c} coins.',
-    statusPriceFail: 'Analyzed {n} transactions, but the price update failed; using previous prices. Try "Refresh Prices" later.',
-    statusPricesUpdated: 'Prices updated.',
-    statusPricesFail: 'Price update failed; using previous prices.',
-    statusLoadingChart: 'Loading historical prices to build the growth chart...',
-    statusChartUpdated: 'Growth chart updated.'
+    pageTitle:'Crypto Portfolio Analyzer', subtitle:'Upload Binance CSV to analyze holdings',
+    uploadMain:'Click or drag & drop Binance CSV file(s)',
+    uploadHint:'Supported format: User ID, Time, Account, Operation, Coin, Change, Remark (select multiple files to merge; re-uploading the exact same file is automatically skipped)',
+    mergeMore:'+ Add more CSV to merge',
+    savedBannerText:'Restored last saved analysis', clearData:'Clear data',
+    clearConfirmTitle:'Clear saved data?',
+    clearConfirmBody:'This deletes the locally stored analysis and transaction history. You will need to re-upload the CSV to see the analysis again. This cannot be undone.',
+    cancel:'Cancel', confirmClear:'Confirm clear',
+    growthTitle:'Cost Basis & Market Value Growth', resetZoom:'↺ Reset Zoom', zoomHint:'💡 Scroll to zoom, drag to pan', rangeAll:'ALL', range1y:'1Y', range1m:'1M', range1w:'1W', range1d:'1D',
+    exportPng:'Export PNG report', exportCsv:'Export CSV',
+    feeTitle:'Fees & Zero-Cost Assets', feeTotalLabel:'Total fees paid (approx USD)', zeroCostLabel:'Zero-cost assets (airdrops/rewards)', noPriceDataTitle:'No price data available, shown as $0', noPriceDataShort:'No price data',
+    holdingsTitle:'Holdings Detail', refreshPrices:'Refresh Prices (CoinGecko)',
+    colCoin:'Coin', colAmount:'Amount', colCost:'Cost Basis (USDT)', colAvg:'Avg. Cost', colPrice:'Price (USD)', colValue:'Market Value (USD)',
+    colUnrealized:'Unrealized P/L', colRealized:'Realized P/L', colReturn:'Return',
+    pieTitle:'Allocation by Market Value', pieByCoin:'By Coin', pieByCategory:'By Category',
+    catMajor:'Major', catStable:'Stablecoin', catAlt:'Altcoin',
+    opsTitle:'Operation Type Stats (Debug)', opsColOp:'Operation', opsColCount:'Count',
+    summaryValueLabel:'Total Market Value', summaryCostLabel:'Total Cost Basis', summaryPnlLabel:'Unrealized P/L (Selected Period)', summaryPctLabel:'Return (Selected Period)',
+    summaryRealizedLabel:'Cumulative Realized P/L',
+    yearlyPnlTitle:'Realized P/L by Year (Tax Reference)', colYear:'Year', colRealizedYear:'Realized P/L (USD)',
+    yearSubtotal:'{year} Subtotal', yearGrandTotal:'Total', yearlyPnlEmpty:'No realized P/L records to show (no Transaction Sold events detected).',
+    yearlyPnlNote:'FIFO realized P/L on every sale, grouped by the sale year; yearly subtotals and the cumulative total are provided for tax reference.',
+    reportHoldingsTitle:'Holdings', reportFooter:'Data source: CoinGecko · Generated by Crypto Portfolio Analyzer',
+    costLabel:'Cumulative Cost Basis', valueLabel:'Market Value',
+    eventsBuyLabel:'Buy events', eventsSellLabel:'Sell events', tooltipEventBuy:'Buy', tooltipEventSell:'Sell', perCoinCostLabel:'{coin} cost',
+    footnote:'Note: Amount = sum of all recorded changes for a coin (buys, sells, fees, airdrops, rewards, etc.), should match your exchange balance. Cost basis uses the pairing method: Transaction Buy events are paired with corresponding Transaction Spend events (in USDT/USDC/BUSD/FDUSD) within the same second; pure deposits or airdrops have no matching spend, so their cost basis is 0. Realized P/L uses FIFO across all Transaction Sold events. Re-uploading the exact same file is auto-detected and skipped (by whole-file content hash, not row-by-row). If a price update fails and a coin has no previously cached price at all, it is flagged with ⚠ and shown as "(N/A)" — meaning its market value is temporarily $0, not a real value. All calculations run locally in your browser; apart from public CoinGecko price lookups (which transmit coin symbols only), nothing is uploaded. Results are saved to your browser (localStorage) for next time.',
+    statusParsing:'Parsing file...', statusParsed:'Parsed {n} transactions, fetching live prices...',
+    statusUpdating:'Updating prices...', statusDone:'Done! Analyzed {n} transactions across {c} coins.',
+    statusPriceFail:'Analyzed {n} transactions, but price update failed — using previous prices.', statusPricesUpdated:'Prices updated.', statusPricesFail:'Price update failed — using previous prices.',
+    statusLoadingChart:'Loading historical prices to build the growth chart...', statusChartUpdated:'Growth chart updated.',
+    statusMerged:'Merged {n} new file(s), {r} transactions total.', statusRestored:'Restored analysis from local storage.',
+    statusExported:'CSV exported.', statusPngExported:'PNG report exported.',
+    statusFileTooLarge:'File too large: {name} (limit 50 MB)', statusTotalTooLarge:'Total file size too large (limit 200 MB)', statusTooManyFiles:'Upload at most {n} files at once', statusTooManyRows:'Too many transactions (limit {n}), please split into smaller files',
+    home:'Home',
+    landingBadge:'Binance CSV Portfolio Analyzer',
+    landingTitleA:'Turn your Binance history into', landingTitleB:'a clear portfolio view.',
+    landingSub:'Drop in your Binance transaction CSV and instantly reconstruct holdings, cost basis, and realized & unrealized P/L — all computed 100% locally in your browser. Nothing is uploaded except public price lookups to CoinGecko.',
+    landingCtaStart:'Start Analyzing', landingCtaMore:'Learn More',
+    landingStripLocal:'100% local', landingStripMerge:'Multi-file auto-merge', landingStripPnl:'FIFO realized P/L',
+    landingPreviewTitle:'Portfolio Overview',
+    landingStatValue:'Market Value', landingStatCost:'Cost Basis', landingStatPnl:'Unrealized P/L', landingStatRealized:'Realized P/L',
+    landingFeaturesTitle:'Why Crypto Portfolio Analyzer?',
+    landingFeaturesSub:'Built for Binance transaction records, with transparent, auditable math.',
+    featImportTitle:'Multi-file drag & drop', featImportDesc:'Drop in multiple Binance CSVs — auto-merged, de-duplicated, and sorted by time.',
+    featHoldingsTitle:'Accurate holdings', featHoldingsDesc:'Sums every Change per coin to match your real exchange balance — fees, airdrops, and rewards included.',
+    featCostTitle:'Cost basis pairing', featCostDesc:'Same-second Buy and Spend events are paired and allocated proportionally, avoiding third-party misclassification of Launchpool trades.',
+    featChartTitle:'Live prices & charts', featChartDesc:'Current prices from CoinGecko, plus cost-basis vs. market-value growth and allocation charts at a glance.',
+    featPnlTitle:'Realized P/L by year', featPnlDesc:'FIFO realized P/L on every sale, grouped by year for easy tax reference.',
+    featPrivacyTitle:'Privacy-first, no sign-up', featPrivacyDesc:'Everything runs locally in your browser; apart from CoinGecko price lookups (which transmit coin symbols only), nothing is uploaded. Results are saved locally and restored on your next visit.',
+    landingStepsTitle:'Get started in three steps', landingStepsSub:'From Binance export to full analysis in minutes.',
+    step1Title:'Export your records', step1Desc:'Export the transaction history CSV from Binance (Orders → Assets History → Transaction History).',
+    step2Title:'Drop it in the browser', step2Desc:'Drag the CSV onto the upload zone — multiple files are merged and de-duplicated.',
+    step3Title:'See your analysis instantly', step3Desc:'Holdings, cost basis, P/L, and charts are generated on the spot, all computed locally.',
+    privacyTitle:'Your data stays on your device', privacyDesc:'Apart from public CoinGecko price lookups (which transmit coin symbols only), this tool sends nothing to any server. Your transaction history is processed only in your browser and saved to local storage — never uploaded.',
+    footerCtaTitle:'Ready to reconstruct your portfolio?', footerCtaSub:'Drop in your first CSV and see your full portfolio analysis in seconds.',
+    landingFooterName:'Crypto Portfolio Analyzer',
+    landingFooterCreator:'Created by Tim0phy',
+    landingFooterCopyright:'© 2026 Crypto Portfolio Analyzer. All rights reserved.',
+    landingFooterDisclaimer:'This tool is for personal reference only and does not constitute investment advice. All calculations run locally on your device; price data is sourced from third parties (CoinGecko) and may be delayed or inaccurate. Users should verify against official exchange records and independently assess the reasonableness of results. The developer(s) assume no legal or compensatory liability for any investment losses arising from reliance on this tool\'s output. Use at your own risk.',
+    appDisclaimer:'This tool is for personal reference only and does not constitute investment advice. All calculations run locally on your device; price data is sourced from third parties (CoinGecko) and may be delayed or inaccurate. Users should verify against official exchange records and independently assess the reasonableness of results. The developer(s) assume no legal or compensatory liability for any investment losses arising from reliance on this tool\'s output. Use at your own risk.',
+    reportDisclaimer:'This tool is for personal reference only and does not constitute investment advice. All calculations run locally on your device; price data is sourced from third parties (CoinGecko) and may be delayed or inaccurate. Users should verify against official exchange records and independently assess the reasonableness of results. The developer(s) assume no legal or compensatory liability for any investment losses arising from reliance on this tool\'s output. Use at your own risk.',
   }
 };
+
+/**
+ * Localization helper. Falls back to Chinese if a key is missing.
+ * @param {string} key
+ * @param {Object} [vars]
+ * @returns {string}
+ */
 function t(key, vars) {
   let s = (I18N[LANG] && I18N[LANG][key]) || I18N.zh[key] || key;
-  if (vars) {
-    Object.keys(vars).forEach(k => {
-      s = s.split('{' + k + '}').join(vars[k]);
-    });
-  }
+  if (vars) Object.keys(vars).forEach(k => { s = s.split('{'+k+'}').join(vars[k]); });
   return s;
 }
+
+/**
+ * Switch the document language and refresh all [data-i18n] elements.
+ */
 function applyLang() {
   document.documentElement.lang = LANG === 'zh' ? 'zh-Hant' : 'en';
   document.title = t('pageTitle');
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    el.textContent = t(el.dataset.i18n);
-  });
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
   const btn = document.getElementById('langToggle');
-  if (btn) btn.textContent = LANG === 'zh' ? 'EN' : '中文';
+  if (btn) btn.textContent = LANG === 'zh' ? 'EN' : '中';
 }
+
+/**
+ * Toggle between dark and light themes via data-attribute.
+ */
 function applyTheme() {
   document.documentElement.dataset.theme = THEME;
   const tbtn = document.getElementById('themeToggle');
-  if (tbtn) tbtn.setAttribute('aria-label', THEME === 'dark' ? '切換至淺色主題' : '切換至深色主題');
+  if (tbtn) tbtn.setAttribute('aria-label', THEME === 'dark' ? 'light mode' : 'dark mode');
 }
 
+/**
+ * Parse raw CSV text into an array of row objects.
+ * @param {string} text
+ * @returns {Array<Object>}
+ */
 function parseCSV(text) {
   const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-  const header = splitCSVLine(lines[0]);
+  const header = splitCSVLine(lines[0]).map(h => h.trim()).filter(h => /^[a-zA-Z0-9_ ]+$/.test(h));
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
     const cols = splitCSVLine(lines[i]);
-    if (cols.length < 6) continue;
-    const row = {};
-    header.forEach((h, idx) => row[h.trim()] = (cols[idx] || '').trim());
+    if (cols.length < 6 || cols.some(c => c.length > MAX_FIELD_LENGTH)) continue;
+    const row = Object.create(null);
+    header.forEach((h, idx) => { row[h] = (cols[idx] || '').trim(); });
+    if (row['Coin'] != null) {
+      row['Coin'] = normalizeCoinSymbol(row['Coin']);
+      if (row['Coin'].length > 32) continue;
+    }
     rows.push(row);
   }
   return rows;
 }
 
+/**
+ * Split a single CSV line respecting quoted fields.
+ * @param {string} line
+ * @returns {Array<string>}
+ */
 function splitCSVLine(line) {
-  const result = [];
-  let cur = '';
-  let inQuotes = false;
+  const result = []; let cur = ''; let inQuotes = false;
   for (let i = 0; i < line.length; i++) {
     const ch = line[i];
     if (ch === '"') { inQuotes = !inQuotes; continue; }
@@ -585,424 +875,1368 @@ function splitCSVLine(line) {
   return result;
 }
 
+// File-level dedupe: hash the entire file's content and skip re-importing a file whose hash
+// was already merged before. Row-level dedupe is intentionally NOT used, because legitimate
+// distinct Binance transactions (e.g. repeated auto-invest/Launchpool buys executed in the
+// same second) can share identical values across every CSV column, since Binance provides no
+// unique transaction ID per row.
+/**
+ * SHA-256 hash a string; falls back to a simple JS hash for old browsers.
+ * @param {string} text
+ * @returns {Promise<string>}
+ */
+async function hashText(text) {
+  try {
+    const enc = new TextEncoder().encode(text);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  } catch (e) {
+    let h = 0;
+    for (let i = 0; i < text.length; i++) { h = (h * 31 + text.charCodeAt(i)) | 0; }
+    return 'fallback_' + h + '_' + text.length;
+  }
+}
+
+
+// ==================== Core portfolio math ====================
+/**
+ * Core analysis: aggregates holdings, counts operations, matches
+ * same-second buy/spend pairs for cost basis, and flags zero-cost inflows.
+ * @param {Array<Object>} rows
+ * @returns {{holdings, opsCount, fees, zeroCost, realized, realizedByYear}}
+ */
 function analyzeData(rows) {
-  const holdings = {};
-  const opsCount = {};
-  const timeGroups = {};
+  const holdings = Object.create(null);
+  const opsCount = Object.create(null);
+  const timeGroups = Object.create(null);
+  const fees = Object.create(null);
+  const zeroCost = [];
 
   rows.forEach(r => {
     const coin = r['Coin'];
-    const change = parseFloat(r['Change']);
+    const change = finiteNumber(r['Change'], NaN);
     const op = r['Operation'];
     const time = r['Time'];
-    if (!coin || isNaN(change)) return;
+    if (!coin || !Number.isFinite(change)) return;
 
-    if (!holdings[coin]) holdings[coin] = { amount: 0, costBasis: 0 };
+    if (!holdings[coin]) holdings[coin] = { amount:0, costBasis:0 };
     holdings[coin].amount += change;
-
     opsCount[op] = (opsCount[op] || 0) + 1;
+
+    if (op === 'Fee' || /fee/i.test(op)) {
+      fees[coin] = (fees[coin] || 0) + Math.abs(change);
+    }
+    if (/airdrop|launchpool|reward|rebate|distribution/i.test(op) && change > 0) {
+      zeroCost.push({ coin, change, op, time });
+    }
 
     const key = time;
     if (!timeGroups[key]) timeGroups[key] = [];
-    timeGroups[key].push({ coin, change, op });
+    timeGroups[key].push({ coin, change, op, time });
   });
 
+  // Pair same-second "Transaction Buy" with "Transaction Spend" stablecoins for cost basis
   Object.values(timeGroups).forEach(group => {
     const buys = group.filter(g => g.op === 'Transaction Buy');
-    const spends = group.filter(g => g.op === 'Transaction Spend' && STABLE_COINS.includes(g.coin));
+    const spends = group.filter(g => g.op === 'Transaction Spend' && STABLECOINS.includes(g.coin));
     if (buys.length === 0 || spends.length === 0) return;
-    const totalSpend = spends.reduce((s, g) => s + Math.abs(g.change), 0);
-    const totalBuyUnits = buys.reduce((s, g) => s + g.change, 0);
+    const totalSpend = spends.reduce((s,g) => s + Math.abs(g.change), 0);
+    const totalBuyUnits = buys.reduce((s,g) => s + g.change, 0);
     if (totalBuyUnits <= 0) return;
     buys.forEach(b => {
       const share = (b.change / totalBuyUnits) * totalSpend;
-      if (!holdings[b.coin]) holdings[b.coin] = { amount: 0, costBasis: 0 };
+      if (!holdings[b.coin]) holdings[b.coin] = { amount:0, costBasis:0 };
       holdings[b.coin].costBasis += share;
     });
   });
 
-  return { holdings, opsCount };
+  const realizedResult = computeRealizedPnl(rows);
+
+  return { holdings, opsCount, fees, zeroCost, realized: realizedResult.realized, realizedByYear: realizedResult.realizedByYear };
 }
 
-async function fetchPrices(coins) {
-  const ids = coins.map(c => COIN_ID_MAP[c]).filter(Boolean);
-  if (ids.length === 0) return {};
-  let data = null;
-  for (let attempt = 1; attempt <= 2 && !data; attempt++) {
-    try {
-      const resp = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=usd`);
-      if (resp.ok) data = await resp.json();
-    } catch (e) {
-      if (attempt === 2) console.error('Price fetch failed', e);
-    }
-    if (!data && attempt === 1) await new Promise(r => setTimeout(r, 800));
-  }
-  lastPriceFetchOk = !!data;
-  const prices = {};
-  if (data) {
-    Object.keys(COIN_ID_MAP).forEach(sym => {
-      const id = COIN_ID_MAP[sym];
-      if (data[id] && data[id].usd != null) {
-        prices[sym] = data[id].usd;
-        priceCache[sym] = data[id].usd;
+/**
+ * FIFO-based realized P/L across all Transaction Sold / Revenue events.
+ * Buy lots are paired with stablecoin spends; sells consume lots against revenues.
+ * @param {Array<Object>} rows
+ * @returns {{realized: Object<string, number>, realizedByYear: Object<string, Object<string, number>>}}
+ *   realized: coin -> cumulative realized P/L
+ *   realizedByYear: year -> { coin -> realized P/L }
+ */
+function computeRealizedPnl(rows) {
+  const timeGroups = Object.create(null);
+  rows.forEach(r => {
+    const coin = r['Coin'];
+    const change = finiteNumber(r['Change'], NaN);
+    const op = r['Operation'];
+    const time = r['Time'];
+    if (!coin || !Number.isFinite(change) || typeof time !== 'string' || !time) return;
+    const tms = Date.parse(time.replace(' ','T'));
+    if (isNaN(tms)) return;
+    if (!timeGroups[tms]) timeGroups[tms] = [];
+    timeGroups[tms].push({ coin, change, op, time, timeMs: tms });
+  });
+
+  const events = Object.keys(timeGroups).map(Number).sort((a,b)=>a-b).map(k => ({ time:k, items:timeGroups[k] }));
+  const lots = Object.create(null);
+  const realized = Object.create(null);
+  const realizedByYear = Object.create(null);
+
+  events.forEach(ev => {
+    const buys = ev.items.filter(g => g.op === 'Transaction Buy');
+    const spends = ev.items.filter(g => g.op === 'Transaction Spend' && STABLECOINS.includes(g.coin));
+    const revenues = ev.items.filter(g => g.op === 'Transaction Revenue' && STABLECOINS.includes(g.coin) && g.change > 0);
+
+    if (buys.length && spends.length) {
+      const totalSpend = spends.reduce((s,g)=>s+Math.abs(g.change),0);
+      const totalBuyUnits = buys.reduce((s,g)=>s+g.change,0);
+      if (totalBuyUnits > 0) {
+        buys.forEach(b => {
+          const share = (b.change / totalBuyUnits) * totalSpend;
+          if (!lots[b.coin]) lots[b.coin] = [];
+          lots[b.coin].push({ qty: b.change, unitCost: share / b.change });
+        });
       }
-    });
+    }
+
+    const soldRows = ev.items.filter(g => !STABLECOINS.includes(g.coin) && g.change < 0 && (g.op === 'Transaction Sold' || g.op === 'Transaction Revenue'));
+    if (soldRows.length && revenues.length) {
+      const year = new Date(ev.time).getFullYear();
+      if (!realizedByYear[year]) realizedByYear[year] = Object.create(null);
+      const totalRevenue = revenues.reduce((s,g)=>s+g.change,0);
+      const totalSoldUnits = soldRows.reduce((s,g)=>s+Math.abs(g.change),0);
+      if (totalSoldUnits > 0) {
+        soldRows.forEach(sr => {
+          let qtyToSell = Math.abs(sr.change);
+          const proceedsPerUnit = totalRevenue / totalSoldUnits;
+          if (!lots[sr.coin]) lots[sr.coin] = [];
+          let costRemoved = 0;
+          // FIFO: consume oldest lots first
+          while (qtyToSell > 0.00000001 && lots[sr.coin].length > 0) {
+            const lot = lots[sr.coin][0];
+            const take = Math.min(lot.qty, qtyToSell);
+            costRemoved += take * lot.unitCost;
+            lot.qty -= take;
+            qtyToSell -= take;
+            if (lot.qty <= 0.00000001) lots[sr.coin].shift();
+          }
+          const proceeds = Math.abs(sr.change) * proceedsPerUnit;
+          const pnl = proceeds - costRemoved;
+          realized[sr.coin] = (realized[sr.coin] || 0) + pnl;
+          realizedByYear[year][sr.coin] = (realizedByYear[year][sr.coin] || 0) + pnl;
+        });
+      }
+    }
+  });
+
+  return { realized, realizedByYear };
+}
+
+/**
+ * Load the persisted symbol-to-CoinGecko-ID cache once.
+ * @returns {Object<string, string>}
+ */
+function loadCoinIdCache() {
+  if (coinIdCacheLoaded) return coinIdCache;
+  coinIdCacheLoaded = true;
+  try {
+    const raw = localStorage.getItem(COIN_ID_CACHE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        Object.keys(parsed).forEach(k => {
+          const v = parsed[k];
+          if (typeof v === 'string' && COINGECKO_ID_RE.test(v)) coinIdCache[k] = v;
+        });
+      }
+    }
+  } catch (e) {}
+  return coinIdCache;
+}
+
+/**
+ * Persist resolved CoinGecko IDs so repeated refreshes do not re-search.
+ */
+function saveCoinIdCache() {
+  try { localStorage.setItem(COIN_ID_CACHE_KEY, JSON.stringify(coinIdCache)); } catch (e) {}
+}
+
+/**
+ * Resolve one unknown symbol to a CoinGecko ID via the public search API.
+ * @param {string} symbol
+ * @returns {Promise<string|null>}
+ */
+async function findCoinId(symbol) {
+  const sym = normalizeCoinSymbol(symbol);
+  if (!sym || unresolvedCoinIds.has(sym)) return null;
+  try {
+    const resp = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(sym)}`);
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    const matches = (Array.isArray(data.coins) ? data.coins : []).filter(c => c && c.id && normalizeCoinSymbol(c.symbol) === sym);
+    if (matches.length === 0) {
+      unresolvedCoinIds.add(sym);
+      return null;
+    }
+    const best = matches.sort((a, b) => (a.market_cap_rank || 999999) - (b.market_cap_rank || 999999))[0];
+    if (!COINGECKO_ID_RE.test(best.id)) {
+      unresolvedCoinIds.add(sym);
+      return null;
+    }
+    coinIdCache[sym] = best.id;
+    saveCoinIdCache();
+    return best.id;
+  } catch (e) {
+    return null;
   }
-  coins.forEach(c => {
-    if (prices[c] == null && priceCache[c] != null) prices[c] = priceCache[c];
+}
+
+/**
+ * Resolve CoinGecko IDs for a list of normalized symbols using the static map first.
+ * @param {Array<string>} coins
+ * @returns {Promise<Object<string, string|null>>}
+ */
+async function resolveCoinIds(coins) {
+  loadCoinIdCache();
+  const idMap = Object.create(null);
+  const pending = [];
+  coins.forEach(sym => {
+    const id = COINIDMAP[sym] || coinIdCache[sym] || null;
+    idMap[sym] = id;
+    if (!id && !unresolvedCoinIds.has(sym)) pending.push(sym);
+  });
+  for (let i = 0; i < pending.length; i++) {
+    const id = await findCoinId(pending[i]);
+    if (id) idMap[pending[i]] = id;
+  }
+  return idMap;
+}
+
+/**
+ * Build a user-facing message when price fetching fails for some coins.
+ * @param {number|null} n - number of parsed transactions (null for updates)
+ * @returns {string}
+ */
+function buildPriceFailMessage(n) {
+  if (missingPriceCoins.length === 0) {
+    return n != null ? t('statusPriceFail', { n }) : t('statusPricesFail');
+  }
+  const coinList = missingPriceCoins.join(', ');
+  if (LANG === 'zh') {
+    const prefix = n != null ? `已分析 ${n} 筆交易，但` : '';
+    return prefix + `市價更新失敗，且以下幣種沒有任何先前快取價格，暫以 $0 計算：${coinList}。` + (n != null ? '請稍後點擊「更新市價」重試。' : '');
+  }
+  const prefix = n != null ? `Analyzed ${n} transactions, but ` : '';
+  return prefix + `price update failed. The following coins have no cached price and are shown as $0: ${coinList}.` + (n != null ? ' Try "Refresh Prices" again later.' : '');
+}
+
+
+/**
+ * Fetch current market prices from CoinGecko for all non-stablecoins.
+ * Unknown symbols are resolved dynamically and requests are split into batches.
+ * @param {Array<string>} coins
+ * @returns {Promise<Object<string, number>>}
+ */
+async function fetchPrices(coins) {
+  missingPriceCoins = [];
+  const uniqueCoins = Array.from(new Set(coins.map(normalizeCoinSymbol).filter(Boolean)));
+  const idMap = await resolveCoinIds(uniqueCoins);
+  const uniqueIds = Array.from(new Set(uniqueCoins.map(c => idMap[c]).filter(Boolean)));
+  const data = Object.create(null);
+  const BATCH_SIZE = 50;
+  for (let start = 0; start < uniqueIds.length; start += BATCH_SIZE) {
+    const batch = uniqueIds.slice(start, start + BATCH_SIZE);
+    let batchData = null;
+    for (let attempt = 1; attempt <= 2 && !batchData; attempt++) {
+      try {
+        const resp = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${batch.map(encodeURIComponent).join(',')}&vs_currencies=usd`);
+        if (resp.ok) batchData = await resp.json();
+      } catch (e) { console.error('Price fetch failed', e); }
+      if (!batchData && attempt === 1) await new Promise(r => setTimeout(r, 800));
+    }
+    if (batchData) Object.assign(data, batchData);
+  }
+  lastPriceFetchOk = uniqueIds.length === 0 || Object.keys(data).length > 0;
+  const prices = Object.create(null);
+  uniqueCoins.forEach(c => {
+    const id = idMap[c];
+    if (id && data[id] && data[id].usd != null) {
+      const usd = finiteNumber(data[id].usd, null);
+      if (usd !== null) {
+        prices[c] = usd;
+        priceCache[c] = usd;
+      }
+    }
+    if (prices[c] == null && priceCache[c] != null) prices[c] = finiteNumber(priceCache[c], null);
+    if (prices[c] == null && currentPrices[c] != null) prices[c] = finiteNumber(currentPrices[c], null);
+    if (prices[c] == null) missingPriceCoins.push(c);
   });
   return prices;
 }
 
+
+// ==================== Growth chart builders ====================
+/**
+ * Build a chronological timeline of every transaction event per coin.
+ * @param {Array<Object>} rows
+ * @returns {Array<Object>}
+ */
 function buildTimeline(rows) {
-  const groups = {};
+  const groups = Object.create(null);
   rows.forEach(r => {
     const coin = r['Coin'];
-    const change = parseFloat(r['Change']);
+    const change = finiteNumber(r['Change'], NaN);
     const op = r['Operation'];
     const time = r['Time'];
-    if (!coin || isNaN(change) || !time) return;
-    const t = Date.parse(time);
-    if (isNaN(t)) return;
-    if (!groups[t]) groups[t] = [];
-    groups[t].push({ coin, change, op });
+    if (!coin || !Number.isFinite(change) || typeof time !== 'string' || !time) return;
+    const tms = Date.parse(time.replace(' ','T'));
+    if (isNaN(tms)) return;
+    if (!groups[tms]) groups[tms] = [];
+    groups[tms].push({ coin, change, op });
   });
-  return Object.keys(groups)
-    .map(Number)
-    .sort((a, b) => a - b)
-    .map(t => ({ time: t, items: groups[t] }));
+  return Object.keys(groups).map(Number).sort((a,b)=>a-b).map(t => ({ time:t, items:groups[t] }));
 }
 
+/**
+ * Apply a single transaction group to the running portfolio snapshot.
+ * @param {Object} snapshot
+ * @param {Array<Object>} group
+ * @param {Object<string, number>} prices
+ * @param {number} timestamp
+ */
 function applyTransactionGroup(ev, holdings, costBasis) {
   const buys = ev.items.filter(g => g.op === 'Transaction Buy');
-  const spends = ev.items.filter(g => g.op === 'Transaction Spend' && STABLE_COINS.includes(g.coin));
-  if (buys.length > 0 && spends.length > 0) {
-    const totalSpend = spends.reduce((s, g) => s + Math.abs(g.change), 0);
-    const totalBuyUnits = buys.reduce((s, g) => s + g.change, 0);
+  const spends = ev.items.filter(g => g.op === 'Transaction Spend' && STABLECOINS.includes(g.coin));
+  const revenues = ev.items.filter(g => g.op === 'Transaction Revenue' && STABLECOINS.includes(g.coin) && g.change > 0);
+  const soldRows = ev.items.filter(g => !STABLECOINS.includes(g.coin) && g.change < 0 && (g.op === 'Transaction Sold' || g.op === 'Transaction Revenue'));
+  const events = [];
+  if (buys.length && spends.length) {
+    const totalSpend = spends.reduce((s,g)=>s+Math.abs(g.change),0);
+    const totalBuyUnits = buys.reduce((s,g)=>s+g.change,0);
     if (totalBuyUnits > 0) {
+      const records = [];
       buys.forEach(b => {
-        const share = (b.change / totalBuyUnits) * totalSpend;
-        costBasis[b.coin] = (costBasis[b.coin] || 0) + share;
+        const share = (b.change/totalBuyUnits)*totalSpend;
+        costBasis[b.coin] = (costBasis[b.coin]||0) + share;
+        records.push({ coin: b.coin, amount: b.change, valueUsd: share });
       });
+      events.push({ side: 'buy', time: ev.time, total: totalSpend, records });
     }
   }
-  ev.items.forEach(it => {
-    holdings[it.coin] = (holdings[it.coin] || 0) + it.change;
-  });
+  if (soldRows.length && revenues.length) {
+    const totalRevenue = revenues.reduce((s,g)=>s+g.change,0);
+    const totalSoldUnits = soldRows.reduce((s,g)=>s+Math.abs(g.change),0);
+    if (totalSoldUnits > 0) {
+      const proceedsPerUnit = totalRevenue / totalSoldUnits;
+      const records = [];
+      soldRows.forEach(sr => {
+        records.push({ coin: sr.coin, amount: sr.change, valueUsd: Math.abs(sr.change) * proceedsPerUnit });
+      });
+      events.push({ side: 'sell', time: ev.time, total: totalRevenue, records });
+    }
+  }
+  ev.items.forEach(it => { holdings[it.coin] = (holdings[it.coin]||0) + it.change; });
+  return events;
 }
 
-function stepForRange(rangeKey) {
-  if (rangeKey === '1d') return 3600000;
-  return 86400000;
-}
+/**
+ * Return the bucket step size (days) for a given time range.
+ * @param {string} rangeKey
+ * @returns {number}
+ */
+function stepForRange(rangeKey) { return rangeKey === '1d' ? 3600000 : 86400000; }
 
+/**
+ * Generate time buckets for chart series based on range and step.
+ * @param {string} rangeKey
+ * @param {number} stepDays
+ * @returns {Array<number>} timestamps
+ */
 function buildBuckets(rangeKey, stepMs) {
   if (growthTimeline.length === 0) return [];
   const now = Date.now();
   const firstEvent = growthTimeline[0].time;
-  const lastEvent = growthTimeline[growthTimeline.length - 1].time;
+  const lastEvent = growthTimeline[growthTimeline.length-1].time;
   const rangeStart = getRangeStart(rangeKey);
   const from = rangeStart != null ? Math.max(rangeStart, firstEvent) : firstEvent;
   const to = Math.max(now, lastEvent);
   const span = to - from;
   let step = stepMs;
-  const MAX_BUCKETS = 600;
-  if (span > 0 && Math.ceil(span / step) > MAX_BUCKETS) {
-    step = Math.ceil(span / (MAX_BUCKETS * stepMs)) * stepMs;
-  }
+  const MAXBUCKETS = 600;
+  if (span > 0 && Math.ceil(span/step) > MAXBUCKETS) step = Math.ceil(span/MAXBUCKETS/stepMs)*stepMs;
   const buckets = [];
-  for (let t = from; t <= to; t += step) buckets.push(t);
-  if (buckets.length === 0 || buckets[buckets.length - 1] < to) buckets.push(to);
+  for (let tt = from; tt <= to; tt += step) buckets.push(tt);
+  if (buckets.length === 0 || buckets[buckets.length-1] !== to) buckets.push(to);
   return buckets;
 }
 
+/**
+ * Compute daily portfolio cost, value, and per-coin cost over time.
+ * @param {Array<Object>} timeline
+ * @param {Array<number>} buckets
+ * @param {Function} priceFn
+ * @returns {Array<Object>}
+ */
 function computeDailySeries(timeline, buckets, priceFn) {
-  const holdings = {};
-  const costBasis = {};
-  const points = [];
+  const holdings = Object.create(null), costBasis = Object.create(null), points = [];
   let eventIdx = 0;
   buckets.forEach(bt => {
+    const bucketEvents = [];
     while (eventIdx < timeline.length && timeline[eventIdx].time <= bt) {
-      applyTransactionGroup(timeline[eventIdx], holdings, costBasis);
+      const evs = applyTransactionGroup(timeline[eventIdx], holdings, costBasis);
+      evs.forEach(e => bucketEvents.push(e));
       eventIdx++;
     }
-    let cost = 0;
-    let value = 0;
+    let cost = 0, value = 0;
+    const coinCost = Object.create(null);
     Object.keys(holdings).forEach(coin => {
       const amount = holdings[coin];
       if (Math.abs(amount) <= 0.0000001) return;
-      cost += costBasis[coin] || 0;
+      const cb = costBasis[coin] || 0;
+      cost += cb;
       value += amount * priceFn(coin, bt);
+      if (Math.abs(cb) > 0.0000001) coinCost[coin] = cb;
     });
-    points.push({ t: bt, cost, value });
+    points.push({ t: bt, cost, value, events: bucketEvents, coinCost });
   });
   return points;
 }
 
+/**
+ * Convert a range key to the number of days it covers.
+ * @param {string} rangeKey
+ * @returns {number}
+ */
 function rangeDays(rangeKey) {
-  const map = { '1y': 365, '1m': 30, '1w': 7, '1d': 1 };
+  const map = { '1y':365, '1m':30, '1w':7, '1d':1 };
   if (rangeKey === 'all') {
     if (growthTimeline.length === 0) return 365;
     const spanDays = Math.ceil((Date.now() - growthTimeline[0].time) / 86400000);
-    return Math.min(Math.max(spanDays, 1), 365);
+    return Math.min(Math.max(spanDays,1), 365);
   }
   return map[rangeKey];
 }
 
+/**
+ * Compute the start timestamp for a given range ending at now.
+ * @param {string} rangeKey
+ * @returns {number}
+ */
 function getRangeStart(rangeKey) {
   if (rangeKey === 'all') return null;
-  const ms = { '1y': 31536000000, '1m': 2592000000, '1w': 604800000, '1d': 86400000 };
-  return Date.now() - (ms[rangeKey] || 0);
+  const ms = { '1y':31536000000, '1m':2592000000, '1w':604800000, '1d':86400000 };
+  return Date.now() - ms[rangeKey];
 }
 
+/**
+ * Format a timestamp for chart axis labels.
+ * @param {number} t
+ * @returns {string}
+ */
 function formatChartTime(t) {
   const d = new Date(t);
-  if (currentRange === '1d') {
-    return d.toLocaleString('zh-Hant', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  }
-  return d.toLocaleDateString('zh-Hant', { year: 'numeric', month: 'numeric', day: 'numeric' });
+  if (currentRange === '1d') return d.toLocaleString(LANG==='zh'?'zh-Hant':'en', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
+  return d.toLocaleDateString(LANG==='zh'?'zh-Hant':'en', { year:'numeric', month:'numeric', day:'numeric' });
 }
 
+/**
+ * Fetch historical market chart for a coin and cache it.
+ * @param {string} coin
+ * @param {number} days
+ */
 async function fetchMarketRange(coin, days) {
   const key = coin + '_' + days;
   if (marketCache[key] !== undefined) return marketCache[key];
-  const id = COIN_ID_MAP[coin];
-  if (!id) { marketCache[key] = null; return null; }
-  const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-  const timer = ctrl ? setTimeout(() => ctrl.abort(), 12000) : null;
-  try {
-    const resp = await fetch(
-      'https://api.coingecko.com/api/v3/coins/' + id + '/market_chart?vs_currency=usd&days=' + days,
-      ctrl ? { signal: ctrl.signal } : {}
-    );
-    const data = await resp.json();
-    marketCache[key] = (data && data.prices) || [];
-  } catch (e) {
-    if (e && e.name === 'AbortError') {
-      console.warn('CoinGecko historical fetch timed out', coin);
-    } else {
-      console.error('Historical price fetch failed for', coin, e);
-    }
-    marketCache[key] = null;
-  } finally {
-    if (timer) clearTimeout(timer);
+  const sym = normalizeCoinSymbol(coin);
+  loadCoinIdCache();
+  let id = COINIDMAP[sym] || coinIdCache[sym];
+  if (!id && !unresolvedCoinIds.has(sym)) id = await findCoinId(sym);
+  if (!id) {
+    if (unresolvedCoinIds.has(sym)) marketCache[key] = null;
+    return null;
   }
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(() => ctrl.abort(), 12000) : null;
+    try {
+    const resp = await fetch(`https://api.coingecko.com/api/v3/coins/${encodeURIComponent(id)}/market_chart?vs_currency=usd&days=${days}`, ctrl ? { signal: ctrl.signal } : {});
+    const data = await resp.json();
+    marketCache[key] = data.prices || [];
+  } catch (e) {
+    marketCache[key] = null;
+  } finally { if (timer) clearTimeout(timer); }
   return marketCache[key];
 }
 
+/**
+ * Lookup the closest cached price at or before a given timestamp.
+ * @param {Array<Object>} chart
+ * @param {number} timestamp
+ * @returns {number|null}
+ */
 function priceAt(chart, t) {
   if (!chart || chart.length === 0) return null;
   let lo = 0, hi = chart.length - 1;
-  while (lo < hi) {
-    const mid = (lo + hi) >> 1;
-    if (chart[mid][0] < t) lo = mid + 1; else hi = mid;
-  }
-  if (lo > 0 && Math.abs(chart[lo - 1][0] - t) <= Math.abs(chart[lo][0] - t)) return chart[lo - 1][1];
+  while (lo < hi) { const mid = (lo+hi+1)>>1; if (chart[mid][0] <= t) lo = mid; else hi = mid-1; }
   return chart[lo][1];
 }
 
+/**
+ * Update the summary cards at the top based on the selected chart range.
+ * @param {Array<Object>} points
+ */
 function updateSummaryRange(points) {
   if (!points || points.length === 0) return;
-  const last = points[points.length - 1];
-  const rangeStart = getRangeStart(currentRange);
-  const emptyAtStart = rangeStart == null || (growthTimeline.length > 0 && rangeStart <= growthTimeline[0].time);
-  const startValue = emptyAtStart ? 0 : points[0].value;
-  const startCost = emptyAtStart ? 0 : points[0].cost;
-  const periodPnl = (last.value - startValue) - (last.cost - startCost);
-  const denom = startValue > 0 ? startValue : (startCost > 0 ? startCost : last.cost);
-  const periodPnlPct = denom > 0 ? (periodPnl / denom) * 100 : 0;
+  const last = points[points.length-1];
+  const trueUnrealized = last.value - last.cost;
+  const denom = last.cost !== 0 ? last.cost : 1;
+  const periodPnlPct = denom !== 0 ? (trueUnrealized/denom)*100 : 0;
+
   const pnlEl = document.getElementById('summaryPnl');
   const pctEl = document.getElementById('summaryPnlPct');
-  if (!pnlEl || !pctEl) return;
-  pnlEl.textContent = `${arrow(periodPnl)} ${periodPnl >= 0 ? '+' : ''}$${periodPnl.toFixed(2)}`;
-  pnlEl.className = 'value ' + (periodPnl >= 0 ? 'positive' : 'negative');
-  pctEl.textContent = `${arrow(periodPnlPct)} ${periodPnlPct >= 0 ? '+' : ''}${periodPnlPct.toFixed(1)}%`;
-  pctEl.className = 'value ' + (periodPnlPct >= 0 ? 'positive' : 'negative');
+  if (pnlEl) { pnlEl.textContent = arrow(trueUnrealized) + trueUnrealized.toFixed(2); pnlEl.className = 'value ' + (trueUnrealized>=0?'positive':'negative'); }
+  if (pctEl) { pctEl.textContent = arrow(periodPnlPct) + periodPnlPct.toFixed(1) + '%'; pctEl.className = 'value ' + (periodPnlPct>=0?'positive':'negative'); }
 }
+
+/**
+ * Format a single event timestamp for tooltip display.
+ * @param {number} t
+ * @returns {string}
+ */
+function formatEventTime(t) {
+  const d = new Date(t);
+  return d.toLocaleString(LANG === 'zh' ? 'zh-Hant' : 'en', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+/**
+ * Format a list of events into tooltip lines.
+ * @param {Array<Object>} events
+ * @returns {Array<string>}
+ */
+function formatEventTooltip(events) {
+  const lines = [];
+  events.forEach(ev => {
+    const side = ev.side === 'sell' ? t('tooltipEventSell') : t('tooltipEventBuy');
+    lines.push(`${side} · ${formatEventTime(ev.time)} · $${ev.total.toFixed(2)}`);
+    ev.records.forEach(r => {
+      const sign = r.amount >= 0 ? '+' : '';
+      lines.push(`  ${r.coin} ${sign}${r.amount.toFixed(6)} ($${r.valueUsd.toFixed(2)})`);
+    });
+  });
+  return lines;
+}
+
+/**
+ * Custom Chart.js plugin to draw vertical event markers on the growth chart.
+ */
+function drawEventMarker(ctx, x, y, radius, style, bg, border, borderWidth) {
+  ctx.save();
+  ctx.beginPath();
+  if (style === 'triangle') {
+    const r3 = radius * 0.866;
+    ctx.moveTo(x, y - radius);
+    ctx.lineTo(x + r3, y + radius / 2);
+    ctx.lineTo(x - r3, y + radius / 2);
+    ctx.closePath();
+  } else {
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+  }
+  ctx.fillStyle = bg;
+  ctx.fill();
+  ctx.lineWidth = borderWidth;
+  ctx.strokeStyle = border;
+  ctx.stroke();
+  ctx.restore();
+}
+
+const eventMarkerPlugin = {
+  id: 'eventMarkers',
+  afterDatasetsDraw(chart) {
+    const { ctx, chartArea, scales } = chart;
+    if (!chartArea || !scales.x || !scales.y) return;
+    const buyLabel = t('eventsBuyLabel');
+    const sellLabel = t('eventsSellLabel');
+    const border = cssVar('--bg', '#0C1014');
+    const borderWidth = 2;
+    chart.data.datasets.forEach((ds, i) => {
+      if (ds.label !== buyLabel && ds.label !== sellLabel) return;
+      if (!chart.isDatasetVisible(i)) return;
+      const isBuy = ds.label === buyLabel;
+      const style = isBuy ? 'circle' : 'triangle';
+      const bg = isBuy ? cssVar('--accent', '#34D399') : cssVar('--risk-neg', '#F87171');
+      const radius = 9;
+      ctx.save();
+      ds.data.forEach((val, idx) => {
+        if (val == null) return;
+        const x = scales.x.getPixelForValue(idx, idx);
+        const y = scales.y.getPixelForValue(val);
+        if (x < chartArea.left - radius || x > chartArea.right + radius ||
+            y < chartArea.top - radius || y > chartArea.bottom + radius) return;
+        drawEventMarker(ctx, x, y, radius, style, bg, border, borderWidth);
+      });
+      ctx.restore();
+    });
+  }
+};
+
+if(typeof ChartZoom !== 'undefined'){ try { Chart.register(ChartZoom); } catch(e){} }
+
+
+// ==================== Chart renderers ====================
+/**
+ * Render (or re-render) the cost-basis vs market-value growth chart.
+ * @param {string} rangeKey
+ */
 async function renderGrowthChart(rangeKey) {
+  const resetBtn = document.getElementById('resetZoomBtn');
+  if(resetBtn) resetBtn.style.display='none';
   if (growthTimeline.length === 0) return;
+  // Race-condition guard: newer calls increment the counter and stale runs bail out
   const requestId = ++chartRequestId;
   const days = rangeDays(rangeKey);
   const coins = Object.keys(holdingsData).filter(c => Math.abs(holdingsData[c].amount) > 0.0000001);
   const statusMsg = document.getElementById('statusMsg');
   statusMsg.textContent = t('statusLoadingChart');
   statusMsg.className = 'status-msg loading';
-  await runPool(coins, 4, async (c) => { await fetchMarketRange(c, days); });
-  statusMsg.textContent = t('statusLoadingChart');
+
+  await runPool(coins, 4, async c => { await fetchMarketRange(c, days); });
+  // If a newer range switch happened while fetching historical prices, abort this render
   if (requestId !== chartRequestId) return;
-  const priceFn = (coin, t) => {
+
+  const priceFn = (coin, tt) => {
     const chart = marketCache[coin + '_' + days];
-    const p = chart ? priceAt(chart, t) : null;
+    const p = chart ? priceAt(chart, tt) : null;
     return p != null ? p : (currentPrices[coin] || 0);
   };
+
   const buckets = buildBuckets(rangeKey, stepForRange(rangeKey));
   const points = computeDailySeries(growthTimeline, buckets, priceFn);
   lastGrowthPoints = points;
   updateSummaryRange(points);
+
   if (typeof Chart === 'undefined' || points.length === 0) return;
   const renderPoints = decimatePoints(points, 400);
+
+  const bigEvents = findLargeEvents(growthTimeline, renderPoints);
+
   const canvas = document.getElementById('growthChart');
   if (growthChartInstance) growthChartInstance.destroy();
-  growthChartInstance = new Chart(canvas, {
-    type: 'line',
-    data: {
-      labels: renderPoints.map(p => formatChartTime(p.t)),
-      datasets: [
-        { label: t('costLabel'), data: renderPoints.map(p => p.cost), borderColor: cssVar('--gold', '#F5B301'), backgroundColor: 'rgba(245,179,1,0.10)', fill: true, tension: 0.2, pointRadius: 0, hoverRadius: 4 },
-        { label: t('valueLabel'), data: renderPoints.map(p => p.value), borderColor: cssVar('--accent', '#34D399'), backgroundColor: 'rgba(52,211,153,0.12)', fill: true, tension: 0.2, pointRadius: 0, hoverRadius: 4 }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      scales: {
-        x: { ticks: { color: cssVar('--text-2', '#98A3AE'), maxTicksLimit: 10, maxRotation: 0 }, grid: { color: cssVar('--border-strong', 'rgba(255,255,255,0.14)') } },
-        y: { ticks: { color: cssVar('--text-2', '#98A3AE'), callback: v => '$' + Number(v).toLocaleString() }, grid: { color: cssVar('--border-strong', 'rgba(255,255,255,0.14)') } }
-      },
-      plugins: {
-        legend: { labels: { color: cssVar('--text', '#EEF2F6') } },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}` } }
-      }
-    }
-  });
-  if (requestId !== chartRequestId) return;
-  statusMsg.textContent = t('statusChartUpdated');
-  statusMsg.className = 'status-msg';
-}
 
-function renderPieChart() {
-  if (typeof Chart === 'undefined') return;
-  const canvas = document.getElementById('allocationPie');
-  if (!canvas) return;
-  const data = Object.entries(holdingsData)
-    .filter(([coin, d]) => Math.abs(d.amount) > 0.0000001)
-    .map(([coin, d]) => ({ coin, value: Math.abs(d.amount) * (currentPrices[coin] || 0) }))
-    .sort((a, b) => b.value - a.value);
-  const total = data.reduce((s, x) => s + x.value, 0);
-  if (pieChartInstance) pieChartInstance.destroy();
-  pieChartInstance = null;
-  if (data.length === 0 || total <= 0) return;
-  pieChartInstance = new Chart(canvas, {
-    type: 'pie',
-    data: {
-      labels: data.map(x => x.coin),
-      datasets: [{
-        data: data.map(x => x.value),
-        backgroundColor: PIE_COLORS,
-        borderColor: cssVar('--bg', '#0C1014'),
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'right', labels: { color: cssVar('--text', '#EEF2F6'), boxWidth: 12, font: { size: 12 } } },
-        tooltip: {
-          callbacks: {
-            label: (ctx) => {
-              const pct = total > 0 ? (ctx.parsed / total) * 100 : 0;
-              return ` ${ctx.label}: $${ctx.parsed.toFixed(2)} (${pct.toFixed(1)}%)`;
+  const hasBuy = p => p.events && p.events.some(e => e.side === 'buy');
+  const hasSell = p => p.events && p.events.some(e => e.side === 'sell');
+  const buyEventData = renderPoints.map(p => (hasBuy(p) ? p.value : null));
+  const sellEventData = renderPoints.map(p => (hasSell(p) ? p.value : null));
+
+  const datasets = [
+    { label: t('costLabel'), data: renderPoints.map(p=>p.cost), borderColor: cssVar('--gold','#F5B301'), backgroundColor:'rgba(245,179,1,0.10)', fill:true, tension:0.2, pointRadius:0, hoverRadius:4, order:1 },
+    { label: t('valueLabel'), data: renderPoints.map(p=>p.value), borderColor: cssVar('--accent','#34D399'), backgroundColor:'rgba(52,211,153,0.12)', fill:true, tension:0.2,
+      pointRadius: renderPoints.map((p,i)=> bigEvents.has(i) ? 4 : 0), pointBackgroundColor: cssVar('--accent','#34D399'), hoverRadius:5, order:1 }
+  ];
+
+  const allCoins = Object.keys(holdingsData).filter(c => Math.abs(holdingsData[c].amount) > 0.0000001);
+  allCoins.forEach((coin, i) => {
+    if (!renderPoints.some(p => p.coinCost && Math.abs(p.coinCost[coin]) > 0.0000001)) return;
+    const color = PIECOLORS[i % PIECOLORS.length];
+    datasets.push({
+      label: t('perCoinCostLabel', { coin }),
+      data: renderPoints.map(p => (p.coinCost && p.coinCost[coin]) || 0),
+      borderColor: color,
+      backgroundColor: 'transparent',
+      borderWidth: 1.5,
+      borderDash: [4, 4],
+      pointRadius: 0,
+      hoverRadius: 3,
+      fill: false,
+      tension: 0.2,
+      order: 2
+    });
+  });
+
+  datasets.push(
+    { label: t('eventsBuyLabel'), type:'scatter', showLine:false, data: buyEventData,
+      pointRadius: 9, pointHoverRadius: 12, pointStyle: 'circle',
+      pointBackgroundColor: cssVar('--accent','#34D399'), pointBorderColor: cssVar('--bg','#0C1014'), pointBorderWidth: 4,
+      order: 999, clip: false },
+    { label: t('eventsSellLabel'), type:'scatter', showLine:false, data: sellEventData,
+      pointRadius: 9, pointHoverRadius: 12, pointStyle: 'triangle',
+      pointBackgroundColor: cssVar('--risk-neg','#F87171'), pointBorderColor: cssVar('--bg','#0C1014'), pointBorderWidth: 4,
+      order: 999, clip: false }
+  );
+
+  growthChartInstance = new Chart(canvas, {
+    type:'line',
+    data:{ labels: renderPoints.map(p=>formatChartTime(p.t)), datasets },
+    plugins: [eventMarkerPlugin],
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{ mode:'index', intersect:false },
+      scales:{
+        x:{ ticks:{ color: cssVar('--text-2','#98A3AE'), maxTicksLimit:10, maxRotation:0 }, grid:{ color: cssVar('--border-strong','rgba(255,255,255,0.14)') } },
+        y:{ ticks:{ color: cssVar('--text-2','#98A3AE'), callback: v => Number(v).toLocaleString() }, grid:{ color: cssVar('--border-strong','rgba(255,255,255,0.14)') } }
+      },
+      plugins:{
+        zoom:{
+          pan:{ enabled:true, mode:'x', modifierKey:null },
+          zoom:{ wheel:{ enabled:true }, pinch:{ enabled:true }, mode:'x', onZoomComplete:({chart})=>{ const btn=document.getElementById('resetZoomBtn'); if(btn) btn.style.display='inline-flex'; } },
+          limits:{ x:{ min:'original', max:'original' } }
+        },
+        legend:{ labels:{ usePointStyle: true, color: cssVar('--text','#EEF2F6') } },
+        tooltip:{
+          callbacks:{
+            title: items => formatChartTime(renderPoints[items[0].dataIndex].t),
+            label: ctx => {
+              if (ctx.dataset.label === t('eventsBuyLabel') || ctx.dataset.label === t('eventsSellLabel')) return null;
+              return `${ctx.dataset.label}: $${ctx.parsed.y!=null?ctx.parsed.y.toFixed(2):'-'}`;
+            },
+            afterBody: items => {
+              const evs = renderPoints[items[0].dataIndex].events;
+              if (!evs || !evs.length) return [];
+              return formatEventTooltip(evs);
             }
           }
         }
       }
     }
   });
+
+  if (requestId !== chartRequestId) return;
+  statusMsg.textContent = t('statusChartUpdated');
+  statusMsg.className = 'status-msg success';
 }
-function renderResults(holdings, opsCount, prices) {
+
+/**
+ * Identify chart indices where cost basis jumps significantly.
+ * @param {Array<Object>} timeline
+ * @param {Array<Object>} points
+ * @returns {Set<number>}
+ */
+function findLargeEvents(timeline, points) {
+  const marked = new Set();
+  if (points.length < 2) return marked;
+  points.forEach((p, i) => {
+    if (i === 0) return;
+    const deltaCost = Math.abs(p.cost - points[i-1].cost);
+    const finalCost = points[points.length-1].cost || 1;
+    if (deltaCost > 0 && deltaCost / finalCost > 0.08) {
+      marked.add(i);
+    }
+  });
+  return marked;
+}
+
+/**
+ * Classify a coin as stablecoin, major coin, or altcoin.
+ * @param {string} coin
+ * @returns {string}
+ */
+function classifyCoin(coin) {
+  if (STABLECOINS.includes(coin)) return t('catStable');
+  if (MAJOR_COINS.includes(coin)) return t('catMajor');
+  return t('catAlt');
+}
+
+/**
+ * Render (or re-render) the allocation pie chart.
+ * @param {Object} holdings
+ * @param {Object<string, number>} prices
+ * @param {string} mode
+ */
+function renderPieChart(holdings, prices, mode) {
+  if (typeof Chart === 'undefined') return;
+  const canvas = document.getElementById('allocationPie');
+  if (!canvas) return;
+
+  let data;
+  if (mode === 'category') {
+    const catMap = Object.create(null);
+    Object.entries(holdings).filter(([c,d]) => Math.abs(d.amount) > 0.0000001).forEach(([coin,d]) => {
+      const cat = classifyCoin(coin);
+      const val = Math.abs(d.amount) * (prices[coin] || 0);
+      catMap[cat] = (catMap[cat] || 0) + val;
+    });
+    data = Object.entries(catMap).map(([label,value]) => ({ label, value })).sort((a,b)=>b.value-a.value);
+  } else {
+    data = Object.entries(holdings).filter(([c,d]) => Math.abs(d.amount) > 0.0000001)
+      .map(([coin,d]) => ({ label: coin, value: Math.abs(d.amount) * (prices[coin] || 0) }))
+      .sort((a,b)=>b.value-a.value);
+  }
+
+  const total = data.reduce((s,x)=>s+x.value,0);
+  if (pieChartInstance) { pieChartInstance.destroy(); pieChartInstance = null; }
+  if (data.length === 0 || total === 0) return;
+
+  const colors = mode === 'category' ? data.map(x => CATEGORY_COLORS[x.label] || '#94A3B8') : data.map((_,i)=>PIECOLORS[i % PIECOLORS.length]);
+
+  pieChartInstance = new Chart(canvas, {
+    type:'pie',
+    data:{ labels: data.map(x=>x.label), datasets:[{ data: data.map(x=>x.value), backgroundColor: colors, borderColor: cssVar('--bg','#0C1014'), borderWidth:2 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:'right', labels:{ color: cssVar('--text','#EEF2F6'), boxWidth:12, font:{ size:12 } } },
+        tooltip:{ callbacks:{ label: ctx => { const pct = total>0 ? (ctx.parsed/total*100) : 0; return `${ctx.label}: $${ctx.parsed.toFixed(2)} (${pct.toFixed(1)}%)`; } } }
+      }
+    }
+  });
+}
+
+/**
+ * Update the fee summary and zero-cost asset chips.
+ * @param {Object<string, number>} fees
+ * @param {Array<Object>} zeroCost
+ * @param {Object<string, number>} prices
+ */
+function renderFeeAndZeroCost(fees, zeroCost, prices) {
+  const feeGrid = document.getElementById('feeSummaryGrid');
+  let totalFeeUsd = 0;
+  Object.entries(fees).forEach(([coin, amt]) => { totalFeeUsd += amt * (prices[coin] || (STABLECOINS.includes(coin) ? 1 : 0)); });
+  feeGrid.innerHTML = '';
+  function makeStatBox(label, value) {
+    const box = document.createElement('div');
+    box.className = 'stat-box';
+    const lbl = document.createElement('div');
+    lbl.className = 'label';
+    lbl.textContent = label;
+    const val = document.createElement('div');
+    val.className = 'value';
+    val.textContent = value;
+    box.appendChild(lbl);
+    box.appendChild(val);
+    return box;
+  }
+  feeGrid.appendChild(makeStatBox(t('feeTotalLabel'), '$' + totalFeeUsd.toFixed(2)));
+  feeGrid.appendChild(makeStatBox(t('zeroCostLabel'), String(zeroCost.length)));
+  const list = document.getElementById('zeroCostList');
+  list.innerHTML = '';
+  const grouped = Object.create(null);
+  zeroCost.forEach(z => { grouped[z.coin] = (grouped[z.coin] || 0) + z.change; });
+  Object.entries(grouped).forEach(([coin, amt]) => {
+    const chip = document.createElement('span');
+    chip.className = 'zero-cost-chip';
+    const strong = document.createElement('strong');
+    strong.textContent = coin;
+    chip.appendChild(strong);
+    chip.appendChild(document.createTextNode(' ' + amt.toFixed(6)));
+    list.appendChild(chip);
+  });
+}
+
+
+// ==================== DOM renderers ====================
+/**
+ * Render the main holdings table and summary grid.
+ * @param {Object} holdings
+ * @param {Object} opsCount
+ * @param {Object<string, number>} prices
+ * @param {Object<string, number>} realized
+ * @param {Object<string, Object<string, number>>} realizedByYear
+ */
+function renderResults(holdings, opsCount, prices, realized, realizedByYear) {
   document.getElementById('resultsSection').style.display = 'block';
 
   const filtered = Object.entries(holdings)
-    .filter(([coin, d]) => Math.abs(d.amount) > 0.0000001)
-    .sort((a, b) => Math.abs(b[1].amount * (prices[b[0]] || 0)) - Math.abs(a[1].amount * (prices[a[0]] || 0)));
+    .filter(([coin,d]) => Math.abs(d.amount) > 0.0000001)
+    .sort((a,b) => Math.abs(b[1].amount*(prices[b[0]]||0)) - Math.abs(a[1].amount*(prices[a[0]]||0)));
 
-  let totalCost = 0, totalValue = 0;
+  let totalCost = 0, totalValue = 0, totalRealized = 0;
   const body = document.getElementById('holdingsBody');
   body.innerHTML = '';
 
-  filtered.forEach(([coin, d]) => {
+  filtered.forEach(([coin,d]) => {
     const price = prices[coin] || 0;
     const marketValue = d.amount * price;
-    const avgCost = d.amount !== 0 ? d.costBasis / d.amount : 0;
+    const avgCost = d.amount !== 0 ? d.costBasis/d.amount : 0;
     const pnl = marketValue - d.costBasis;
-    const pnlPct = d.costBasis > 0 ? (pnl / d.costBasis) * 100 : 0;
-    totalCost += d.costBasis;
-    totalValue += marketValue;
+    const pnlPct = d.costBasis > 0 ? (pnl/d.costBasis)*100 : 0;
+    const rPnl = (realized && realized[coin]) || 0;
+    totalCost += d.costBasis; totalValue += marketValue; totalRealized += rPnl;
+
+    const noPriceData = missingPriceCoins.includes(coin) && price === 0;
+    const priceCellNote = noPriceData ? ` title="${t('noPriceDataTitle')}" style="border-color:var(--risk-neg);"` : '';
 
     const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><span class="coin-icon-badge">${coin.slice(0,2)}</span>${coin}</td>
-      <td>${d.amount.toFixed(8)}</td>
-      <td>$${d.costBasis.toFixed(2)}</td>
-      <td>$${avgCost.toFixed(4)}</td>
-      <td><input class="price-input" data-coin="${coin}" value="${price.toFixed(4)}"></td>
-      <td>$${marketValue.toFixed(2)}</td>
-      <td class="${pnl >= 0 ? 'positive' : 'negative'}">${arrow(pnl)} ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}</td>
-      <td class="${pnlPct >= 0 ? 'positive' : 'negative'}">${arrow(pnlPct)} ${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(1)}%</td>
-    `;
+    const tdCoin = document.createElement('td');
+    const badge = document.createElement('span');
+    badge.className = 'coin-icon-badge';
+    badge.textContent = coin.slice(0, 2);
+    tdCoin.appendChild(badge);
+    tdCoin.appendChild(document.createTextNode(coin));
+    if (noPriceData) {
+      tdCoin.appendChild(document.createTextNode(' '));
+      const warn = document.createElement('span');
+      warn.title = t('noPriceDataShort');
+      warn.style.color = 'var(--risk-neg)';
+      warn.textContent = '⚠';
+      tdCoin.appendChild(warn);
+    }
+    tr.appendChild(tdCoin);
+    const tdAmt = document.createElement('td');
+    tdAmt.textContent = d.amount.toFixed(8);
+    tr.appendChild(tdAmt);
+    const tdCost = document.createElement('td');
+    tdCost.textContent = '$' + d.costBasis.toFixed(2);
+    tr.appendChild(tdCost);
+    const tdAvg = document.createElement('td');
+    tdAvg.textContent = '$' + avgCost.toFixed(4);
+    tr.appendChild(tdAvg);
+    const tdPrice = document.createElement('td');
+    const inp = document.createElement('input');
+    inp.className = 'price-input';
+    inp.dataset.coin = coin;
+    inp.value = price.toFixed(4);
+    if (noPriceData) {
+      inp.title = t('noPriceDataTitle');
+      inp.style.borderColor = 'var(--risk-neg)';
+    }
+    tdPrice.appendChild(inp);
+    tr.appendChild(tdPrice);
+    const tdValue = document.createElement('td');
+    tdValue.textContent = '$' + marketValue.toFixed(2);
+    if (noPriceData) {
+      tdValue.appendChild(document.createTextNode(' '));
+      const na = document.createElement('span');
+      na.style.color = 'var(--risk-neg)';
+      na.style.fontSize = '11px';
+      na.textContent = '(N/A)';
+      tdValue.appendChild(na);
+    }
+    tr.appendChild(tdValue);
+    const tdPnl = document.createElement('td');
+    tdPnl.textContent = arrow(pnl) + '$' + pnl.toFixed(2);
+    tdPnl.className = pnl >= 0 ? 'positive' : 'negative';
+    tr.appendChild(tdPnl);
+    const tdRPnl = document.createElement('td');
+    tdRPnl.textContent = arrow(rPnl) + '$' + rPnl.toFixed(2);
+    tdRPnl.className = rPnl >= 0 ? 'positive' : 'negative';
+    tr.appendChild(tdRPnl);
+    const tdPct = document.createElement('td');
+    tdPct.textContent = arrow(pnlPct) + pnlPct.toFixed(1) + '%';
+    tdPct.className = pnlPct >= 0 ? 'positive' : 'negative';
+    tr.appendChild(tdPct);
     body.appendChild(tr);
   });
 
   document.querySelectorAll('.price-input').forEach(inp => {
-    inp.addEventListener('change', (e) => {
+    inp.addEventListener('change', async e => {
       const coin = e.target.dataset.coin;
-      currentPrices[coin] = parseFloat(e.target.value) || 0;
-      renderResults(holdingsData, opsCount, currentPrices);
+      currentPrices[coin] = finiteNumber(e.target.value, 0);
+      const idx = missingPriceCoins.indexOf(coin);
+      if (idx >= 0) missingPriceCoins.splice(idx, 1);
+      renderResults(holdingsData, opsCount, currentPrices, realizedPnl, realizedPnlByYear);
+      await persistState();
     });
   });
 
   const totalPnl = totalValue - totalCost;
-  const totalPnlPct = totalCost > 0 ? (totalPnl / totalCost) * 100 : 0;
+  const totalPnlPct = totalCost > 0 ? (totalPnl/totalCost)*100 : 0;
 
   const summaryGrid = document.getElementById('summaryGrid');
-  summaryGrid.innerHTML = `
-    <div class="stat-box"><div class="label" data-i18n="summaryValueLabel">總市值</div><div class="value">$${totalValue.toFixed(2)}</div></div>
-    <div class="stat-box"><div class="label" data-i18n="summaryCostLabel">總成本基礎</div><div class="value">$${totalCost.toFixed(2)}</div></div>
-    <div class="stat-box"><div class="label" data-i18n="summaryPnlLabel">未實現盈虧（所選期間）</div><div class="value ${totalPnl >= 0 ? 'positive' : 'negative'}" id="summaryPnl">${arrow(totalPnl)} ${totalPnl >= 0 ? '+' : ''}$${totalPnl.toFixed(2)}</div></div>
-    <div class="stat-box"><div class="label" data-i18n="summaryPctLabel">整體回報率（所選期間）</div><div class="value ${totalPnlPct >= 0 ? 'positive' : 'negative'}" id="summaryPnlPct">${arrow(totalPnlPct)} ${totalPnlPct >= 0 ? '+' : ''}${totalPnlPct.toFixed(1)}%</div></div>
-  `;
-  updateSummaryRange(lastGrowthPoints);
+  summaryGrid.innerHTML = '';
+  function makeSummaryBox(label, value, extraClass, id) {
+    const box = document.createElement('div');
+    box.className = 'stat-box';
+    const lbl = document.createElement('div');
+    lbl.className = 'label';
+    lbl.textContent = label;
+    const val = document.createElement('div');
+    val.className = 'value' + (extraClass ? ' ' + extraClass : '');
+    val.textContent = value;
+    if (id) val.id = id;
+    box.appendChild(lbl);
+    box.appendChild(val);
+    return box;
+  }
+  summaryGrid.appendChild(makeSummaryBox(t('summaryValueLabel'), '$' + totalValue.toFixed(2)));
+  summaryGrid.appendChild(makeSummaryBox(t('summaryCostLabel'), '$' + totalCost.toFixed(2)));
+  summaryGrid.appendChild(makeSummaryBox(t('summaryPnlLabel'), arrow(totalPnl) + totalPnl.toFixed(2), totalPnl >= 0 ? 'positive' : 'negative', 'summaryPnl'));
+  summaryGrid.appendChild(makeSummaryBox(t('summaryPctLabel'), arrow(totalPnlPct) + totalPnlPct.toFixed(1) + '%', totalPnlPct >= 0 ? 'positive' : 'negative', 'summaryPnlPct'));
+  summaryGrid.appendChild(makeSummaryBox(t('summaryRealizedLabel'), arrow(totalRealized) + '$' + totalRealized.toFixed(2), totalRealized >= 0 ? 'positive' : 'negative'));
 
-  const opsBody = document.getElementById('opsBody');
-  opsBody.innerHTML = '';
-  Object.entries(opsCount).sort((a,b) => b[1]-a[1]).forEach(([op, count]) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${op}</td><td>${count}</td>`;
-    opsBody.appendChild(tr);
-  });
+  if (Object.keys(opsCount).length > 0) {
+    const opsBody = document.getElementById('opsBody');
+    opsBody.innerHTML = '';
+    Object.entries(opsCount).sort((a,b)=>b[1]-a[1]).forEach(([op,count]) => {
+      const tr = document.createElement('tr');
+      const tdOp = document.createElement('td');
+      tdOp.textContent = op;
+      const tdCount = document.createElement('td');
+      tdCount.textContent = count;
+      tr.appendChild(tdOp);
+      tr.appendChild(tdCount);
+      opsBody.appendChild(tr);
+    });
+  }
 
-  renderPieChart();
-  applyLang();
+  renderPieChart(holdings, prices, currentPieMode);
+  renderFeeAndZeroCost(feeTotals, zeroCostAssets, prices);
+  renderYearlyPnl(realizedByYear);
 }
 
-async function handleFile(file) {
+/**
+ * Build flat rows for the yearly realized P/L table (per-coin rows, per-year
+ * subtotals, and a grand total).
+ * @param {Object<string, Object<string, number>>} realizedByYear
+ * @returns {Array<{type:string, yearLabel:string, coinLabel:string, pnl:number}>}
+ */
+function buildYearlyPnlRows(realizedByYear) {
+  const rows = [];
+  if (!realizedByYear) return rows;
+  const years = Object.keys(realizedByYear).map(Number).sort((a,b) => a - b);
+  if (years.length === 0) return rows;
+  years.forEach(year => {
+    const coins = Object.entries(realizedByYear[year]).sort((a,b) => Math.abs(b[1]) - Math.abs(a[1]));
+    coins.forEach(([coin, pnl]) => rows.push({ type:'row', yearLabel:String(year), coinLabel:coin, pnl:pnl }));
+    const yearTotal = coins.reduce((s, [, pnl]) => s + pnl, 0);
+    rows.push({ type:'subtotal', yearLabel:'', coinLabel:t('yearSubtotal', { year:year }), pnl:yearTotal });
+  });
+  const grandTotal = years.reduce((s, y) => s + Object.values(realizedByYear[y]).reduce((a, v) => a + v, 0), 0);
+  rows.push({ type:'total', yearLabel:'', coinLabel:t('yearGrandTotal'), pnl:grandTotal });
+  return rows;
+}
+
+/**
+ * Render the realized P/L table grouped by year (tax reference).
+ * @param {Object<string, Object<string, number>>} realizedByYear
+ */
+function renderYearlyPnl(realizedByYear) {
+  const body = document.getElementById('yearlyPnlBody');
+  const rows = buildYearlyPnlRows(realizedByYear);
+  if (rows.length === 0) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 3;
+    td.style.textAlign = 'center';
+    td.style.color = 'var(--text-3)';
+    td.textContent = t('yearlyPnlEmpty');
+    tr.appendChild(td);
+    body.appendChild(tr);
+    return;
+  }
+  body.innerHTML = '';
+  rows.forEach(r => {
+    const tr = document.createElement('tr');
+    const isAgg = r.type === 'subtotal' || r.type === 'total';
+    if (isAgg) {
+      tr.style.background = 'var(--surface-2)';
+      tr.style.fontWeight = '700';
+    }
+    const tdYear = document.createElement('td');
+    tdYear.textContent = r.yearLabel;
+    const tdCoin = document.createElement('td');
+    tdCoin.textContent = r.coinLabel;
+    const tdPnl = document.createElement('td');
+    tdPnl.textContent = arrow(r.pnl) + '$' + r.pnl.toFixed(2);
+    tdPnl.className = r.pnl >= 0 ? 'positive' : 'negative';
+    tr.appendChild(tdYear);
+    tr.appendChild(tdCoin);
+    tr.appendChild(tdPnl);
+    body.appendChild(tr);
+  });
+}
+
+const CRYPTO_DB = 'portfolioCrypto';
+const CRYPTO_STORE = 'keys';
+const CRYPTO_KEY_ID = 'master';
+
+async function getOrCreateCryptoKey() {
+    return new Promise((resolve, reject) => {
+        const req = indexedDB.open(CRYPTO_DB, 1);
+        req.onupgradeneeded = e => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(CRYPTO_STORE)) {
+                db.createObjectStore(CRYPTO_STORE);
+            }
+        };
+        req.onsuccess = e => {
+            const db = e.target.result;
+            const tx = db.transaction(CRYPTO_STORE, 'readonly');
+            const store = tx.objectStore(CRYPTO_STORE);
+            const getReq = store.get(CRYPTO_KEY_ID);
+            getReq.onsuccess = async ev => {
+                if (ev.target.result) {
+                    const keyData = new Uint8Array(ev.target.result);
+                    const cryptoKey = await crypto.subtle.importKey('raw', keyData, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+                    db.close();
+                    resolve(cryptoKey);
+                } else {
+                    const newKey = crypto.getRandomValues(new Uint8Array(32));
+                    const cryptoKey = await crypto.subtle.importKey('raw', newKey, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+                    const tx2 = db.transaction(CRYPTO_STORE, 'readwrite');
+                    const store2 = tx2.objectStore(CRYPTO_STORE);
+                    // Use add() so simultaneous tabs never overwrite each other's key.
+                    store2.add(Array.from(newKey), CRYPTO_KEY_ID);
+                    tx2.oncomplete = () => { db.close(); resolve(cryptoKey); };
+                    tx2.onerror = () => {
+                        // Another tab won the race; reuse the key it stored.
+                        const tx3 = db.transaction(CRYPTO_STORE, 'readonly');
+                        const getReq2 = tx3.objectStore(CRYPTO_STORE).get(CRYPTO_KEY_ID);
+                        getReq2.onsuccess = async ev2 => {
+                            if (ev2.target.result) {
+                                try {
+                                    const existingKey = await crypto.subtle.importKey('raw', new Uint8Array(ev2.target.result), { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+                                    db.close();
+                                    resolve(existingKey);
+                                    return;
+                                } catch (e) {}
+                            }
+                            db.close();
+                            reject(tx2.error || new Error('key store conflict'));
+                        };
+                        getReq2.onerror = () => { db.close(); reject(getReq2.error); };
+                    };
+                }
+            };
+            getReq.onerror = () => { db.close(); reject(getReq.error); };
+        };
+        req.onerror = () => reject(req.error);
+    });
+}
+
+async function encryptPayload(plaintext) {
+    try {
+        const key = await getOrCreateCryptoKey();
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const encoder = new TextEncoder();
+        const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoder.encode(plaintext));
+        const combined = new Uint8Array(iv.length + ciphertext.byteLength);
+        combined.set(iv, 0);
+        combined.set(new Uint8Array(ciphertext), iv.length);
+        let binary = '';
+        for (let i = 0; i < combined.length; i++) binary += String.fromCharCode(combined[i]);
+        return btoa(binary);
+    } catch (e) {
+        console.warn('encrypt failed', e);
+        throw new Error('Encryption failed — data will not be saved in plaintext.');
+    }
+}
+
+async function decryptPayload(b64) {
+    try {
+        const key = await getOrCreateCryptoKey();
+        const binary = atob(b64);
+        const combined = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) combined[i] = binary.charCodeAt(i);
+        const iv = combined.slice(0, 12);
+        const ciphertext = combined.slice(12);
+        const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+        return new TextDecoder().decode(decrypted);
+    } catch (e) {
+        console.warn('decrypt failed', e);
+        return null;
+    }
+}
+
+/**
+ * Save raw rows, prices, and file hashes to localStorage. The value is
+ * AES-GCM obfuscated with an origin-local key in IndexedDB; this is not
+ * real at-rest encryption because the key lives next to the ciphertext.
+ */
+async function persistState() {
+  try {
+    const payload = JSON.stringify({ rawRows: allRawRows, currentPrices, importedFileHashes, savedAt: Date.now() });
+    const encrypted = await encryptPayload(payload);
+    localStorage.setItem(STORAGE_KEY, STORAGE_PREFIX + encrypted);
+  } catch (e) { console.warn('persist failed', e); }
+}
+
+/**
+ * Load previously saved state from localStorage.
+ * Accepts the current prefixed envelope, legacy bare ciphertext, and the
+ * old v1 plaintext shape (migrated to the new format on load).
+ * @returns {Object|null}
+ */
+function sanitizeSavedState(saved) {
+  if (!saved || typeof saved !== 'object' || !Array.isArray(saved.rawRows)) return null;
+  if (saved.rawRows.length > MAX_ROWS) return null;
+  const currentPrices = Object.create(null);
+  if (saved.currentPrices && typeof saved.currentPrices === 'object') {
+    Object.keys(saved.currentPrices).forEach(k => {
+      const v = finiteNumber(saved.currentPrices[k], null);
+      if (v !== null) currentPrices[normalizeCoinSymbol(k)] = v;
+    });
+  }
+  const importedFileHashes = Array.isArray(saved.importedFileHashes)
+    ? saved.importedFileHashes.filter(h => typeof h === 'string' && h.length > 0 && h.length <= 128)
+    : [];
+  return {
+    rawRows: saved.rawRows,
+    currentPrices,
+    importedFileHashes,
+    savedAt: typeof saved.savedAt === 'number' && Number.isFinite(saved.savedAt) ? saved.savedAt : Date.now()
+  };
+}
+
+async function loadPersistedState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return null;
+
+  // Current format: STORAGE_PREFIX + base64(AES-GCM payload).
+  if (raw.startsWith(STORAGE_PREFIX)) {
+    const decrypted = await decryptPayload(raw.slice(STORAGE_PREFIX.length));
+    if (!decrypted) return null;
+    try { return sanitizeSavedState(JSON.parse(decrypted)); } catch (e) { return null; }
+  }
+
+  // Legacy bare-base64 ciphertext written before the envelope prefix existed.
+  if (/^[A-Za-z0-9+/]+={0,2}$/.test(raw) && raw.length > 32) {
+    const decrypted = await decryptPayload(raw);
+    if (!decrypted) return null;
+    try { return sanitizeSavedState(JSON.parse(decrypted)); } catch (e) { return null; }
+  }
+
+  // Legacy v1 plaintext JSON. Only migrate when the shape matches a real
+  // saved state; arbitrary JSON is never accepted.
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && Array.isArray(parsed.rawRows) && typeof parsed.savedAt === 'number') {
+      const clean = sanitizeSavedState(parsed);
+      try {
+        const encrypted = await encryptPayload(raw);
+        localStorage.setItem(STORAGE_KEY, STORAGE_PREFIX + encrypted);
+      } catch (e) { /* leave the legacy value; migration retries next load */ }
+      return clean;
+    }
+  } catch (e) {}
+
+  return null;
+}
+
+/**
+ * Remove the saved portfolio payload and the crypto-key database. The key is
+ * random and origin-local, so clearing both removes the local analysis data
+ * together with the key that could decrypt it.
+ */
+function clearStoredData() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  return new Promise(resolve => {
+    if (typeof indexedDB === 'undefined') { resolve(); return; }
+    try {
+      const req = indexedDB.deleteDatabase(CRYPTO_DB);
+      req.onsuccess = () => resolve();
+      req.onerror = () => resolve();
+      req.onblocked = () => resolve();
+      setTimeout(resolve, 1500);
+    } catch (e) { resolve(); }
+  });
+}
+
+/**
+ * Main orchestrator: dedupe rows, analyze data, fetch prices, and render everything.
+ * @param {Array<Object>} rows
+ * @param {boolean} [isRestore]
+ */
+async function processRows(rows, isRestore) {
+  rows = rows.map(r => {
+    if (!r || r['Coin'] == null) return r;
+    const normalized = Object.assign({}, r);
+    normalized['Coin'] = normalizeCoinSymbol(normalized['Coin']);
+    return normalized;
+  });
+  allRawRows = rows;
+  const { holdings, opsCount, fees, zeroCost, realized, realizedByYear } = analyzeData(allRawRows);
+  holdingsData = holdings;
+  operationCounts = opsCount;
+  feeTotals = fees;
+  zeroCostAssets = zeroCost;
+  realizedPnl = realized;
+  realizedPnlByYear = realizedByYear || {};
+  growthTimeline = buildTimeline(allRawRows);
+  // Wipe historical price caches so the next chart rebuild fetches fresh data
+  Object.keys(marketCache).forEach(k => delete marketCache[k]);
+
+  const statusMsg = document.getElementById('statusMsg');
+  const coins = Object.keys(holdings).filter(c => Math.abs(holdings[c].amount) > 0.0000001);
+
+  if (!isRestore) {
+    statusMsg.textContent = t('statusParsed', { n: allRawRows.length });
+  }
+  const prices = await fetchPrices(coins);
+  currentPrices = prices;
+
+  renderResults(holdings, opsCount, prices, realized, realizedByYear);
+  await renderGrowthChart(currentRange);
+
+  if (lastPriceFetchOk) {
+    statusMsg.textContent = t('statusDone', { n: allRawRows.length, c: coins.length });
+    statusMsg.className = 'status-msg success';
+  } else {
+    statusMsg.textContent = buildPriceFailMessage(allRawRows.length);
+    statusMsg.className = 'status-msg error';
+  }
+  await persistState();
+  document.getElementById('mergeMoreBtn').style.display = 'inline-flex';
+}
+
+/**
+ * Read uploaded CSV files, dedupe by hash, and pass to processRows.
+ * @param {FileList} fileList
+ */
+async function handleFiles(fileList) {
   const statusMsg = document.getElementById('statusMsg');
   statusMsg.textContent = t('statusParsing');
   statusMsg.className = 'status-msg loading';
 
-  const text = await file.text();
-  const rows = parseCSV(text);
-  const { holdings, opsCount } = analyzeData(rows);
-  holdingsData = holdings;
-  growthTimeline = buildTimeline(rows);
-  Object.keys(marketCache).forEach(k => delete marketCache[k]);
+  try {
+    const files = Array.from(fileList);
+    const oversized = files.find(f => f.size > MAX_FILE_SIZE);
+    if (oversized) {
+      statusMsg.textContent = t('statusFileTooLarge', { name: oversized.name });
+      statusMsg.className = 'status-msg error';
+      return;
+    }
+    const totalSize = files.reduce((s, f) => s + f.size, 0);
+    if (totalSize > MAX_TOTAL_SIZE) {
+      statusMsg.textContent = t('statusTotalTooLarge');
+      statusMsg.className = 'status-msg error';
+      return;
+    }
+    if (files.length > MAX_FILES_PER_BATCH) {
+      statusMsg.textContent = t('statusTooManyFiles', { n: MAX_FILES_PER_BATCH });
+      statusMsg.className = 'status-msg error';
+      return;
+    }
+    const texts = await Promise.all(files.map(f => f.text()));
+    const hashes = await Promise.all(texts.map(txt => hashText(txt)));
 
-  statusMsg.textContent = t('statusParsed', { n: rows.length });
 
-  const coins = Object.keys(holdings).filter(c => Math.abs(holdings[c].amount) > 0.0000001);
-  const prices = await fetchPrices(coins);
-  currentPrices = prices;
+    const parsedSets = texts.map(txt => parseCSV(txt));
+    const isNew = hashes.map(h => !importedFileHashes.includes(h));
+    const skippedCount = isNew.filter(v => !v).length;
+    const addedFiles = isNew.filter(Boolean).length;
+    const addedRows = parsedSets.reduce((s, arr, i) => s + (isNew[i] ? arr.length : 0), 0);
+    if (allRawRows.length + addedRows > MAX_ROWS) {
+      statusMsg.textContent = t('statusTooManyRows', { n: MAX_ROWS });
+      statusMsg.className = 'status-msg error';
+      return;
+    }
 
-  renderResults(holdings, opsCount, prices);
-  await renderGrowthChart(currentRange);
+    const combinedRows = [...allRawRows];
+    isNew.forEach((yes, i) => {
+      if (yes) {
+        combinedRows.push(...parsedSets[i]);
+        importedFileHashes.push(hashes[i]);
+      }
+    });
 
-  if (lastPriceFetchOk) {
-    statusMsg.textContent = t('statusDone', { n: rows.length, c: coins.length });
-    statusMsg.className = 'status-msg success';
-  } else {
-    statusMsg.textContent = t('statusPriceFail', { n: rows.length });
+    if (addedFiles === 0 && skippedCount > 0) {
+      statusMsg.textContent = LANG === 'zh'
+        ? `已略過 ${skippedCount} 個先前已上載過的相同檔案，資料未變動。`
+        : `Skipped ${skippedCount} file(s) already uploaded before — no changes made.`;
+      statusMsg.className = 'status-msg success';
+      return;
+    }
+
+    if (skippedCount > 0) {
+      statusMsg.textContent = LANG === 'zh'
+        ? `已略過 ${skippedCount} 個重複檔案，正在處理 ${addedFiles} 個新檔案...`
+        : `Skipped ${skippedCount} duplicate file(s), processing ${addedFiles} new file(s)...`;
+    } else if (addedFiles > 1 || allRawRows.length > 0) {
+      statusMsg.textContent = t('statusMerged', { n: addedFiles, r: combinedRows.length });
+    }
+
+    await processRows(combinedRows, false);
+  } catch (e) {
+    console.error('handleFiles failed', e);
+    statusMsg.textContent = (LANG === 'zh' ? '解析失敗：' : 'Parsing failed: ') + (e && e.message ? e.message : e);
     statusMsg.className = 'status-msg error';
   }
 }
@@ -1012,61 +2246,558 @@ document.getElementById('refreshPricesBtn').addEventListener('click', async () =
   const statusMsg = document.getElementById('statusMsg');
   statusMsg.textContent = t('statusUpdating');
   statusMsg.className = 'status-msg loading';
-  const prices = await fetchPrices(coins);
-  currentPrices = prices;
-  renderResults(holdingsData, {}, prices);
-  await renderGrowthChart(currentRange);
-  statusMsg.textContent = lastPriceFetchOk ? t('statusPricesUpdated') : t('statusPricesFail');
-  statusMsg.className = 'status-msg ' + (lastPriceFetchOk ? 'success' : 'error');
+  try {
+    const prices = await fetchPrices(coins);
+    currentPrices = prices;
+    renderResults(holdingsData, {}, prices, realizedPnl, realizedPnlByYear);
+    await renderGrowthChart(currentRange);
+    statusMsg.textContent = lastPriceFetchOk ? t('statusPricesUpdated') : buildPriceFailMessage();
+    statusMsg.className = 'status-msg ' + (lastPriceFetchOk ? 'success' : 'error');
+    await persistState();
+  } catch (e) {
+    console.error(e);
+    statusMsg.textContent = buildPriceFailMessage();
+    statusMsg.className = 'status-msg error';
+  }
 });
 
-document.querySelectorAll('.range-btn').forEach(btn => {
+document.querySelectorAll('.range-btn[data-range]').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.range-btn[data-range]').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentRange = btn.dataset.range;
     renderGrowthChart(currentRange);
   });
 });
 
+document.querySelectorAll('#pieModeTabs .range-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#pieModeTabs .range-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPieMode = btn.dataset.mode;
+    renderPieChart(holdingsData, currentPrices, currentPieMode);
+  });
+});
+
+document.getElementById('exportCsvBtn').addEventListener('click', () => {
+  const rows = [['Coin','Amount','CostBasis_USDT','AvgCost','Price_USD','MarketValue_USD','UnrealizedPL_USD','RealizedPL_USD','Return_%','PriceDataMissing']];
+  Object.entries(holdingsData).filter(([c,d]) => Math.abs(d.amount) > 0.0000001).forEach(([coin,d]) => {
+    const price = currentPrices[coin] || 0;
+    const mv = d.amount * price;
+    const avg = d.amount !== 0 ? d.costBasis/d.amount : 0;
+    const pnl = mv - d.costBasis;
+    const pnlPct = d.costBasis > 0 ? (pnl/d.costBasis)*100 : 0;
+    const rPnl = (realizedPnl && realizedPnl[coin]) || 0;
+    const missing = missingPriceCoins.includes(coin) && price === 0 ? 'YES' : 'NO';
+    rows.push([escapeCsvCell(coin), d.amount, d.costBasis.toFixed(2), avg.toFixed(4), price.toFixed(4), mv.toFixed(2), pnl.toFixed(2), rPnl.toFixed(2), pnlPct.toFixed(1), escapeCsvCell(missing)]);
+  });
+  rows.push([]);
+  rows.push([escapeCsvCell('Year'), escapeCsvCell('Coin'), escapeCsvCell('RealizedPL_USD')]);
+  buildYearlyPnlRows(realizedPnlByYear).forEach(r => {
+    rows.push([escapeCsvCell(r.yearLabel || ''), escapeCsvCell(r.coinLabel), r.pnl.toFixed(2)]);
+  });
+  const csv = rows.map(r => r.map(escapeCsvCell).join(',')).join('\n');
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'portfolio_holdings_' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  const statusMsg = document.getElementById('statusMsg');
+  statusMsg.textContent = t('statusExported'); statusMsg.className = 'status-msg success';
+});
+
+// ==================== PNG export canvas helpers ====================
+/**
+ * Draw a rounded rectangle path on a canvas context.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} x
+ * @param {number} y
+ * @param {number} w
+ * @param {number} h
+ * @param {number} r
+ */
+function roundRect(ctx, x, y, w, h, r) {
+  const radius = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + w - radius, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+  ctx.lineTo(x + w, y + h - radius);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+  ctx.lineTo(x + radius, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
+
+/**
+ * Draw a titled panel for the PNG report.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} x
+ * @param {number} y
+ * @param {number} w
+ * @param {number} h
+ * @param {number} r
+ * @param {string} title
+ */
+function drawPanel(ctx, x, y, w, h, r, title) {
+  ctx.save();
+  ctx.fillStyle = cssVar('--surface-2', '#1B232B');
+  roundRect(ctx, x, y, w, h, r);
+  ctx.fill();
+  ctx.strokeStyle = cssVar('--border', 'rgba(255,255,255,0.07)');
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  if (title) {
+    ctx.fillStyle = cssVar('--text', '#EEF2F6');
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(title, x + 16, y + 28);
+  }
+  ctx.restore();
+}
+
+/**
+ * Clip subsequent drawing to a rounded rectangle.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} x
+ * @param {number} y
+ * @param {number} w
+ * @param {number} h
+ * @param {number} r
+ */
+function clipPanel(ctx, x, y, w, h, r) {
+  ctx.save();
+  roundRect(ctx, x, y, w, h, r);
+  ctx.clip();
+}
+
+/**
+ * Draw a metric card for the PNG report.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} x
+ * @param {number} y
+ * @param {number} w
+ * @param {number} h
+ * @param {number} r
+ * @param {string} label
+ * @param {string} value
+ * @param {string} color
+ */
+function drawMetric(ctx, x, y, w, h, r, label, value, color) {
+  ctx.save();
+  ctx.fillStyle = cssVar('--surface-2', '#1B232B');
+  roundRect(ctx, x, y, w, h, r);
+  ctx.fill();
+  ctx.strokeStyle = cssVar('--border', 'rgba(255,255,255,0.07)');
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = cssVar('--text-2', '#98A3AE');
+  ctx.font = '12px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText(label, x + 16, y + 14);
+  ctx.fillStyle = color || cssVar('--text', '#EEF2F6');
+  ctx.font = 'bold 20px sans-serif';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(value, x + 16, y + h - 14);
+  ctx.restore();
+}
+
+function wrapCanvasText(ctx, text, maxWidth) {
+  const lines = [];
+  let currentLine = '';
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const testLine = currentLine + char;
+    if (ctx.measureText(testLine).width > maxWidth && currentLine.length > 0) {
+      lines.push(currentLine);
+      currentLine = char;
+    } else {
+      currentLine = testLine;
+    }
+  }
+  if (currentLine.length > 0) lines.push(currentLine);
+  return lines;
+}
+
+document.getElementById('exportPngBtn').addEventListener('click', async () => {
+  const scale = 2;
+  const width = 1000;
+  const padding = 32;
+  const gap = 16;
+
+  const filtered = Object.entries(holdingsData)
+    .filter(([c, d]) => Math.abs(d.amount) > 0.0000001)
+    .sort((a, b) => Math.abs(b[1].amount * (currentPrices[b[0]] || 0)) - Math.abs(a[1].amount * (currentPrices[a[0]] || 0)));
+  const displayRows = filtered;
+
+  const rowHeight = 34;
+  const tableHeaderH = 36;
+  const tableBodyH = displayRows.length * rowHeight + 8;
+  const tableH = 44 + tableHeaderH + tableBodyH;
+  const yearlyTableRows = buildYearlyPnlRows(realizedPnlByYear);
+  if (yearlyTableRows.length === 0) yearlyTableRows.push({ type:'empty', yearLabel:'', coinLabel:t('yearlyPnlEmpty'), pnl:0 });
+  const yearlyRowH = 28;
+  const yearlyHeaderH = 30;
+  const yearlyTableH = 44 + yearlyHeaderH + yearlyTableRows.length * yearlyRowH + 8;
+  const height = 516 + tableH + 56 + 24 + yearlyTableH + 72;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(scale, scale);
+
+  ctx.fillStyle = cssVar('--bg', '#0C1014');
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.fillStyle = cssVar('--text', '#EEF2F6');
+  ctx.font = 'bold 26px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText(t('pageTitle'), padding, 32);
+  ctx.font = '14px sans-serif';
+  ctx.fillStyle = cssVar('--text-2', '#98A3AE');
+  ctx.textAlign = 'right';
+  ctx.fillText(new Date().toLocaleDateString(LANG === 'zh' ? 'zh-Hant' : 'en'), width - padding, 40);
+
+  const total = filtered.reduce((s, [coin, d]) => s + d.amount * (currentPrices[coin] || 0), 0);
+  const totalCost = Object.values(holdingsData).reduce((s, d) => s + d.costBasis, 0);
+  const unrealized = total - totalCost;
+  const realized = Object.values(realizedPnl || {}).reduce((s, v) => s + v, 0);
+  const metricY = 84;
+  const metricH = 76;
+  const metricW = (width - padding * 2 - gap * 3) / 4;
+
+  drawMetric(ctx, padding, metricY, metricW, metricH, 12, t('summaryValueLabel'), '$' + total.toFixed(2), cssVar('--text', '#EEF2F6'));
+  drawMetric(ctx, padding + metricW + gap, metricY, metricW, metricH, 12, t('summaryCostLabel'), '$' + totalCost.toFixed(2), cssVar('--text', '#EEF2F6'));
+  drawMetric(ctx, padding + (metricW + gap) * 2, metricY, metricW, metricH, 12, t('summaryPnlLabel'), arrow(unrealized) + '$' + unrealized.toFixed(2), unrealized >= 0 ? cssVar('--risk-pos', '#34D399') : cssVar('--risk-neg', '#F87171'));
+  drawMetric(ctx, padding + (metricW + gap) * 3, metricY, metricW, metricH, 12, t('summaryRealizedLabel'), arrow(realized) + '$' + realized.toFixed(2), realized >= 0 ? cssVar('--risk-pos', '#34D399') : cssVar('--risk-neg', '#F87171'));
+
+  const chartY = metricY + metricH + 24;
+  const chartH = 300;
+  const leftW = 560;
+  const rightW = width - padding * 2 - leftW - gap;
+
+  drawPanel(ctx, padding, chartY, leftW, chartH, 12, t('growthTitle'));
+  try {
+    const growthCanvas = document.getElementById('growthChart');
+    if (growthCanvas) {
+      const gBoxX = padding + 16, gBoxY = chartY + 44, gBoxW = leftW - 32, gBoxH = chartH - 60;
+      const gAsp = growthCanvas.width / growthCanvas.height;
+      let gW = gBoxW, gH = gBoxW / gAsp;
+      if (gH > gBoxH) { gH = gBoxH; gW = gH * gAsp; }
+      const gX = gBoxX + (gBoxW - gW) / 2, gY = gBoxY + (gBoxH - gH) / 2;
+      clipPanel(ctx, gBoxX, gBoxY, gBoxW, gBoxH, 8);
+      ctx.drawImage(growthCanvas, gX, gY, gW, gH);
+      ctx.restore();
+    }
+  } catch (e) {}
+
+  drawPanel(ctx, padding + leftW + gap, chartY, rightW, chartH, 12, t('pieTitle'));
+  try {
+    const pieCanvas = document.getElementById('allocationPie');
+    if (pieCanvas) {
+      const pBoxX = padding + leftW + gap + 16, pBoxY = chartY + 44, pBoxW = rightW - 32, pBoxH = chartH - 60;
+      const pAsp = pieCanvas.width / pieCanvas.height;
+      let pW = pBoxW, pH = pBoxW / pAsp;
+      if (pH > pBoxH) { pH = pBoxH; pW = pH * pAsp; }
+      const pX = pBoxX + (pBoxW - pW) / 2, pY = pBoxY + (pBoxH - pH) / 2;
+      clipPanel(ctx, pBoxX, pBoxY, pBoxW, pBoxH, 8);
+      ctx.drawImage(pieCanvas, pX, pY, pW, pH);
+      ctx.restore();
+    }
+  } catch (e) {}
+
+  const tableY = chartY + chartH + 24;
+  drawPanel(ctx, padding, tableY, width - padding * 2, tableH, 12, t('reportHoldingsTitle'));
+
+  const cols = [
+    { label: t('colCoin'), width: 100, align: 'left' },
+    { label: t('colAmount'), width: 120, align: 'right' },
+    { label: t('colAvg'), width: 100, align: 'right' },
+    { label: t('colPrice'), width: 100, align: 'right' },
+    { label: t('colValue'), width: 130, align: 'right' },
+    { label: t('colUnrealized'), width: 130, align: 'right' },
+    { label: t('colReturn'), width: 90, align: 'right' }
+  ];
+
+  const contentX = padding + 16;
+  const contentY = tableY + 44;
+  const contentW = width - padding * 2 - 32;
+
+  ctx.save();
+  ctx.fillStyle = cssVar('--surface-3', '#222C35');
+  roundRect(ctx, contentX, contentY, contentW, tableHeaderH, 8);
+  ctx.fill();
+  ctx.restore();
+
+  let cx = contentX + 12;
+  ctx.fillStyle = cssVar('--text', '#EEF2F6');
+  ctx.font = 'bold 12px sans-serif';
+  ctx.textBaseline = 'middle';
+  cols.forEach(c => {
+    ctx.textAlign = c.align;
+    ctx.fillText(c.label, cx + (c.align === 'right' ? c.width - 12 : 0), contentY + tableHeaderH / 2);
+    cx += c.width;
+  });
+
+  displayRows.forEach(([coin, d], i) => {
+    const y = contentY + tableHeaderH + i * rowHeight;
+    const price = currentPrices[coin] || 0;
+    const avg = d.amount !== 0 ? d.costBasis / d.amount : 0;
+    const mv = d.amount * price;
+    const pnl = mv - d.costBasis;
+    const pnlPct = d.costBasis > 0 ? (pnl / d.costBasis) * 100 : 0;
+    const missing = missingPriceCoins.includes(coin) && price === 0;
+
+    ctx.font = '12px sans-serif';
+    ctx.textBaseline = 'middle';
+
+    const cells = [
+      { text: coin + (missing ? ' (N/A)' : ''), align: 'left', width: 100, color: cssVar('--text', '#EEF2F6') },
+      { text: d.amount.toFixed(6), align: 'right', width: 120, color: cssVar('--text-2', '#98A3AE') },
+      { text: '$' + avg.toFixed(4), align: 'right', width: 100, color: cssVar('--text-2', '#98A3AE') },
+      { text: price > 0 ? '$' + price.toFixed(4) : 'N/A', align: 'right', width: 100, color: cssVar('--text-2', '#98A3AE') },
+      { text: '$' + mv.toFixed(2), align: 'right', width: 130, color: cssVar('--text', '#EEF2F6') },
+      { text: arrow(pnl) + '$' + pnl.toFixed(2), align: 'right', width: 130, color: pnl >= 0 ? cssVar('--risk-pos', '#34D399') : cssVar('--risk-neg', '#F87171') },
+      { text: arrow(pnlPct) + pnlPct.toFixed(1) + '%', align: 'right', width: 90, color: pnlPct >= 0 ? cssVar('--risk-pos', '#34D399') : cssVar('--risk-neg', '#F87171') }
+    ];
+
+    cx = contentX + 12;
+    cells.forEach(cell => {
+      ctx.fillStyle = cell.color;
+      ctx.textAlign = cell.align;
+      ctx.fillText(cell.text, cx + (cell.align === 'right' ? cell.width - 12 : 0), y + rowHeight / 2);
+      cx += cell.width;
+    });
+
+    if (i < displayRows.length - 1) {
+      ctx.strokeStyle = cssVar('--border', 'rgba(255,255,255,0.07)');
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(contentX, y + rowHeight);
+      ctx.lineTo(contentX + contentW, y + rowHeight);
+      ctx.stroke();
+    }
+  });
+
+  const yearlyY = tableY + tableH + 24;
+  drawPanel(ctx, padding, yearlyY, width - padding * 2, yearlyTableH, 12, t('yearlyPnlTitle'));
+
+  const yCols = [
+    { label: t('colYear'), width: 120, align: 'left' },
+    { label: t('colCoin'), width: 220, align: 'left' },
+    { label: t('colRealizedYear'), width: 200, align: 'right' }
+  ];
+
+  ctx.save();
+  ctx.fillStyle = cssVar('--surface-3', '#222C35');
+  roundRect(ctx, contentX, yearlyY + 44, contentW, yearlyHeaderH, 8);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.fillStyle = cssVar('--text', '#EEF2F6');
+  ctx.font = 'bold 12px sans-serif';
+  ctx.textBaseline = 'middle';
+  let ycx = contentX + 12;
+  yCols.forEach(c => {
+    ctx.textAlign = c.align;
+    ctx.fillText(c.label, ycx + (c.align === 'right' ? c.width - 12 : 0), yearlyY + 44 + yearlyHeaderH / 2);
+    ycx += c.width;
+  });
+
+  yearlyTableRows.forEach((r, i) => {
+    const y = yearlyY + 44 + yearlyHeaderH + i * yearlyRowH;
+    ctx.font = '12px sans-serif';
+    ctx.textBaseline = 'middle';
+    if (r.type === 'subtotal' || r.type === 'total') {
+      ctx.fillStyle = cssVar('--surface-2', '#1B232B');
+      ctx.fillRect(contentX, y, contentW, yearlyRowH);
+    }
+    const cells = [
+      { text: r.yearLabel, align: 'left', width: 120, color: cssVar('--text', '#EEF2F6') },
+      { text: r.coinLabel, align: 'left', width: 220, color: r.type === 'empty' ? cssVar('--text-3', '#5F6B76') : cssVar('--text-2', '#98A3AE') },
+      { text: r.type === 'empty' ? '' : arrow(r.pnl) + '$' + r.pnl.toFixed(2), align: 'right', width: 200, color: r.pnl >= 0 ? cssVar('--risk-pos', '#34D399') : cssVar('--risk-neg', '#F87171') }
+    ];
+    let cxx = contentX + 12;
+    cells.forEach(cell => {
+      ctx.fillStyle = cell.color;
+      ctx.textAlign = cell.align;
+      ctx.fillText(cell.text, cxx + (cell.align === 'right' ? cell.width - 12 : 0), y + yearlyRowH / 2);
+      cxx += cell.width;
+    });
+    if (i < yearlyTableRows.length - 1) {
+      ctx.strokeStyle = cssVar('--border', 'rgba(255,255,255,0.07)');
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(contentX, y + yearlyRowH);
+      ctx.lineTo(contentX + contentW, y + yearlyRowH);
+      ctx.stroke();
+    }
+  });
+
+  ctx.fillStyle = cssVar('--text-3', '#5F6B76');
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText(t('reportFooter'), padding, yearlyY + yearlyTableH + 20);
+
+  const disclaimerY = yearlyY + yearlyTableH + 40;
+  const disclaimerText = t('reportDisclaimer');
+  ctx.font = '10px sans-serif';
+  ctx.fillStyle = cssVar('--text-3', '#5F6B76');
+  const maxTextW = width - padding * 2;
+  const discLines = wrapCanvasText(ctx, disclaimerText, maxTextW);
+  let discY = disclaimerY;
+  discLines.forEach(line => {
+    ctx.fillText(line, padding, discY);
+    discY += 14;
+  });
+
+  canvas.toBlob(blob => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'portfolio_report_' + new Date().toISOString().slice(0, 10) + '.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    const statusMsg = document.getElementById('statusMsg');
+    statusMsg.textContent = t('statusPngExported');
+    statusMsg.className = 'status-msg success';
+  });
+});
+
+document.getElementById('resetZoomBtn').addEventListener('click', () => { if(growthChartInstance){ growthChartInstance.resetZoom(); document.getElementById('resetZoomBtn').style.display='none'; } });
+
 document.getElementById('langToggle').addEventListener('click', () => {
   LANG = LANG === 'zh' ? 'en' : 'zh';
-  try { localStorage.setItem('portfolioLang', LANG); } catch (e) {}
+  try { localStorage.setItem('portfolioLang', LANG); } catch(e) {}
   applyLang();
+  if (Object.keys(holdingsData).length > 0) {
+    renderResults(holdingsData, operationCounts, currentPrices, realizedPnl, realizedPnlByYear);
+    renderFeeAndZeroCost(feeTotals, zeroCostAssets, currentPrices);
+  }
   renderGrowthChart(currentRange);
+  renderPieChart(holdingsData, currentPrices, currentPieMode);
 });
+
 document.getElementById('themeToggle').addEventListener('click', () => {
   THEME = THEME === 'dark' ? 'light' : 'dark';
-  try { localStorage.setItem('portfolioTheme', THEME); } catch (e) {}
+  try { localStorage.setItem('portfolioTheme', THEME); } catch(e) {}
   applyTheme();
   renderGrowthChart(currentRange);
-  renderPieChart();
+  renderPieChart(holdingsData, currentPrices, currentPieMode);
 });
+
+
+// ==================== Event listeners ====================
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
+const mergeMoreBtn = document.getElementById('mergeMoreBtn');
 
 dropZone.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', (e) => {
-  if (e.target.files.length > 0) handleFile(e.target.files[0]);
-});
-dropZone.addEventListener('dragenter', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
-dropZone.addEventListener('drop', (e) => {
-  e.preventDefault();
-  dropZone.classList.remove('dragover');
-  if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
-});
-dropZone.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+mergeMoreBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => { if (e.target.files.length > 0) handleFiles(e.target.files); fileInput.value=''; });
+dropZone.addEventListener('dragenter', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files); });
+dropZone.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+
+const clearModal = document.getElementById('clearModal');
+document.getElementById('clearDataBtn').addEventListener('click', () => clearModal.classList.add('open'));
+document.getElementById('clearCancelBtn').addEventListener('click', () => clearModal.classList.remove('open'));
+document.getElementById('clearConfirmBtn').addEventListener('click', async () => {
+  importedFileHashes = [];
+  clearModal.classList.remove('open');
+  await clearStoredData();
+  location.reload();
 });
 
 window.addEventListener('resize', () => {
   if (growthChartInstance) growthChartInstance.resize();
   if (pieChartInstance) pieChartInstance.resize();
 });
-applyTheme();
-applyLang();
+
+
+// ==================== Landing page view ====================
+const landingView = document.getElementById('landing');
+const appView = document.getElementById('appView');
+const homeBtn = document.getElementById('homeBtn');
+
+function showLanding() {
+  landingView.style.display = 'block';
+  appView.style.display = 'none';
+  if (homeBtn) homeBtn.style.display = 'none';
+  window.scrollTo(0, 0);
+}
+
+function enterApp(focusUpload) {
+  landingView.style.display = 'none';
+  appView.style.display = 'block';
+  if (homeBtn) homeBtn.style.display = 'inline-flex';
+  window.scrollTo(0, 0);
+  if (focusUpload) {
+    const dz = document.getElementById('dropZone');
+    if (dz) {
+      setTimeout(() => {
+        dz.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        dz.classList.add('pulse');
+        setTimeout(() => dz.classList.remove('pulse'), 1900);
+      }, 80);
+    }
+  }
+}
+
+document.querySelectorAll('[data-cta="enter"]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    let hasData = false;
+    try { const s = await loadPersistedState(); hasData = !!(s && s.rawRows && s.rawRows.length > 0); } catch (e) {}
+    enterApp(!hasData);
+  });
+});
+
+document.querySelectorAll('[data-scroll]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = document.getElementById(btn.dataset.scroll);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+if (homeBtn) homeBtn.addEventListener('click', showLanding);
+
+// ==================== Bootstrap ====================
+(async function init() {
+  applyTheme();
+  applyLang();
+  try {
+    const saved = await loadPersistedState();
+    if (saved && saved.rawRows && saved.rawRows.length > 0) {
+      enterApp(false);
+      document.getElementById('savedBanner').style.display = 'flex';
+      document.getElementById('savedTimestamp').textContent = new Date(saved.savedAt).toLocaleString();
+      if (saved.currentPrices) {
+        currentPrices = Object.create(null);
+        Object.keys(saved.currentPrices).forEach(k => { currentPrices[normalizeCoinSymbol(k)] = saved.currentPrices[k]; });
+      }
+      if (saved.importedFileHashes) importedFileHashes = saved.importedFileHashes;
+      await processRows(saved.rawRows, true);
+      const statusMsg = document.getElementById('statusMsg');
+      statusMsg.textContent = t('statusRestored');
+      statusMsg.className = 'status-msg success';
+    }
+  } catch (e) {
+    console.error('init restore failed', e);
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e2) {}
+  }
+})();
 </script>
 </body>
 </html>
