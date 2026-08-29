@@ -11,6 +11,7 @@
 </div>
 
 A single-page web app that parses your Binance transaction-history CSV and imports public on-chain wallet activity to reconstruct combined portfolio holdings, cost basis, market value, and realized / unrealized P/L — entirely in your browser.
+<img width="2540" height="1226" alt="homepage" src="https://github.com/user-attachments/assets/7a93e6b2-1a8a-4839-8b75-03606f235881" />
 
 > [!NOTE]
 > No backend, no accounts. Your CSV is parsed and processed 100% client-side. Public blockchain explorer / RPC requests transmit only the address you choose to track; price lookups use [CoinGecko](https://www.coingecko.com/en/api). Amounts and account credentials are never sent anywhere, because there is no app server.
