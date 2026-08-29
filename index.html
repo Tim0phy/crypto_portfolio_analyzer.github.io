@@ -9,7 +9,7 @@ try {
 } catch (e) {}
 </script>
 <title>Portfolio</title>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src https://api.coingecko.com; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.coingecko.com https://blockchain.info https://blockstream.info https://api.etherscan.io https://api.mainnet-beta.solana.com https://solana-rpc.publicnode.com https://rpc.ankr.com/solana https://lite-api.jup.ag https://cardano-mainnet.blockfrost.io https://xrplcluster.com https://s1.ripple.com https://xrpl.ws https://*.workers.dev; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" crossorigin="anonymous" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g"></script>
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js" crossorigin="anonymous" integrity="sha384-Cs3dgUx6+jDxxuqHvVH8Onpyj2LF1gKZurLDlhqzuJmUqVYMJ0THTWpxK5Z086Zm"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.2.0/dist/chartjs-plugin-zoom.min.js" crossorigin="anonymous" integrity="sha384-dwwI6ICEN/0ZQlS5owhUa/6ZzvwUPmjH45bFVCAcjgjTulbHJvlE+TGU3g1k0N3R"></script>
@@ -85,10 +85,11 @@ body { font-family:var(--font-sans); color:var(--text); margin:0; padding:0; lin
 .status-msg.success { color:var(--risk-pos); }
 .status-msg.error { color:var(--risk-neg); }
 @keyframes spin { to { transform:rotate(360deg); } }
-.summary-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(190px,1fr)); gap:16px; margin-bottom:20px; }
-.stat-box { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:18px; box-shadow:var(--shadow-1); }
-.stat-box .label { font-size:12px; font-weight:550; color:var(--text-2); margin-bottom:10px; text-transform:uppercase; letter-spacing:.5px; }
-.stat-box .value { font-size:24px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.3px; }
+.summary-grid { display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:14px; margin-bottom:20px; }
+.stat-box { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 14px; box-shadow:var(--shadow-1); }
+.stat-box .label { font-size:11px; font-weight:550; color:var(--text-2); margin-bottom:8px; text-transform:uppercase; letter-spacing:.4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.stat-box .value { font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.3px; white-space:nowrap; }
+#feeSummaryGrid.summary-grid { grid-template-columns:repeat(auto-fit, minmax(190px,1fr)); }
 .stat-box .subvalue { font-size:12px; color:var(--text-3); margin-top:4px; }
 .table-wrap { width:100%; max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; }
 table { width:100%; border-collapse:collapse; font-size:13px; }
@@ -129,6 +130,20 @@ a { color:var(--accent); }
 .zero-cost-chip { display:inline-flex; align-items:center; gap:6px; background:var(--surface-2); border:1px solid var(--border-strong); border-radius:var(--radius-full); padding:6px 12px; font-size:12px; color:var(--text-2); }
 .zero-cost-chip strong { color:var(--text); font-size:12px; }
 .action-row { display:flex; gap:10px; flex-wrap:wrap; }
+
+.form-grid { display:grid; grid-template-columns:minmax(150px,190px) minmax(240px,1fr) minmax(140px,1fr); gap:12px; align-items:end; }
+.form-field label { display:block; font-size:12px; font-weight:600; color:var(--text-2); margin-bottom:6px; }
+.form-field input, .form-field select { width:100%; background:var(--surface-2); border:1px solid var(--border-strong); color:var(--text); border-radius:8px; padding:9px 10px; font-size:13px; font-family:inherit; }
+.form-field input:focus, .form-field select:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--ring); }
+.form-actions { display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
+.api-key-row { display:flex; gap:10px; align-items:center; margin-top:14px; }
+.api-key-input { flex:1 1 260px; background:var(--surface-2); border:1px solid var(--border-strong); color:var(--text); border-radius:8px; padding:9px 10px; font-size:13px; font-family:inherit; }
+.api-key-input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--ring); }
+@media (max-width:760px) {
+  .form-grid { grid-template-columns:1fr; align-items:stretch; }
+  .api-key-row { align-items:stretch; }
+  .api-key-input { flex-basis:auto; }
+}
 .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); display:none; align-items:center; justify-content:center; z-index:50; padding:20px; }
 .modal-overlay.open { display:flex; }
 .modal-box { background:var(--surface); border:1px solid var(--border-strong); border-radius:var(--radius-card); padding:24px; max-width:420px; width:100%; box-shadow:var(--shadow-2); }
@@ -216,6 +231,9 @@ a { color:var(--accent); }
   .holdings-table-wrap { width:100%; }
   .pie-chart-container { width:100%; }
 }
+@media (max-width:1100px) {
+  .summary-grid { grid-template-columns:repeat(3,1fr); gap:12px; }
+}
 @media (max-width:760px) {
   .app-header { padding:18px 16px 6px; }
   .container { padding:4px 16px 48px; }
@@ -256,7 +274,7 @@ a { color:var(--accent); }
 
 <section id="landing" class="landing">
   <div class="landing-hero">
-    <span class="landing-badge"><span class="dot"></span><span data-i18n="landingBadge">Binance CSV 持倉分析工具</span></span>
+    <span class="landing-badge"><span class="dot"></span><span data-i18n="landingBadge">Binance CSV + 鏈上錢包</span></span>
     <h1 class="landing-title"><span data-i18n="landingTitleA">你的幣安交易紀錄，</span><br><span class="accent" data-i18n="landingTitleB">一頁清晰持倉。</span></h1>
     <p class="landing-sub" data-i18n="landingSub">把 Binance 匯出的交易紀錄 CSV 拖入瀏覽器，即時重構持倉、成本基礎與盈虧——所有計算 100% 在您的瀏覽器本機完成，資料不會上傳。</p>
     <div class="landing-cta-row">
@@ -401,6 +419,69 @@ a { color:var(--accent); }
     <div class="status-msg" id="statusMsg" aria-live="polite"></div>
   </div>
 
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h3 class="card-title" data-i18n="walletTitle">鏈上錢包追蹤</h3>
+        <p class="card-subtitle" data-i18n="walletSubtitle">加入公開錢包地址，讓轉出到自託管錢包的資產繼續進入同一個 Portfolio。</p>
+      </div>
+      <button id="refreshWalletsBtn" class="btn btn-secondary" type="button" style="display:none;" data-i18n="refreshWallets">更新全部錢包</button>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="walletNetwork">網絡</label>
+        <select id="walletNetwork"></select>
+      </div>
+      <div class="form-field">
+        <label for="walletAddress">錢包地址</label>
+        <input id="walletAddress" type="text" autocomplete="off" spellcheck="false" placeholder="bc1... / 0x... / Solana address">
+      </div>
+      <div class="form-field">
+        <label for="walletLabel">名稱（選填）</label>
+        <input id="walletLabel" type="text" maxlength="40" autocomplete="off" placeholder="Ledger / Phantom">
+      </div>
+    </div>
+
+    <details class="advanced" style="margin-top:14px;">
+      <summary data-i18n="walletApiKeyTitle">EVM / Cardano API 金鑰</summary>
+      <div class="api-key-row">
+        <input id="etherscanKeyInput" class="api-key-input" type="password" autocomplete="off" placeholder="Etherscan API key">
+      </div>
+      <div class="api-key-row">
+        <input id="blockfrostKeyInput" class="api-key-input" type="password" autocomplete="off" placeholder="Blockfrost project ID">
+      </div>
+      <div class="api-key-row">
+        <button id="saveEtherscanKeyBtn" class="btn btn-secondary" type="button" data-i18n="saveKey">儲存</button>
+      </div>
+      <p class="footnote" data-i18n="walletApiKeyHint">部署雲端 proxy 後，EVM / Cardano 均無需 API key。</p>
+      <p class="footnote" data-i18n="walletProxyNote" id="walletProxyNote" hidden></p>
+    </details>
+
+    <div class="form-actions">
+      <button id="addWalletBtn" class="btn btn-primary" type="button" data-i18n="addWallet">加入並同步</button>
+    </div>
+    <div class="status-msg" id="walletStatusMsg" aria-live="polite"></div>
+
+    <div class="table-wrap" id="walletTableWrap" style="display:none; margin-top:16px;">
+      <table>
+        <thead>
+          <tr>
+            <th data-i18n="walletColName">名稱</th>
+            <th data-i18n="walletColNetwork">網絡</th>
+            <th data-i18n="walletColAddress">地址</th>
+            <th data-i18n="walletColEvents">事件數</th>
+            <th data-i18n="walletColSynced">最後同步</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="walletAccountsBody"></tbody>
+      </table>
+    </div>
+
+    <div class="footnote" data-i18n="walletFootnote">支援 Bitcoin、Ethereum、BNB Chain、Polygon、Arbitrum、Optimism、Base、Avalanche C-Chain、Solana、Cardano 及 XRP Ledger。鏈上買入/賣出、幣幣兌換、Gas 費與代幣轉帳會轉成 FIFO 帳本；若外部入帳沒有交易所紀錄或穩定幣支付配對，成本基礎會以 0 計算。與已匯入 Binance 提幣金額和時間相符的鏈上入帳會自動對沖，避免同一筆資產重複計算。</div>
+  </div>
+
   <div id="resultsSection" style="display:none;">
     <div class="summary-grid" id="summaryGrid"></div>
 
@@ -492,8 +573,8 @@ a { color:var(--accent); }
       </div>
       <div class="footnote" data-i18n="footnote">
         說明：持倉數量 = 該幣種所有紀錄變動量加總（含買入、賣出、手續費、空投、獎勵等），與交易所實際餘額應一致。
-        成本基礎採用「配對法」：將同一秒內發生的 Transaction Buy 與對應的 Transaction Spend（以 USDT/USDC/BUSD/FDUSD 計價）互相配對加總；
-        單純存入（Deposit）或空投（Airdrop）因無對應花費，成本基礎計為 0。已實現盈虧採用先進先出法（FIFO）計算所有 Transaction Sold 事件。
+        成本基礎採用時間排序的 FIFO 帳本：同一秒內的 Transaction Buy 與穩定幣 Transaction Spend 互相配對，賣出、提幣或幣幣轉換會扣減剩餘成本；
+        穩定幣存款視為現金本金，成本基礎為面額；非穩定幣單純存入或空投因無對應花費，成本基礎計為 0。已實現盈虧以 FIFO 淨收入減去被消耗批次的成本計算；第三幣手續費按該幣 FIFO 成本扣除。
         重複上載完全相同的檔案會被自動偵測並略過（採用整份檔案內容比對，而非逐行比對，避免誤刪真實但欄位數值相同的交易，例如同一秒內執行的多筆定投）。
         若市價更新失敗且該幣種沒有任何先前成功抓取的快取價格，畫面會以 ⚠ 標示並顯示「(N/A)」，代表該筆市值暫時以 $0 計算，並非真實市值。
         此工具所有計算均在您的瀏覽器本機完成，不會上傳任何資料到伺服器；分析結果會儲存在本機瀏覽器（localStorage）方便下次開啟直接查看。
@@ -526,19 +607,35 @@ a { color:var(--accent); }
 
 <script>
 const STABLECOINS = ['USDT','USDC','BUSD','FDUSD'];
+const LOT_QTY_EPSILON = 0.00000001;
 const COINIDMAP = { BTC:'bitcoin', ETH:'ethereum', BNB:'binancecoin', ADA:'cardano', DOGE:'dogecoin', XRP:'ripple', SOL:'solana', USDT:'tether', USDC:'usd-coin', PAXG:'pax-gold', FDUSD:'first-digital-usd', USUAL:'usual', VANA:'vana', BIO:'bio-protocol', XLM:'stellar', PEPE:'pepe', DAI:'dai', LTC:'litecoin', DOT:'polkadot', LINK:'chainlink', TRX:'tron', SHIB:'shiba-inu' };
 const COIN_ID_CACHE_KEY = 'cryptoPortfolioCoinIds_v1';
 const MAJOR_COINS = ['BTC','ETH'];
 // Keys must match both zh-Hant and en labels returned by classifyCoin
 const CATEGORY_COLORS = { '主流幣':'#34D399', 'Major':'#34D399', '穩定幣':'#F5B301', 'Stablecoin':'#F5B301', '小幣':'#7DA6FF', 'Altcoin':'#7DA6FF' };
 const PIECOLORS = ['#34D399','#F5B301','#4FC3F7','#F87171','#A78BFA','#22D3EE','#FBBF24','#F472B6','#A3E635','#E2E8F0'];
-const STORAGE_KEY = 'cryptoPortfolioAnalyzer_v2';
-const STORAGE_PREFIX = 'v2.';
+const STORAGE_KEY = 'cryptoPortfolioAnalyzer_v3';
+const STORAGE_PREFIX = 'v3.';
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
 const MAX_TOTAL_SIZE = 200 * 1024 * 1024;
 const MAX_FILES_PER_BATCH = 100;
 const MAX_ROWS = 250000;
 const MAX_FIELD_LENGTH = 4096;
+const MAX_WALLET_ACCOUNTS = 50;
+const WALLET_TOKEN_SYMBOL_KEY = 'cryptoPortfolioWalletTokenSymbols_v1';
+const WALLET_NETWORKS = [
+  { id:'bitcoin', name:'Bitcoin', kind:'bitcoin', nativeSymbol:'BTC' },
+  { id:'ethereum', name:'Ethereum', kind:'evm', chainId:1, nativeSymbol:'ETH' },
+  { id:'bsc', name:'BNB Chain', kind:'evm', chainId:56, nativeSymbol:'BNB' },
+  { id:'polygon', name:'Polygon PoS', kind:'evm', chainId:137, nativeSymbol:'POL' },
+  { id:'arbitrum', name:'Arbitrum One', kind:'evm', chainId:42161, nativeSymbol:'ETH' },
+  { id:'optimism', name:'OP Mainnet', kind:'evm', chainId:10, nativeSymbol:'ETH' },
+  { id:'base', name:'Base', kind:'evm', chainId:8453, nativeSymbol:'ETH' },
+  { id:'avalanche', name:'Avalanche C-Chain', kind:'evm', chainId:43114, nativeSymbol:'AVAX' },
+  { id:'solana', name:'Solana', kind:'solana', nativeSymbol:'SOL' },
+  { id:'cardano', name:'Cardano', kind:'cardano', nativeSymbol:'ADA' },
+  { id:'xrp', name:'XRP Ledger', kind:'ripple', nativeSymbol:'XRP' }
+];
 const COINGECKO_ID_RE = /^[a-z0-9-]{1,128}$/i;
 
 /**
@@ -670,13 +767,24 @@ let realizedPnl = Object.create(null);
 let realizedPnlByYear = Object.create(null);
 let operationCounts = Object.create(null);
 let missingPriceCoins = [];
+let exchangeRows = [];
+let walletAccounts = [];
+let walletLedgerRows = [];
+let walletApiKeys = { etherscan:'', blockfrost:'' };
+
+// Base path for the cloud proxy (Cloudflare Worker). When set, EVM and Cardano
+// are fetched through it (keyless: Blockscout for EVM, Koios for Cardano).
+// Set to '' to disable the proxy and use direct APIs with your own keys.
+// In the proxy-only setup (static site on GitHub Pages), this must be the
+// absolute worker URL, e.g. https://crypto-portfolio-proxy.<subdomain>.workers.dev/api
+const PROXY_BASE = 'crypto-portfolio-proxy.timophychanhy.workers.dev/api';
 
 let LANG = 'zh'; try { LANG = localStorage.getItem('portfolioLang') || 'zh'; } catch(e) {}
 let THEME = 'dark'; try { THEME = localStorage.getItem('portfolioTheme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); } catch(e) {}
 
 const I18N = {
   zh: {
-    pageTitle:'Portfolio', subtitle:'Binance CSV 持倉分析',
+    pageTitle:'Portfolio', subtitle:'Binance CSV + 錢包持倉分析',
     uploadMain:'點擊或拖放 Binance CSV 交易紀錄檔案',
     uploadHint:'支援格式：User ID, Time, Account, Operation, Coin, Change, Remark（可一次選取多個檔案自動合併；重複上載完全相同的檔案會自動略過，不會重複計算）',
     mergeMore:'＋ 新增更多CSV合併分析',
@@ -693,20 +801,34 @@ const I18N = {
     pieTitle:'持倉分佈（按市值）', pieByCoin:'按幣種', pieByCategory:'按類別',
     catMajor:'主流幣', catStable:'穩定幣', catAlt:'小幣',
     opsTitle:'操作類型統計（除錯用）', opsColOp:'操作類型 (Operation)', opsColCount:'筆數',
-    summaryValueLabel:'總市值', summaryCostLabel:'總成本基礎', summaryPnlLabel:'未實現盈虧（所選區間）', summaryPctLabel:'回報率（所選區間）',
-    summaryRealizedLabel:'累計已實現盈虧',
+    summaryValueLabel:'總市值', summaryCostLabel:'總成本基礎', summaryPnlLabel:'未實現盈虧', summaryPctLabel:'回報率',
+    summaryRealizedLabel:'累計已實現盈虧', summaryTotalLabel:'總盈虧',
     yearlyPnlTitle:'年度已實現盈虧（報稅參考）', colYear:'年份', colRealizedYear:'已實現盈虧 (USD)',
     yearSubtotal:'{year} 小計', yearGrandTotal:'累計', yearlyPnlEmpty:'目前沒有可顯示的已實現盈虧紀錄（未偵測到 Transaction Sold 事件）。',
     yearlyPnlNote:'以 FIFO 先進先出法計算每次賣出的已實現盈虧，並按賣出年份分組；每年小計與累計總額可作報稅參考。',
     reportHoldingsTitle:'持倉明細', reportFooter:'資料來源：CoinGecko · 本報告由 Crypto Portfolio Analyzer 產生',
     costLabel:'累計成本基礎', valueLabel:'市值',
     eventsBuyLabel:'買入事件', eventsSellLabel:'賣出事件', tooltipEventBuy:'買入', tooltipEventSell:'賣出', perCoinCostLabel:'{coin} 成本',
-    footnote:'說明：持倉數量 = 該幣種所有紀錄變動量加總（含買入、賣出、手續費、空投、獎勵等），與交易所實際餘額應一致。成本基礎採用「配對法」：將同一秒內發生的 Transaction Buy 與對應的 Transaction Spend（以 USDT/USDC/BUSD/FDUSD 計價）互相配對加總；單純存入（Deposit）或空投（Airdrop）因無對應花費，成本基礎計為 0。已實現盈虧採用先進先出法（FIFO）計算所有 Transaction Sold 事件。重複上載完全相同的檔案會被自動偵測並略過（採用整份檔案內容比對，而非逐行比對）。若市價更新失敗且該幣種沒有任何先前成功抓取的快取價格，畫面會以 ⚠ 標示並顯示「(N/A)」，代表該筆市值暫時以 $0 計算，並非真實市值。此工具所有計算均在您的瀏覽器本機完成；除了向 CoinGecko 查詢公開幣價（只傳送幣種代號）外，不會上傳任何資料；分析結果會儲存在本機瀏覽器（localStorage）方便下次開啟直接查看。',
+    footnote:'說明：持倉數量 = 該幣種所有紀錄變動量加總（含買入、賣出、手續費、空投、獎勵等），與交易所實際餘額應一致。成本基礎採用時間排序的 FIFO 帳本：同一秒內的 Transaction Buy 與穩定幣 Transaction Spend 互相配對，賣出、提幣或幣幣轉換會扣減剩餘成本；穩定幣存款視為現金本金，成本基礎為面額，非穩定幣單純存入或空投成本基礎為 0。已實現盈虧以 FIFO 淨收入減去被消耗批次的成本計算。重複上載完全相同的檔案會被自動偵測並略過（採用整份檔案內容比對，而非逐行比對）。若市價更新失敗且該幣種沒有任何先前成功抓取的快取價格，畫面會以 ⚠ 標示並顯示「(N/A)」，代表該筆市值暫時以 $0 計算，並非真實市值。此工具所有計算均在您的瀏覽器本機完成；除了向 CoinGecko 查詢公開幣價（只傳送幣種代號）外，不會上傳任何資料；分析結果會儲存在本機瀏覽器（localStorage）方便下次開啟直接查看。',
     statusParsing:'正在解析檔案...', statusParsed:'已解析 {n} 筆交易，正在讀取即時市價...',
     statusUpdating:'正在更新市價...', statusDone:'完成！共分析 {n} 筆交易，涵蓋 {c} 種幣種。',
     statusPriceFail:'已分析 {n} 筆交易，但市價更新失敗，使用先前的價格。', statusPricesUpdated:'市價已更新。', statusPricesFail:'市價更新失敗，使用先前的價格。',
     statusLoadingChart:'正在計算歷史走勢...', statusChartUpdated:'走勢圖已更新。',
     statusMerged:'已合併 {n} 個新檔案，共 {r} 筆交易。', statusRestored:'已從本機儲存中還原分析結果。',
+    walletTitle:'鏈上錢包追蹤', walletSubtitle:'加入公開錢包地址，讓轉出到自託管錢包的資產繼續進入同一個 Portfolio。',
+    refreshWallets:'更新全部錢包', saveKey:'儲存', addWallet:'加入並同步',
+    walletApiKeyTitle:'EVM / Cardano API 金鑰', walletApiKeyHint:'部署雲端 proxy（Cloudflare Worker）後，EVM 經 Blockscout、Cardano 經 Koios 查詢，均無需 API key。若未部署 proxy，可自行輸入 Etherscan key 作備用。', walletProxyNote:'已連接雲端 proxy：EVM / Cardano 直接查詢，無須輸入 API key。',
+    walletCardanoKeyRequired:'Cardano 需要透過雲端 proxy（Cloudflare Worker）讀取 Koios 數據；請部署 proxy 後使用。',
+    walletColName:'名稱', walletColNetwork:'網絡', walletColAddress:'地址', walletColEvents:'事件數', walletColSynced:'最後同步',
+    walletRemove:'移除', walletSync:'同步', walletRequired:'請選擇網絡並輸入錢包地址。', walletInvalidAddress:'地址格式與所選網絡不符。',
+    walletDuplicate:'這個地址已在追蹤清單中。', walletLimitReached:'最多可追蹤 {n} 個錢包地址。',
+    walletEvmKeyRequired:'EVM 網絡需要免費 Etherscan API 金鑰。請展開「EVM / Cardano API 金鑰」後輸入。',
+    walletSyncing:'正在從區塊鏈讀取交易...', walletSynced:'已同步 {network} 錢包，共 {n} 筆鏈上事件。',
+    walletPartialSynced:'已同步部分鏈上事件（{n} 筆）。部分 API 頁面或 RPC 要求失敗，稍後可再同步。',
+    walletLimitedSynced:'已同步 {n} 筆可取得的鏈上事件；此資料來源目前只回傳部分歷史。',
+    walletSyncFailed:'錢包同步失敗：{message}', walletNoEvents:'此地址沒有找到可分析的鏈上事件。',
+    walletKeySaved:'API 金鑰已儲存在本機加密狀態中。', walletAccountRemoved:'已移除錢包並重新計算 Portfolio。',
+    walletFootnote:'支援 Bitcoin、Ethereum、BNB Chain、Polygon、Arbitrum、Optimism、Base、Avalanche C-Chain、Solana、Cardano 及 XRP Ledger。鏈上買入/賣出、幣幣兌換、手續費與代幣轉帳會轉成 FIFO 帳本；若外部入帳沒有交易所紀錄或支付配對，成本基礎會以 0 計算。與已匯入 Binance 提幣金額和時間相符的鏈上入帳會自動對沖，避免重複計算。',
     statusExported:'已匯出 CSV 檔案。', statusPngExported:'已匯出 PNG 報告。',
     statusFileTooLarge:'檔案過大：{name}（上限 50 MB）', statusTotalTooLarge:'檔案總大小過大（上限 200 MB）', statusTooManyFiles:'一次最多上載 {n} 個檔案', statusTooManyRows:'交易筆數過多（上限 {n} 筆），請分批上載或縮小範圍',
     home:'首頁',
@@ -739,7 +861,7 @@ const I18N = {
     reportDisclaimer:'本工具僅供個人參考之用，不構成任何投資建議。所有計算均於使用者裝置本地執行，幣價數據來自第三方（CoinGecko），可能存在延遲或偏差。使用者應以交易所官方紀錄為準，自行核實原始數據並評估分析結果之合理性。如因依賴本工具之輸出而作出投資決定並招致損失，本項目開發者不承擔任何法律或賠償責任。使用者須自行承擔一切風險。',
   },
   en: {
-    pageTitle:'Crypto Portfolio Analyzer', subtitle:'Upload Binance CSV to analyze holdings',
+    pageTitle:'Crypto Portfolio Analyzer', subtitle:'Binance CSV + wallet holdings',
     uploadMain:'Click or drag & drop Binance CSV file(s)',
     uploadHint:'Supported format: User ID, Time, Account, Operation, Coin, Change, Remark (select multiple files to merge; re-uploading the exact same file is automatically skipped)',
     mergeMore:'+ Add more CSV to merge',
@@ -756,24 +878,38 @@ const I18N = {
     pieTitle:'Allocation by Market Value', pieByCoin:'By Coin', pieByCategory:'By Category',
     catMajor:'Major', catStable:'Stablecoin', catAlt:'Altcoin',
     opsTitle:'Operation Type Stats (Debug)', opsColOp:'Operation', opsColCount:'Count',
-    summaryValueLabel:'Total Market Value', summaryCostLabel:'Total Cost Basis', summaryPnlLabel:'Unrealized P/L (Selected Period)', summaryPctLabel:'Return (Selected Period)',
-    summaryRealizedLabel:'Cumulative Realized P/L',
+    summaryValueLabel:'Total Market Value', summaryCostLabel:'Total Cost Basis', summaryPnlLabel:'Unrealized P/L', summaryPctLabel:'Return',
+    summaryRealizedLabel:'Cumulative Realized P/L', summaryTotalLabel:'Total P/L',
     yearlyPnlTitle:'Realized P/L by Year (Tax Reference)', colYear:'Year', colRealizedYear:'Realized P/L (USD)',
     yearSubtotal:'{year} Subtotal', yearGrandTotal:'Total', yearlyPnlEmpty:'No realized P/L records to show (no Transaction Sold events detected).',
     yearlyPnlNote:'FIFO realized P/L on every sale, grouped by the sale year; yearly subtotals and the cumulative total are provided for tax reference.',
     reportHoldingsTitle:'Holdings', reportFooter:'Data source: CoinGecko · Generated by Crypto Portfolio Analyzer',
     costLabel:'Cumulative Cost Basis', valueLabel:'Market Value',
     eventsBuyLabel:'Buy events', eventsSellLabel:'Sell events', tooltipEventBuy:'Buy', tooltipEventSell:'Sell', perCoinCostLabel:'{coin} cost',
-    footnote:'Note: Amount = sum of all recorded changes for a coin (buys, sells, fees, airdrops, rewards, etc.), should match your exchange balance. Cost basis uses the pairing method: Transaction Buy events are paired with corresponding Transaction Spend events (in USDT/USDC/BUSD/FDUSD) within the same second; pure deposits or airdrops have no matching spend, so their cost basis is 0. Realized P/L uses FIFO across all Transaction Sold events. Re-uploading the exact same file is auto-detected and skipped (by whole-file content hash, not row-by-row). If a price update fails and a coin has no previously cached price at all, it is flagged with ⚠ and shown as "(N/A)" — meaning its market value is temporarily $0, not a real value. All calculations run locally in your browser; apart from public CoinGecko price lookups (which transmit coin symbols only), nothing is uploaded. Results are saved to your browser (localStorage) for next time.',
+    footnote:'Note: Amount = sum of all recorded changes for a coin (buys, sells, fees, airdrops, rewards, etc.), should match your exchange balance. Cost basis uses chronological FIFO lots: same-second Transaction Buy rows pair with stablecoin Transaction Spend rows, and sales, withdrawals, or crypto swaps reduce remaining cost. Stablecoin deposits are cash principal at face value; non-stablecoin deposits and airdrops have no purchase cost, so their cost basis is 0. Realized P/L is net FIFO proceeds minus consumed lot cost; third-asset fees use the fee asset\'s FIFO cost. Re-uploading the exact same file is auto-detected and skipped (by whole-file content hash, not row-by-row). If a price update fails and a coin has no previously cached price at all, it is flagged with ⚠ and shown as "(N/A)" — meaning its market value is temporarily $0, not a real value. All calculations run locally in your browser; apart from public CoinGecko price lookups (which transmit coin symbols only), nothing is uploaded. Results are saved to your browser (localStorage) for next time.',
     statusParsing:'Parsing file...', statusParsed:'Parsed {n} transactions, fetching live prices...',
     statusUpdating:'Updating prices...', statusDone:'Done! Analyzed {n} transactions across {c} coins.',
     statusPriceFail:'Analyzed {n} transactions, but price update failed — using previous prices.', statusPricesUpdated:'Prices updated.', statusPricesFail:'Price update failed — using previous prices.',
     statusLoadingChart:'Loading historical prices to build the growth chart...', statusChartUpdated:'Growth chart updated.',
     statusMerged:'Merged {n} new file(s), {r} transactions total.', statusRestored:'Restored analysis from local storage.',
+    walletTitle:'On-chain wallets', walletSubtitle:'Add public wallet addresses so self-custody assets remain part of the same portfolio.',
+    refreshWallets:'Refresh all wallets', saveKey:'Save', addWallet:'Add & sync',
+    walletApiKeyTitle:'EVM / Cardano API key', walletApiKeyHint:'With the cloud proxy (Cloudflare Worker), EVM uses Blockscout and Cardano uses Koios — no API key needed. Without the proxy you may paste an Etherscan key as fallback.', walletProxyNote:'Cloud proxy active: EVM/Cardano are queried directly, no API key required.',
+    walletCardanoKeyRequired:'Cardano reads Koios through the cloud proxy (Cloudflare Worker). Deploy the proxy to use it.',
+    walletColName:'Name', walletColNetwork:'Network', walletColAddress:'Address', walletColEvents:'Events', walletColSynced:'Last synced',
+    walletRemove:'Remove', walletSync:'Sync', walletRequired:'Select a network and enter a wallet address.', walletInvalidAddress:'The address format does not match the selected network.',
+    walletDuplicate:'This address is already being tracked.', walletLimitReached:'A maximum of {n} wallets can be tracked.',
+    walletEvmKeyRequired:'EVM networks require a free Etherscan API key. Expand "EVM / Cardano API key" and paste it.',
+    walletSyncing:'Reading blockchain transactions...', walletSynced:'Synced {network} wallet with {n} on-chain events.',
+    walletPartialSynced:'Synced a partial history ({n} events). Some API pages or RPC calls failed; try syncing again later.',
+    walletLimitedSynced:'Synced {n} available on-chain events; this data source currently returns only part of the history.',
+    walletSyncFailed:'Wallet sync failed: {message}', walletNoEvents:'No analyzable on-chain events were found for this address.',
+    walletKeySaved:'API key saved in encrypted local state.', walletAccountRemoved:'Wallet removed and portfolio recalculated.',
+    walletFootnote:'Supports Bitcoin, Ethereum, BNB Chain, Polygon, Arbitrum, Optimism, Base, Avalanche C-Chain, Solana, Cardano, and the XRP Ledger. On-chain buys, sells, swaps, fees, and token transfers enter the same FIFO ledger; external inflows without an exchange record or payment leg have zero cost. Matching Binance withdrawals and on-chain receipts are reconciled to avoid double counting.',
     statusExported:'CSV exported.', statusPngExported:'PNG report exported.',
     statusFileTooLarge:'File too large: {name} (limit 50 MB)', statusTotalTooLarge:'Total file size too large (limit 200 MB)', statusTooManyFiles:'Upload at most {n} files at once', statusTooManyRows:'Too many transactions (limit {n}), please split into smaller files',
     home:'Home',
-    landingBadge:'Binance CSV Portfolio Analyzer',
+    landingBadge:'Binance CSV + On-chain Wallet Analyzer',
     landingTitleA:'Turn your Binance history into', landingTitleB:'a clear portfolio view.',
     landingSub:'Drop in your Binance transaction CSV and instantly reconstruct holdings, cost basis, and realized & unrealized P/L — all computed 100% locally in your browser. Nothing is uploaded except public price lookups to CoinGecko.',
     landingCtaStart:'Start Analyzing', landingCtaMore:'Learn More',
@@ -898,12 +1034,241 @@ async function hashText(text) {
 }
 
 
-// ==================== Core portfolio math ====================
+function feeQuantityForCoin(items, coin) {
+  return items.reduce((total, item) => (
+    item.coin === coin && (item.op === 'Fee' || /fee/i.test(item.op))
+      ? total + Math.abs(item.change)
+      : total
+  ), 0);
+}
+
+function consumeFifoLots(lots, coin, quantity) {
+  if (!lots[coin]) lots[coin] = [];
+  let remaining = Math.abs(quantity);
+  let costRemoved = 0;
+  while (remaining > LOT_QTY_EPSILON && lots[coin].length > 0) {
+    const lot = lots[coin][0];
+    const take = Math.min(lot.qty, remaining);
+    costRemoved += take * lot.unitCost;
+    lot.qty -= take;
+    remaining -= take;
+    if (lot.qty <= LOT_QTY_EPSILON) lots[coin].shift();
+  }
+  return costRemoved;
+}
+
 /**
- * Core analysis: aggregates holdings, counts operations, matches
- * same-second buy/spend pairs for cost basis, and flags zero-cost inflows.
- * @param {Array<Object>} rows
- * @returns {{holdings, opsCount, fees, zeroCost, realized, realizedByYear}}
+ * Apply one timestamp group to holdings, FIFO lots, and realized P/L.
+ *
+ * Buy fees paid in the acquired asset reduce the lot quantity to the amount
+ * retained. Sale fees paid in the sold asset are disposed of together with the
+ * sale quantity, so remaining cost and per-unit proceeds stay consistent.
+ */
+function applyLedgerEvent(event, holdings, lots, realized, realizedByYear, collectChartEvents) {
+  const items = event.items;
+  const getHolding = coin => {
+    if (!holdings[coin]) holdings[coin] = { amount:0, costBasis:0 };
+    return holdings[coin];
+  };
+  const isFeeItem = item => item.op === 'Fee' || /fee/i.test(item.op || '');
+  // Broad pairing: any non-stable inflow + any stable outflow in the same second is treated as a buy,
+  // and any non-stable outflow + stable inflow as a sell. This covers Binance operation label
+  // variations (Transaction Spend / Sold / Revenue) that would otherwise leave buys at zero cost
+  // and make realized P/L disappear, which is the root cause of the ~$338 cost-basis gap.
+  const buys = items.filter(item => !STABLECOINS.includes(item.coin) && item.change > 0 && !isFeeItem(item));
+  const quoteSpends = items.filter(item => STABLECOINS.includes(item.coin) && item.change < 0 && !isFeeItem(item));
+  const stableFees = items.filter(item => STABLECOINS.includes(item.coin) && isFeeItem(item));
+  const hasQuotePair = buys.length > 0 && quoteSpends.length > 0;
+  const totalBuyUnits = buys.reduce((sum, item) => sum + item.change, 0);
+  const purchaseSpend = quoteSpends.reduce((sum, item) => sum + Math.abs(item.change), 0)
+    + stableFees.reduce((sum, item) => sum + Math.abs(item.change), 0);
+
+  const inKindBuyFeeCoins = new Set(hasQuotePair ? buys.map(item => item.coin) : []);
+  const chartEvents = [];
+  const disposalResults = [];
+  const newLotsByCoin = Object.create(null);
+
+  items.filter(item => item.change > 0).forEach(item => {
+    let quantity = item.change;
+    // Stablecoin inflows are cash principal, not zero-cost income. Keeping their
+    // USD cost prevents deposited USDT/USDC from appearing as unrealized gain.
+    let cost = STABLECOINS.includes(item.coin) ? item.change : 0;
+    if (hasQuotePair && buys.includes(item) && totalBuyUnits > LOT_QTY_EPSILON) {
+      const sameCoinBuys = buys.filter(buy => buy.coin === item.coin);
+      const sameCoinUnits = sameCoinBuys.reduce((sum, buy) => sum + buy.change, 0);
+      const inKindFeeShare = sameCoinUnits > 0
+        ? feeQuantityForCoin(items, item.coin) * (item.change / sameCoinUnits)
+        : 0;
+      const spendShare = (item.change / totalBuyUnits) * purchaseSpend;
+      quantity = Math.max(0, item.change - inKindFeeShare);
+      cost = spendShare;
+    }
+    getHolding(item.coin).costBasis += cost;
+    if (quantity <= LOT_QTY_EPSILON) return;
+    const lot = { qty:quantity, unitCost:cost / quantity };
+    if (!lots[item.coin]) lots[item.coin] = [];
+    lots[item.coin].push(lot);
+    if (!newLotsByCoin[item.coin]) newLotsByCoin[item.coin] = [];
+    newLotsByCoin[item.coin].push(lot);
+  });
+
+  if (hasQuotePair && collectChartEvents && purchaseSpend > 0 && totalBuyUnits > LOT_QTY_EPSILON) {
+    chartEvents.push({
+      side:'buy',
+      time:event.time,
+      total:purchaseSpend,
+      records:buys.map(item => ({
+        coin:item.coin,
+        amount:item.change,
+        valueUsd:(item.change / totalBuyUnits) * purchaseSpend
+      }))
+    });
+  }
+
+  const saleRevenues = items.filter(item => STABLECOINS.includes(item.coin) && item.change > 0 && !isFeeItem(item));
+  const disposalRows = items.filter(item => !STABLECOINS.includes(item.coin) && item.change < 0 && !isFeeItem(item));
+  const isSale = disposalRows.length > 0 && saleRevenues.length > 0;
+  const isCryptoSwap = !isSale && disposalRows.length > 0
+    && items.some(item => !STABLECOINS.includes(item.coin) && item.change > 0 && !isFeeItem(item));
+  const inKindSaleFeeCoins = new Set((isSale || isCryptoSwap) ? disposalRows.map(item => item.coin) : []);
+
+  if ((isSale || isCryptoSwap) && disposalRows.length > 0) {
+    const totalRevenue = saleRevenues.reduce((sum, item) => sum + item.change, 0);
+    const stableFee = stableFees.reduce((sum, item) => sum + Math.abs(item.change), 0);
+    const netProceeds = Math.max(0, totalRevenue - stableFee);
+    const inKindFeeForDisposal = row => {
+      const sameCoinUnits = disposalRows
+        .filter(disposal => disposal.coin === row.coin)
+        .reduce((sum, disposal) => sum + Math.abs(disposal.change), 0);
+      return sameCoinUnits > 0
+        ? feeQuantityForCoin(items, row.coin) * (Math.abs(row.change) / sameCoinUnits)
+        : 0;
+    };
+    const totalDisposalUnits = disposalRows.reduce((sum, row) => sum + Math.abs(row.change) + inKindFeeForDisposal(row), 0);
+    const proceedsPerUnit = totalDisposalUnits > 0 ? netProceeds / totalDisposalUnits : 0;
+    const year = new Date(event.time).getFullYear();
+    if (!realizedByYear[year]) realizedByYear[year] = Object.create(null);
+    let totalCostRemoved = 0;
+
+    disposalRows.forEach(row => {
+      const inKindFee = inKindFeeForDisposal(row);
+      const quantity = Math.abs(row.change) + inKindFee;
+      const proceeds = quantity * proceedsPerUnit;
+      const costRemoved = consumeFifoLots(lots, row.coin, quantity);
+      totalCostRemoved += costRemoved;
+      getHolding(row.coin).costBasis = Math.max(0, getHolding(row.coin).costBasis - costRemoved);
+
+      if (isSale) {
+        const pnl = proceeds - costRemoved;
+        realized[row.coin] = (realized[row.coin] || 0) + pnl;
+        realizedByYear[year][row.coin] = (realizedByYear[year][row.coin] || 0) + pnl;
+        disposalResults.push({ coin: row.coin, pnl, proceeds, year });
+      }
+    });
+
+    if (isCryptoSwap) {
+      const swapTargets = items.filter(item => !STABLECOINS.includes(item.coin) && item.change > 0 && !isFeeItem(item));
+      const targetUnits = swapTargets.reduce((sum, item) => sum + item.change, 0);
+      swapTargets.forEach(target => {
+        const rolledCost = targetUnits > 0 ? totalCostRemoved * (target.change / targetUnits) : 0;
+        getHolding(target.coin).costBasis += rolledCost;
+        const targetLots = newLotsByCoin[target.coin] || [];
+        if (targetLots.length > 0) {
+          const costPerUnit = rolledCost / target.change;
+          targetLots.forEach(lot => { lot.unitCost = costPerUnit; });
+        }
+      });
+    } else {
+      saleRevenues.forEach(revenue => {
+        (newLotsByCoin[revenue.coin] || []).forEach(lot => {
+          lot.unitCost = revenue.change > 0 ? 1 : 0;
+        });
+      });
+    }
+    if (isSale && collectChartEvents && saleRevenues.length > 0 && disposalRows.length > 0) {
+      const totalDisposal = disposalRows.reduce((s, r) => s + Math.abs(r.change), 0);
+      const totalRev = saleRevenues.reduce((s, r) => s + r.change, 0);
+      chartEvents.push({
+        side:'sell',
+        time:event.time,
+        total: totalRev,
+        records: disposalRows.map(r => ({
+          coin: r.coin,
+          amount: r.change,
+          valueUsd: totalDisposal > 0 ? (Math.abs(r.change) / totalDisposal) * totalRev : 0
+        }))
+      });
+    }
+  }
+
+  items.filter(item => item.change < 0).forEach(item => {
+    const isSaleDisposal = (isSale || isCryptoSwap) && disposalRows.includes(item);
+    const isFee = item.op === 'Fee' || /fee/i.test(item.op);
+    const isAccountedInKindFee = isFee
+      && ((hasQuotePair && inKindBuyFeeCoins.has(item.coin)) || inKindSaleFeeCoins.has(item.coin));
+    if (isSaleDisposal || isAccountedInKindFee) return;
+
+    // A third-asset fee (for example BNB) carries its own FIFO cost. Transfer
+    // that cost into purchases, subtract it from sale proceeds-equivalent P/L,
+    // or capitalize it into crypto-swap targets instead of losing it silently.
+    if (isFee && !STABLECOINS.includes(item.coin)
+      && ((hasQuotePair && !inKindBuyFeeCoins.has(item.coin)) || (isSale || isCryptoSwap))) {
+      const feeCost = consumeFifoLots(lots, item.coin, Math.abs(item.change));
+      getHolding(item.coin).costBasis = Math.max(0, getHolding(item.coin).costBasis - feeCost);
+
+      if (hasQuotePair && totalBuyUnits > LOT_QTY_EPSILON) {
+        buys.forEach(buy => {
+          const allocatedFeeCost = feeCost * (buy.change / totalBuyUnits);
+          getHolding(buy.coin).costBasis += allocatedFeeCost;
+          const buyLots = newLotsByCoin[buy.coin] || [];
+          const buyLotQuantity = buyLots.reduce((sum, lot) => sum + lot.qty, 0);
+          if (buyLotQuantity > LOT_QTY_EPSILON) {
+            const unitCostIncrease = allocatedFeeCost / buyLotQuantity;
+            buyLots.forEach(lot => { lot.unitCost += unitCostIncrease; });
+          }
+        });
+        return;
+      }
+
+      if (isSale && disposalResults.length > 0) {
+        const totalResultProceeds = disposalResults.reduce((sum, result) => sum + result.proceeds, 0);
+        disposalResults.forEach(result => {
+          const allocatedFeeCost = totalResultProceeds > 0
+            ? feeCost * (result.proceeds / totalResultProceeds)
+            : feeCost / disposalResults.length;
+          realized[result.coin] -= allocatedFeeCost;
+          realizedByYear[result.year][result.coin] -= allocatedFeeCost;
+        });
+        return;
+      }
+
+      if (isCryptoSwap) {
+        const swapTargets = items.filter(target => !STABLECOINS.includes(target.coin) && target.change > 0 && !isFeeItem(target));
+        const targetUnits = swapTargets.reduce((sum, target) => sum + target.change, 0);
+        swapTargets.forEach(target => {
+          const allocatedFeeCost = targetUnits > 0 ? feeCost * (target.change / targetUnits) : 0;
+          getHolding(target.coin).costBasis += allocatedFeeCost;
+          const targetLots = newLotsByCoin[target.coin] || [];
+          const targetLotQuantity = targetLots.reduce((sum, lot) => sum + lot.qty, 0);
+          if (targetLotQuantity > LOT_QTY_EPSILON) {
+            const unitCostIncrease = allocatedFeeCost / targetLotQuantity;
+            targetLots.forEach(lot => { lot.unitCost += unitCostIncrease; });
+          }
+        });
+      }
+      return;
+    }
+
+    const costRemoved = consumeFifoLots(lots, item.coin, Math.abs(item.change));
+    getHolding(item.coin).costBasis = Math.max(0, getHolding(item.coin).costBasis - costRemoved);
+  });
+
+  return collectChartEvents ? chartEvents : [];
+}
+
+/**
+ * Core analysis: aggregates holdings, counts operations, applies FIFO lots
+ * chronologically, and flags zero-cost inflows.
  */
 function analyzeData(rows) {
   const holdings = Object.create(null);
@@ -911,122 +1276,71 @@ function analyzeData(rows) {
   const timeGroups = Object.create(null);
   const fees = Object.create(null);
   const zeroCost = [];
+  const lots = Object.create(null);
+  const realized = Object.create(null);
+  const realizedByYear = Object.create(null);
 
-  rows.forEach(r => {
-    const coin = r['Coin'];
-    const change = finiteNumber(r['Change'], NaN);
-    const op = r['Operation'];
-    const time = r['Time'];
+  rows.forEach(row => {
+    const coin = row['Coin'];
+    const change = finiteNumber(row['Change'], NaN);
+    const op = row['Operation'];
+    const time = row['Time'];
     if (!coin || !Number.isFinite(change)) return;
 
     if (!holdings[coin]) holdings[coin] = { amount:0, costBasis:0 };
     holdings[coin].amount += change;
     opsCount[op] = (opsCount[op] || 0) + 1;
 
-    if (op === 'Fee' || /fee/i.test(op)) {
-      fees[coin] = (fees[coin] || 0) + Math.abs(change);
-    }
+    if (op === 'Fee' || /fee/i.test(op)) fees[coin] = (fees[coin] || 0) + Math.abs(change);
     if (/airdrop|launchpool|reward|rebate|distribution/i.test(op) && change > 0) {
       zeroCost.push({ coin, change, op, time });
     }
 
-    const key = time;
-    if (!timeGroups[key]) timeGroups[key] = [];
-    timeGroups[key].push({ coin, change, op, time });
+    const parsedTime = Date.parse(String(time || '').replace(' ', 'T'));
+    if (!Number.isFinite(parsedTime)) return;
+    if (!timeGroups[parsedTime]) timeGroups[parsedTime] = [];
+    timeGroups[parsedTime].push({ coin, change, op, time });
   });
 
-  // Pair same-second "Transaction Buy" with "Transaction Spend" stablecoins for cost basis
-  Object.values(timeGroups).forEach(group => {
-    const buys = group.filter(g => g.op === 'Transaction Buy');
-    const spends = group.filter(g => g.op === 'Transaction Spend' && STABLECOINS.includes(g.coin));
-    if (buys.length === 0 || spends.length === 0) return;
-    const totalSpend = spends.reduce((s,g) => s + Math.abs(g.change), 0);
-    const totalBuyUnits = buys.reduce((s,g) => s + g.change, 0);
-    if (totalBuyUnits <= 0) return;
-    buys.forEach(b => {
-      const share = (b.change / totalBuyUnits) * totalSpend;
-      if (!holdings[b.coin]) holdings[b.coin] = { amount:0, costBasis:0 };
-      holdings[b.coin].costBasis += share;
-    });
+  Object.keys(timeGroups).map(Number).sort((a,b) => a-b).forEach(time => {
+    applyLedgerEvent(
+      { time, items:timeGroups[time] },
+      holdings,
+      lots,
+      realized,
+      realizedByYear,
+      false
+    );
   });
 
-  const realizedResult = computeRealizedPnl(rows);
-
-  return { holdings, opsCount, fees, zeroCost, realized: realizedResult.realized, realizedByYear: realizedResult.realizedByYear };
+  return { holdings, opsCount, fees, zeroCost, realized, realizedByYear };
 }
 
 /**
  * FIFO-based realized P/L across all Transaction Sold / Revenue events.
  * Buy lots are paired with stablecoin spends; sells consume lots against revenues.
- * @param {Array<Object>} rows
- * @returns {{realized: Object<string, number>, realizedByYear: Object<string, Object<string, number>>}}
- *   realized: coin -> cumulative realized P/L
- *   realizedByYear: year -> { coin -> realized P/L }
  */
 function computeRealizedPnl(rows) {
-  const timeGroups = Object.create(null);
-  rows.forEach(r => {
-    const coin = r['Coin'];
-    const change = finiteNumber(r['Change'], NaN);
-    const op = r['Operation'];
-    const time = r['Time'];
-    if (!coin || !Number.isFinite(change) || typeof time !== 'string' || !time) return;
-    const tms = Date.parse(time.replace(' ','T'));
-    if (isNaN(tms)) return;
-    if (!timeGroups[tms]) timeGroups[tms] = [];
-    timeGroups[tms].push({ coin, change, op, time, timeMs: tms });
-  });
-
-  const events = Object.keys(timeGroups).map(Number).sort((a,b)=>a-b).map(k => ({ time:k, items:timeGroups[k] }));
+  const holdings = Object.create(null);
   const lots = Object.create(null);
   const realized = Object.create(null);
   const realizedByYear = Object.create(null);
+  const events = Object.create(null);
 
-  events.forEach(ev => {
-    const buys = ev.items.filter(g => g.op === 'Transaction Buy');
-    const spends = ev.items.filter(g => g.op === 'Transaction Spend' && STABLECOINS.includes(g.coin));
-    const revenues = ev.items.filter(g => g.op === 'Transaction Revenue' && STABLECOINS.includes(g.coin) && g.change > 0);
+  rows.forEach(row => {
+    const coin = row['Coin'];
+    const change = finiteNumber(row['Change'], NaN);
+    const op = row['Operation'];
+    const time = row['Time'];
+    if (!coin || !Number.isFinite(change) || typeof time !== 'string' || !time) return;
+    const timeMs = Date.parse(time.replace(' ', 'T'));
+    if (!Number.isFinite(timeMs)) return;
+    if (!events[timeMs]) events[timeMs] = [];
+    events[timeMs].push({ coin, change, op, time });
+  });
 
-    if (buys.length && spends.length) {
-      const totalSpend = spends.reduce((s,g)=>s+Math.abs(g.change),0);
-      const totalBuyUnits = buys.reduce((s,g)=>s+g.change,0);
-      if (totalBuyUnits > 0) {
-        buys.forEach(b => {
-          const share = (b.change / totalBuyUnits) * totalSpend;
-          if (!lots[b.coin]) lots[b.coin] = [];
-          lots[b.coin].push({ qty: b.change, unitCost: share / b.change });
-        });
-      }
-    }
-
-    const soldRows = ev.items.filter(g => !STABLECOINS.includes(g.coin) && g.change < 0 && (g.op === 'Transaction Sold' || g.op === 'Transaction Revenue'));
-    if (soldRows.length && revenues.length) {
-      const year = new Date(ev.time).getFullYear();
-      if (!realizedByYear[year]) realizedByYear[year] = Object.create(null);
-      const totalRevenue = revenues.reduce((s,g)=>s+g.change,0);
-      const totalSoldUnits = soldRows.reduce((s,g)=>s+Math.abs(g.change),0);
-      if (totalSoldUnits > 0) {
-        soldRows.forEach(sr => {
-          let qtyToSell = Math.abs(sr.change);
-          const proceedsPerUnit = totalRevenue / totalSoldUnits;
-          if (!lots[sr.coin]) lots[sr.coin] = [];
-          let costRemoved = 0;
-          // FIFO: consume oldest lots first
-          while (qtyToSell > 0.00000001 && lots[sr.coin].length > 0) {
-            const lot = lots[sr.coin][0];
-            const take = Math.min(lot.qty, qtyToSell);
-            costRemoved += take * lot.unitCost;
-            lot.qty -= take;
-            qtyToSell -= take;
-            if (lot.qty <= 0.00000001) lots[sr.coin].shift();
-          }
-          const proceeds = Math.abs(sr.change) * proceedsPerUnit;
-          const pnl = proceeds - costRemoved;
-          realized[sr.coin] = (realized[sr.coin] || 0) + pnl;
-          realizedByYear[year][sr.coin] = (realizedByYear[year][sr.coin] || 0) + pnl;
-        });
-      }
-    }
+  Object.keys(events).map(Number).sort((a,b) => a-b).forEach(time => {
+    applyLedgerEvent({ time, items:events[time] }, holdings, lots, realized, realizedByYear, false);
   });
 
   return { realized, realizedByYear };
@@ -1198,44 +1512,26 @@ function buildTimeline(rows) {
 }
 
 /**
- * Apply a single transaction group to the running portfolio snapshot.
- * @param {Object} snapshot
- * @param {Array<Object>} group
- * @param {Object<string, number>} prices
- * @param {number} timestamp
+ * Apply a single transaction group to the running chart snapshot.
+ * @param {Object} event Chronological transaction group
+ * @param {Object<string, number>} holdings Mutable quantity map
+ * @param {Object<string, number>} costBasis Mutable cost map
+ * @param {Object<string, Array<{qty:number, unitCost:number}>>} lots Persistent FIFO lots
+ * @returns {Array<Object>} Buy/sell events for chart tooltips
  */
-function applyTransactionGroup(ev, holdings, costBasis) {
-  const buys = ev.items.filter(g => g.op === 'Transaction Buy');
-  const spends = ev.items.filter(g => g.op === 'Transaction Spend' && STABLECOINS.includes(g.coin));
-  const revenues = ev.items.filter(g => g.op === 'Transaction Revenue' && STABLECOINS.includes(g.coin) && g.change > 0);
-  const soldRows = ev.items.filter(g => !STABLECOINS.includes(g.coin) && g.change < 0 && (g.op === 'Transaction Sold' || g.op === 'Transaction Revenue'));
-  const events = [];
-  if (buys.length && spends.length) {
-    const totalSpend = spends.reduce((s,g)=>s+Math.abs(g.change),0);
-    const totalBuyUnits = buys.reduce((s,g)=>s+g.change,0);
-    if (totalBuyUnits > 0) {
-      const records = [];
-      buys.forEach(b => {
-        const share = (b.change/totalBuyUnits)*totalSpend;
-        costBasis[b.coin] = (costBasis[b.coin]||0) + share;
-        records.push({ coin: b.coin, amount: b.change, valueUsd: share });
-      });
-      events.push({ side: 'buy', time: ev.time, total: totalSpend, records });
-    }
-  }
-  if (soldRows.length && revenues.length) {
-    const totalRevenue = revenues.reduce((s,g)=>s+g.change,0);
-    const totalSoldUnits = soldRows.reduce((s,g)=>s+Math.abs(g.change),0);
-    if (totalSoldUnits > 0) {
-      const proceedsPerUnit = totalRevenue / totalSoldUnits;
-      const records = [];
-      soldRows.forEach(sr => {
-        records.push({ coin: sr.coin, amount: sr.change, valueUsd: Math.abs(sr.change) * proceedsPerUnit });
-      });
-      events.push({ side: 'sell', time: ev.time, total: totalRevenue, records });
-    }
-  }
-  ev.items.forEach(it => { holdings[it.coin] = (holdings[it.coin]||0) + it.change; });
+function applyTransactionGroup(event, holdings, costBasis, lots) {
+  event.items.forEach(item => {
+    holdings[item.coin] = (holdings[item.coin] || 0) + item.change;
+  });
+  const ledgerHoldings = Object.create(null);
+  Object.keys(holdings).forEach(coin => {
+    ledgerHoldings[coin] = { amount: holdings[coin], costBasis: costBasis[coin] || 0 };
+  });
+  const events = applyLedgerEvent(event, ledgerHoldings, lots, Object.create(null), Object.create(null), true);
+  Object.keys(ledgerHoldings).forEach(coin => {
+    holdings[coin] = ledgerHoldings[coin].amount;
+    costBasis[coin] = ledgerHoldings[coin].costBasis;
+  });
   return events;
 }
 
@@ -1278,12 +1574,12 @@ function buildBuckets(rangeKey, stepMs) {
  * @returns {Array<Object>}
  */
 function computeDailySeries(timeline, buckets, priceFn) {
-  const holdings = Object.create(null), costBasis = Object.create(null), points = [];
+  const holdings = Object.create(null), costBasis = Object.create(null), lots = Object.create(null), points = [];
   let eventIdx = 0;
   buckets.forEach(bt => {
     const bucketEvents = [];
     while (eventIdx < timeline.length && timeline[eventIdx].time <= bt) {
-      const evs = applyTransactionGroup(timeline[eventIdx], holdings, costBasis);
+      const evs = applyTransactionGroup(timeline[eventIdx], holdings, costBasis, lots);
       evs.forEach(e => bucketEvents.push(e));
       eventIdx++;
     }
@@ -1378,23 +1674,6 @@ function priceAt(chart, t) {
   let lo = 0, hi = chart.length - 1;
   while (lo < hi) { const mid = (lo+hi+1)>>1; if (chart[mid][0] <= t) lo = mid; else hi = mid-1; }
   return chart[lo][1];
-}
-
-/**
- * Update the summary cards at the top based on the selected chart range.
- * @param {Array<Object>} points
- */
-function updateSummaryRange(points) {
-  if (!points || points.length === 0) return;
-  const last = points[points.length-1];
-  const trueUnrealized = last.value - last.cost;
-  const denom = last.cost !== 0 ? last.cost : 1;
-  const periodPnlPct = denom !== 0 ? (trueUnrealized/denom)*100 : 0;
-
-  const pnlEl = document.getElementById('summaryPnl');
-  const pctEl = document.getElementById('summaryPnlPct');
-  if (pnlEl) { pnlEl.textContent = arrow(trueUnrealized) + trueUnrealized.toFixed(2); pnlEl.className = 'value ' + (trueUnrealized>=0?'positive':'negative'); }
-  if (pctEl) { pctEl.textContent = arrow(periodPnlPct) + periodPnlPct.toFixed(1) + '%'; pctEl.className = 'value ' + (periodPnlPct>=0?'positive':'negative'); }
 }
 
 /**
@@ -1511,7 +1790,6 @@ async function renderGrowthChart(rangeKey) {
   const buckets = buildBuckets(rangeKey, stepForRange(rangeKey));
   const points = computeDailySeries(growthTimeline, buckets, priceFn);
   lastGrowthPoints = points;
-  updateSummaryRange(points);
 
   if (typeof Chart === 'undefined' || points.length === 0) return;
   const renderPoints = decimatePoints(points, 400);
@@ -1828,6 +2106,22 @@ function renderResults(holdings, opsCount, prices, realized, realizedByYear) {
 
   const totalPnl = totalValue - totalCost;
   const totalPnlPct = totalCost > 0 ? (totalPnl/totalCost)*100 : 0;
+  // Binance 口徑：投入 vs 現值（毛入金）
+  function getBinanceGross() {
+    let gross = 0;
+    const src = (typeof allRawRows !== 'undefined' && allRawRows.length) ? allRawRows : [];
+    src.forEach(r => {
+      const coin = r['Coin']; const ch = finiteNumber(r['Change'], 0);
+      const op = r['Operation'] || '';
+      if (!STABLECOINS.includes(coin) || !(ch > 0)) return;
+      if (op === 'P2P Trading' || op === 'Deposit') gross += ch;
+    });
+    return gross;
+  }
+  const binanceCost = getBinanceGross();
+  const binanceUnrealized = totalValue - binanceCost;
+  const binancePct = binanceCost > 0 ? (binanceUnrealized / binanceCost) * 100 : 0;
+  const binanceTotal = binanceUnrealized + totalRealized;
 
   const summaryGrid = document.getElementById('summaryGrid');
   summaryGrid.innerHTML = '';
@@ -1846,10 +2140,12 @@ function renderResults(holdings, opsCount, prices, realized, realizedByYear) {
     return box;
   }
   summaryGrid.appendChild(makeSummaryBox(t('summaryValueLabel'), '$' + totalValue.toFixed(2)));
-  summaryGrid.appendChild(makeSummaryBox(t('summaryCostLabel'), '$' + totalCost.toFixed(2)));
-  summaryGrid.appendChild(makeSummaryBox(t('summaryPnlLabel'), arrow(totalPnl) + totalPnl.toFixed(2), totalPnl >= 0 ? 'positive' : 'negative', 'summaryPnl'));
-  summaryGrid.appendChild(makeSummaryBox(t('summaryPctLabel'), arrow(totalPnlPct) + totalPnlPct.toFixed(1) + '%', totalPnlPct >= 0 ? 'positive' : 'negative', 'summaryPnlPct'));
+  summaryGrid.appendChild(makeSummaryBox(t('summaryCostLabel'), '$' + binanceCost.toFixed(2)));
+  summaryGrid.appendChild(makeSummaryBox(t('summaryPnlLabel'), arrow(binanceUnrealized) + binanceUnrealized.toFixed(2), binanceUnrealized >= 0 ? 'positive' : 'negative', 'summaryPnl'));
+  summaryGrid.appendChild(makeSummaryBox(t('summaryPctLabel'), arrow(binancePct) + binancePct.toFixed(1) + '%', binancePct >= 0 ? 'positive' : 'negative', 'summaryPnlPct'));
   summaryGrid.appendChild(makeSummaryBox(t('summaryRealizedLabel'), arrow(totalRealized) + '$' + totalRealized.toFixed(2), totalRealized >= 0 ? 'positive' : 'negative'));
+  const totalPnlAll = binanceTotal;
+  summaryGrid.appendChild(makeSummaryBox(t('summaryTotalLabel'), arrow(totalPnlAll) + '$' + totalPnlAll.toFixed(2), totalPnlAll >= 0 ? 'positive' : 'negative'));
 
   if (Object.keys(opsCount).length > 0) {
     const opsBody = document.getElementById('opsBody');
@@ -2025,6 +2321,846 @@ async function decryptPayload(b64) {
     }
 }
 
+
+// ==================== On-chain wallet imports ====================
+function loadWalletTokenSymbols() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(WALLET_TOKEN_SYMBOL_KEY) || '{}');
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch (e) { return {}; }
+}
+const walletTokenSymbols = loadWalletTokenSymbols();
+
+function saveWalletTokenSymbols() {
+  try { localStorage.setItem(WALLET_TOKEN_SYMBOL_KEY, JSON.stringify(walletTokenSymbols)); } catch (e) {}
+}
+
+async function walletFetchJson(url, options = {}, timeout = 18000) {
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(() => ctrl.abort(), timeout) : null;
+  try {
+    const resp = await fetch(url, ctrl ? Object.assign({ signal:ctrl.signal }, options) : options);
+    if (!resp.ok) throw new Error(resp.status === 429 ? 'rate limited (HTTP 429)' : 'HTTP ' + resp.status);
+    return await resp.json();
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+function walletTime(ms) {
+  const value = Number(ms);
+  return new Date(Number.isFinite(value) && value > 0 ? value : Date.now()).toISOString();
+}
+
+function makeWalletRow(account, timeMs, coin, change, op, txid) {
+  const normalizedCoin = normalizeCoinSymbol(coin);
+  return {
+    'User ID':'WALLET',
+    'Time': walletTime(timeMs),
+    'Account':'Spot',
+    'Operation':op,
+    'Coin':normalizedCoin,
+    'Change':Number(change),
+    'Remark':account.network.toUpperCase() + ' · ' + String(txid || '').slice(0, 24),
+    _source:'wallet',
+    _accountId:account.id,
+    _network:account.network,
+    _txid:String(txid || '')
+  };
+}
+
+function pushWalletGroup(groups, timeMs, txid, item) {
+  if (!Number.isFinite(item.change) || Math.abs(item.change) < LOT_QTY_EPSILON || !item.coin) return;
+  const key = String(timeMs) + ':' + String(txid);
+  if (!groups[key]) groups[key] = { timeMs:Number(timeMs), txid:String(txid || ''), items:[] };
+  groups[key].items.push(item);
+}
+
+function assignWalletOperations(groups) {
+  return Object.values(groups)
+    .sort((a,b) => a.timeMs - b.timeMs)
+    .map(group => {
+      const hasStableSpend = group.items.some(item =>
+        item.change < 0 && STABLECOINS.includes(normalizeCoinSymbol(item.coin)));
+      const hasCryptoSpend = group.items.some(item =>
+        item.change < 0 && !STABLECOINS.includes(normalizeCoinSymbol(item.coin)));
+      const rows = group.items.map(item => {
+        const coin = normalizeCoinSymbol(item.coin);
+        let op;
+        if (item.change > 0) op = STABLECOINS.includes(coin) ? 'Transaction Revenue'
+          : ((hasStableSpend || hasCryptoSpend) ? 'Transaction Revenue' : 'Deposit');
+        else op = STABLECOINS.includes(coin) ? 'Transaction Spend' : 'Transaction Sold';
+        return { coin, change:item.change, op };
+      });
+      return { group, rows };
+    });
+}
+
+function bigIntToAmount(value, decimals) {
+  try {
+    const raw = String(value || '0');
+    if (!/^-?\d+$/.test(raw)) return finiteNumber(Number(raw), 0);
+    const negative = raw.startsWith('-');
+    const digits = negative ? raw.slice(1) : raw;
+    const scale = Math.max(0, Number(decimals) || 0);
+    if (scale === 0) return (negative ? -1 : 1) * Number(digits);
+    const padded = digits.padStart(scale + 1, '0');
+    const whole = padded.slice(0, -scale);
+    const fraction = padded.slice(-scale).replace(/0+$/, '');
+    const amount = Number(fraction ? whole + '.' + fraction : whole);
+    return (negative ? -1 : 1) * amount;
+  } catch (e) { return 0; }
+}
+
+function shortAddress(address) {
+  const value = String(address || '');
+  return value.length <= 18 ? value : value.slice(0, 10) + '…' + value.slice(-8);
+}
+
+function validateWalletAddress(network, address) {
+  const value = String(address || '').trim();
+  if (network.kind === 'bitcoin') return /^(bc1[a-z0-9]{20,71}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/.test(value);
+  if (network.kind === 'evm') return /^0x[a-fA-F0-9]{40}$/.test(value);
+  if (network.kind === 'solana') return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(value);
+  if (network.kind === 'cardano') return /^addr(_test)?1[02-9ac-hj-np-z]{20,100}$/.test(value);
+  if (network.kind === 'ripple') return /^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(value);
+  return false;
+}
+
+async function fetchBitcoinTransactions(address, onProgress) {
+  const groups = Object.create(null);
+  let offset = 0;
+  let total = Infinity;
+  const pageSize = 50;
+  for (let page = 0; page < 20 && offset < total; page++) {
+    if (onProgress) onProgress(offset, total);
+    const data = await walletFetchJson('https://blockchain.info/rawaddr/' + encodeURIComponent(address) +
+      '?cors=true&offset=' + offset);
+    total = finiteNumber(data.n_tx, offset + data.txs.length);
+    (Array.isArray(data.txs) ? data.txs : []).forEach(tx => {
+      const timeMs = finiteNumber(tx.time, 0) * 1000;
+      const incoming = (tx.out || []).filter(out => out && out.addr === address)
+        .reduce((sum,out) => sum + finiteNumber(out.value, 0), 0);
+      const inputs = tx.inputs || [];
+      const spentByOwner = inputs.reduce((sum,input) => (
+        sum + (input && input.prevout && input.prevout.addr === address ? finiteNumber(input.prevout.value, 0) : 0)
+      ), 0);
+      const isSender = spentByOwner > 0;
+      const delta = satoshiToBtc(incoming - spentByOwner - (isSender ? finiteNumber(tx.fee, 0) : 0));
+      if (Math.abs(delta) >= LOT_QTY_EPSILON) {
+        pushWalletGroup(groups, timeMs, tx.hash, { coin:'BTC', change:delta });
+      }
+    });
+    const received = Array.isArray(data.txs) ? data.txs.length : 0;
+    if (received < pageSize) break;
+    offset += received;
+  }
+  const events = assignWalletOperations(groups).flatMap(({ group, rows }) => rows);
+  return { events, partial: Number.isFinite(total) && offset < total };
+}
+
+function satoshiToBtc(satoshi) {
+  return bigIntToAmount(String(Math.round(finiteNumber(satoshi, 0))), 8);
+}
+
+async function fetchEtherscanPage(params, apiKey) {
+  const search = new URLSearchParams(Object.assign({}, params, apiKey ? { apikey:apiKey } : {}));
+  const base = PROXY_BASE ? PROXY_BASE + '/evm/v2/api' : 'https://api.etherscan.io/v2/api';
+  const data = await walletFetchJson(base + '?' + search.toString());
+  if (data.status === '0' && data.message && !/no transactions found/i.test(data.message)) {
+    throw new Error(data.result || data.message || 'Etherscan request failed');
+  }
+  return Array.isArray(data.result) ? data.result : [];
+}
+
+async function fetchEvmTransactions(network, address, apiKey, onProgress) {
+  if (!PROXY_BASE && !apiKey) throw new Error(t('walletEvmKeyRequired'));
+  const base = { chainid:network.chainId, address, startblock:0, endblock:99999999, sort:'asc' };
+  const nativeGroups = Object.create(null);
+  const tokenGroups = Object.create(null);
+  const lists = { normal:[], internal:[], tokens:[] };
+
+  for (let page = 1; page <= 5; page++) {
+    if (onProgress) onProgress(page, 5);
+    const rows = await fetchEtherscanPage(Object.assign({}, base, {
+      module:'account', action:'txlist', page, offset:10000
+    }), apiKey);
+    lists.normal.push(...rows);
+    if (rows.length < 10000) break;
+  }
+
+  for (let page = 1; page <= 3; page++) {
+    const rows = await fetchEtherscanPage(Object.assign({}, base, {
+      module:'account', action:'txlistinternal', page, offset:10000
+    }), apiKey);
+    lists.internal.push(...rows);
+    if (rows.length < 10000) break;
+  }
+
+  for (let page = 1; page <= 5; page++) {
+    const rows = await fetchEtherscanPage(Object.assign({}, base, {
+      module:'account', action:'tokentx', page, offset:10000
+    }), apiKey);
+    lists.tokens.push(...rows);
+    if (rows.length < 10000) break;
+  }
+
+  lists.normal.forEach(tx => {
+    const timeMs = finiteNumber(tx.timeStamp, 0) * 1000;
+    const value = bigIntToAmount(tx.value, 18);
+    const from = String(tx.from || '').toLowerCase();
+    const to = String(tx.to || '').toLowerCase();
+    const lower = address.toLowerCase();
+    const fee = bigIntToAmount(
+      BigInt(finiteNumber(tx.gasUsed, 0) || 0) * BigInt(finiteNumber(tx.gasPrice, 0) || 0), 18
+    );
+    let nativeDelta = 0;
+    if (from === lower && to === lower) nativeDelta = -fee;
+    else if (from === lower) nativeDelta = -(value + fee);
+    else if (to === lower) nativeDelta = value;
+    if (Math.abs(nativeDelta) >= LOT_QTY_EPSILON) {
+      pushWalletGroup(nativeGroups, timeMs, tx.hash, { coin:network.nativeSymbol, change:nativeDelta });
+    }
+  });
+
+  lists.internal.forEach(tx => {
+    const lower = address.toLowerCase();
+    const from = String(tx.from || '').toLowerCase();
+    const to = String(tx.to || '').toLowerCase();
+    if (from !== lower && to !== lower) return;
+    const value = bigIntToAmount(tx.value, 18);
+    const delta = to === lower ? value : -value;
+    if (Math.abs(delta) >= LOT_QTY_EPSILON) {
+      pushWalletGroup(nativeGroups, finiteNumber(tx.timeStamp, 0) * 1000, tx.hash,
+        { coin:network.nativeSymbol, change:delta });
+    }
+  });
+
+  lists.tokens.forEach(tx => {
+    const lower = address.toLowerCase();
+    const from = String(tx.from || '').toLowerCase();
+    const to = String(tx.to || '').toLowerCase();
+    if (from !== lower && to !== lower) return;
+    const decimals = finiteNumber(tx.tokenDecimal, 18);
+    const amount = bigIntToAmount(tx.value, decimals);
+    const symbol = normalizeCoinSymbol(tx.tokenSymbol || ('TOKEN_' + String(tx.contractAddress || '').slice(0, 8)));
+    pushWalletGroup(tokenGroups, finiteNumber(tx.timeStamp, 0) * 1000, tx.hash,
+      { coin:symbol, change:to === lower ? Math.abs(amount) : -Math.abs(amount) });
+  });
+
+  // Native and token legs of one swap share the transaction timestamp/hash.
+  const merged = Object.create(null);
+  Object.entries(nativeGroups).forEach(([key, group]) => { merged[key] = group; });
+  Object.entries(tokenGroups).forEach(([key, group]) => {
+    if (!merged[key]) merged[key] = group;
+    else group.items.forEach(item => merged[key].items.push(item));
+  });
+  const events = assignWalletOperations(merged).flatMap(({ group, rows }) => rows);
+  const expectedPages = lists.normal.length >= 50000 || lists.tokens.length >= 50000;
+  return { events, partial:expectedPages };
+}
+
+const SOLANA_MINTS = {
+  EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v:'USDC',
+  Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB:'USDT'
+};
+
+const SOLANA_RPC_ENDPOINTS = [
+  'https://api.mainnet-beta.solana.com',
+  'https://rpc.ankr.com/solana',
+  'https://solana-rpc.publicnode.com'
+];
+
+async function solanaRpc(method, params) {
+  let lastError = null;
+  for (const endpoint of SOLANA_RPC_ENDPOINTS) {
+    try {
+      const data = await walletFetchJson(endpoint, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body:JSON.stringify({ jsonrpc:'2.0', id:Date.now(), method, params })
+      }, 25000);
+      if (data.error) throw new Error(data.error.message || 'Solana RPC error');
+      return data.result;
+    } catch (error) {
+      lastError = error;
+      console.warn('Solana RPC endpoint failed', endpoint, error);
+    }
+  }
+  throw lastError || new Error('All Solana RPC endpoints failed');
+}
+
+async function resolveSolanaSymbols(mints) {
+  const unknown = Array.from(new Set(mints)).filter(mint => mint && !walletTokenSymbols[mint]);
+  for (let i = 0; i < unknown.length; i += 50) {
+    const batch = unknown.slice(i, i + 50);
+    try {
+      const results = await walletFetchJson('https://lite-api.jup.ag/tokens/v2/search?query=' + batch.join(','));
+      (Array.isArray(results) ? results : []).forEach(token => {
+        if (token.id && token.symbol) walletTokenSymbols[token.id] = normalizeCoinSymbol(token.symbol);
+      });
+    } catch (e) { console.warn('Solana token lookup failed', e); }
+  }
+  saveWalletTokenSymbols();
+}
+
+async function fetchSolanaTransactions(address, onProgress) {
+  const signatures = await solanaRpc('getSignaturesForAddress', [address, { limit:500 }]);
+  const transactions = [];
+  const workerCount = 3;
+  let next = 0;
+  async function worker() {
+    while (next < signatures.length) {
+      const index = next++;
+      const signature = signatures[index].signature;
+      try {
+        const tx = await solanaRpc('getParsedTransaction', [signature, { maxSupportedTransactionVersion:0 }]);
+        if (tx) transactions[index] = tx;
+      } catch (e) { console.warn('Solana transaction skipped', e); }
+      if (onProgress) onProgress(index + 1, signatures.length);
+    }
+  }
+  await Promise.all(Array.from({ length:workerCount }, worker));
+
+  const groups = Object.create(null);
+  transactions.forEach((tx, index) => {
+    const meta = tx.meta;
+    if (!meta) return;
+    const staticKeys = (tx.transaction.message.accountKeys || []).map(key =>
+      typeof key === 'string' ? key : key.pubkey);
+    const loaded = meta.loadedAddresses || {};
+    const allKeys = staticKeys.concat((loaded.writable || []).map(k => k.pubkey || k))
+      .concat((loaded.readonly || []).map(k => k.pubkey || k));
+    const slotTime = finiteNumber(signatures[index].blockTime, 0) * 1000;
+
+    allKeys.forEach((key, keyIndex) => {
+      if (key !== address) return;
+      const delta = (finiteNumber(meta.postBalances[keyIndex], 0)
+        - finiteNumber(meta.preBalances[keyIndex], 0)) / 100000000;
+      if (Math.abs(delta) >= LOT_QTY_EPSILON) pushWalletGroup(groups, slotTime, signatures[index].signature,
+        { coin:'SOL', change:delta });
+    });
+
+    const preTokens = meta.preTokenBalances || [];
+    const postTokens = meta.postTokenBalances || [];
+    const balances = Object.create(null);
+    const keyOf = balance => balance.owner + ':' + balance.mint;
+    preTokens.filter(balance => balance.owner === address).forEach(balance => {
+      balances[keyOf(balance)] = finiteNumber(balance.uiTokenAmount && balance.uiTokenAmount.uiAmount, 0);
+    });
+    postTokens.filter(balance => balance.owner === address).forEach(balance => {
+      const key = keyOf(balance);
+      balances[key] = finiteNumber(balance.uiTokenAmount && balance.uiTokenAmount.uiAmount, 0) - (balances[key] || 0);
+    });
+    Object.keys(preTokens.concat(postTokens).reduce((set,balance) => {
+      if (balance.owner === address) set[balance.mint] = true; return set;
+    }, {})).forEach(mint => {
+      const delta = balances[address + ':' + mint] || 0;
+      if (Math.abs(delta) >= LOT_QTY_EPSILON) {
+        pushWalletGroup(groups, slotTime, signatures[index].signature,
+          { coin:SOLANA_MINTS[mint] || walletTokenSymbols[mint] || ('SPL_' + mint.slice(0, 6)), change:delta });
+      }
+    });
+  });
+
+  const mints = [];
+  Object.values(groups).forEach(group => group.items.forEach(item => {
+    if (/^SPL_/.test(item.coin)) mints.push(item.coin.slice(4));
+  }));
+  await resolveSolanaSymbols(mints);
+  Object.values(groups).forEach(group => group.items.forEach(item => {
+    if (/^SPL_/.test(item.coin)) item.coin = walletTokenSymbols[item.coin.slice(4)] || item.coin;
+  }));
+  const events = assignWalletOperations(groups).flatMap(({ group, rows }) => rows);
+  return { events, partial:signatures.length >= 500 };
+}
+
+async function fetchBlockstreamTransactions(address, onProgress) {
+  const groups = Object.create(null);
+  const transactions = await walletFetchJson('https://blockstream.info/api/address/' + encodeURIComponent(address) + '/txs');
+  (Array.isArray(transactions) ? transactions : []).forEach(tx => {
+    const timeMs = (finiteNumber(tx.status && tx.status.block_time, 0) || Math.floor(Date.now() / 1000)) * 1000;
+    const incoming = (tx.vout || []).filter(output => output && output.scriptpubkey_address === address)
+      .reduce((sum,output) => sum + finiteNumber(output.value, 0), 0);
+    const spentByOwner = (tx.vin || []).reduce((sum,input) => (
+      sum + (input && input.prevout && input.prevout.scriptpubkey_address === address
+        ? finiteNumber(input.prevout.value, 0) : 0)
+    ), 0);
+    const isSender = spentByOwner > 0;
+    const delta = satoshiToBtc(incoming - spentByOwner - (isSender ? finiteNumber(tx.fee, 0) : 0));
+    if (Math.abs(delta) >= LOT_QTY_EPSILON) {
+      pushWalletGroup(groups, timeMs, tx.txid, { coin:'BTC', change:delta });
+    }
+  });
+  const events = assignWalletOperations(groups).flatMap(({ group, rows }) => rows);
+  return { events, partial:Array.isArray(transactions) && transactions.length >= 25 };
+}
+
+
+// ==================== Cardano and XRP Ledger ====================
+async function koiosGet(path, params) {
+  const base = PROXY_BASE ? PROXY_BASE + '/cardano' : 'https://api.koios.rest/api/v1';
+  const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+  return walletFetchJson(base + path + qs, {}, 25000);
+}
+
+function cardanoHexToText(hex) {
+  const value = String(hex || '');
+  if (!/^[0-9a-fA-F]*$/.test(value) || value.length % 2) return '';
+  try {
+    const text = Array.from({ length:value.length / 2 }, (_, i) =>
+      String.fromCharCode(parseInt(value.substr(i * 2, 2), 16))).join('');
+    return /^[\x20-\x7E]+$/.test(text) ? text : '';
+  } catch (e) { return ''; }
+}
+
+async function fetchCardanoTransactions(address, apiKey, onProgress) {
+  if (!PROXY_BASE) throw new Error(t('walletCardanoKeyRequired'));
+  const txRows = [];
+  const seenHashes = new Set();
+
+  const rows = await koiosGet('/address_txs', { _address:address });
+  (Array.isArray(rows) ? rows : []).forEach(row => {
+    if (row && row.tx_hash && !seenHashes.has(row.tx_hash)) {
+      seenHashes.add(row.tx_hash);
+      txRows.push(row);
+    }
+  });
+
+  const selectedRows = txRows.slice(0, 300).sort((a,b) =>
+    finiteNumber(a.block_time, 0) - finiteNumber(b.block_time, 0));
+  const groups = Object.create(null);
+  const assetUnits = new Set();
+
+  for (let start = 0; start < selectedRows.length; start += 6) {
+    const batch = selectedRows.slice(start, start + 6);
+    const details = await Promise.all(batch.map(async row => {
+      try {
+        const list = await koiosGet('/tx_info', { _tx_hash:row.tx_hash });
+        return Array.isArray(list) ? list[0] : null;
+      } catch (error) {
+        console.warn('Cardano transaction skipped', row.tx_hash, error);
+        return null;
+      }
+    }));
+
+    batch.forEach((row, batchIndex) => {
+      const tx = details[batchIndex];
+      if (!tx) return;
+      const timeMs = (finiteNumber(row.block_time, 0) || Math.floor(Date.now() / 1000)) * 1000;
+      let adaDelta = 0;
+      const assetDelta = Object.create(null);
+      const applyLeg = (leg, sign) => {
+        if (!leg || String(leg.address || '') !== address) return;
+        const lovelace = finiteNumber(leg.value, 0);
+        if (lovelace) adaDelta += sign * bigIntToAmount(String(lovelace), 6);
+        (Array.isArray(leg.asset_list) ? leg.asset_list : []).forEach(asset => {
+          const unit = String(asset.policy_id || '') + String(asset.asset_name || '');
+          const qty = finiteNumber(asset.quantity, 0);
+          if (unit) assetDelta[unit] = (assetDelta[unit] || 0) + sign * qty;
+        });
+      };
+      (Array.isArray(tx.inputs) ? tx.inputs : []).forEach(input => applyLeg(input, -1));
+      (Array.isArray(tx.outputs) ? tx.outputs : []).forEach(output => applyLeg(output, 1));
+      if (Math.abs(adaDelta) >= LOT_QTY_EPSILON) pushWalletGroup(groups, timeMs, row.tx_hash, { coin:'ADA', change:adaDelta });
+      Object.keys(assetDelta).forEach(unit => {
+        if (Math.abs(assetDelta[unit]) >= LOT_QTY_EPSILON) {
+          assetUnits.add(unit);
+          pushWalletGroup(groups, timeMs, row.tx_hash, { coin:'CARDANO_UNIT:' + unit, change:assetDelta[unit] });
+        }
+      });
+    });
+    if (onProgress) onProgress(Math.min(start + 6, selectedRows.length), selectedRows.length);
+  }
+
+  const unitInfo = Object.create(null);
+  await Promise.all(Array.from(assetUnits).slice(0, 40).map(async unit => {
+    try {
+      const policyId = unit.slice(0, 56);
+      const assetName = unit.slice(56);
+      const list = await koiosGet('/asset_metadata', { _asset_policy:policyId, _asset_name:assetName });
+      const meta = (Array.isArray(list) ? list[0] : null);
+      const reg = (meta && meta.token_registry_metadata) || {};
+      const label = reg.ticker || reg.name || cardanoHexToText(assetName);
+      if (label) walletTokenSymbols['cardano:' + unit] = normalizeCoinSymbol(label);
+    } catch (error) { console.warn('Cardano asset metadata skipped', unit, error); }
+  }));
+  saveWalletTokenSymbols();
+  Object.values(groups).forEach(group => group.items.forEach(item => {
+    if (item.coin.startsWith('CARDANO_UNIT:')) {
+      const unit = item.coin.slice('CARDANO_UNIT:'.length);
+      item.coin = walletTokenSymbols['cardano:' + unit] || ('ADA_' + unit.slice(0, 8).toUpperCase());
+    }
+  }));
+
+  const events = assignWalletOperations(groups).flatMap(({ group, rows }) => rows);
+  return { events, partial:txRows.length >= 500 };
+}
+
+const XRPL_ENDPOINTS = [
+  'https://xrplcluster.com',
+  'https://xrpl.ws/',
+  'https://s1.ripple.com:51234/'
+];
+
+async function xrplRequest(method, paramObject) {
+  let lastError = null;
+  for (const endpoint of XRPL_ENDPOINTS) {
+    try {
+      const payload = await walletFetchJson(endpoint, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body:JSON.stringify({ id:'portfolio-' + Date.now(), method, params:[paramObject] })
+      }, 25000);
+      const result = payload && payload.result;
+      if (!result || result.status !== 'success') throw new Error(result && result.error_message || 'XRPL RPC error');
+      return result;
+    } catch (error) {
+      lastError = error;
+      console.warn('XRPL endpoint failed', endpoint, error);
+    }
+  }
+  throw lastError || new Error('All XRPL endpoints failed');
+}
+
+function rippleCurrencyCode(code) {
+  const value = String(code || '');
+  if (/^[A-Za-z0-9?!@#$%^&*()\[\]{}|~]{3}$/.test(value)) return value.toUpperCase();
+  const letters = String(value).replace(/00/g, '').match(/([2-7][0-9a-f])/gi);
+  if (letters) {
+    try {
+      const text = letters.map(pair => String.fromCharCode(parseInt(pair, 16))).join('');
+      if (/^[A-Z0-9._~-]{3,12}$/i.test(text)) return text.toUpperCase();
+    } catch (e) {}
+  }
+  return 'IOU_' + value.replace(/[^0-9a-z]/gi, '').slice(0, 8).toUpperCase();
+}
+
+function rippleAffectedNodes(meta) {
+  const nodes = (meta && (meta.AffectedNodes || meta.ModifiedNodes)) || [];
+  return nodes.map(entry => {
+    if (entry.ModifiedNode) return { kind:'modified', node:entry.ModifiedNode };
+    if (entry.CreatedNode) return { kind:'created', node:entry.CreatedNode };
+    if (entry.DeletedNode) return { kind:'deleted', node:entry.DeletedNode };
+    return null;
+  }).filter(Boolean);
+}
+
+async function fetchRippleTransactions(address, onProgress) {
+  const groups = Object.create(null);
+  let marker;
+  let eventCount = 0;
+
+  for (let page = 0; page < 25; page++) {
+    const params = {
+      account:address,
+      ledger_index_min:-1,
+      ledger_index_max:-1,
+      binary:false,
+      limit:200
+    };
+    if (marker) params.marker = marker;
+    const result = await xrplRequest('account_tx', params);
+    const transactions = Array.isArray(result.transactions) ? result.transactions : [];
+
+    transactions.forEach(entry => {
+      const meta = entry.meta || entry.metadata;
+      const tx = entry.tx || entry.tx_json || entry;
+      if (!meta || !tx || !tx.hash) return;
+      const timeMs = ((finiteNumber(tx.date, 0) || 0) + 946684800) * 1000;
+      const deltas = Object.create(null);
+      const addDelta = (coin, change, scale) => {
+        if (scale) change /= scale;
+        if (!Number.isFinite(change) || Math.abs(change) < LOT_QTY_EPSILON) return;
+        deltas[coin] = (deltas[coin] || 0) + change;
+      };
+
+      rippleAffectedNodes(meta).forEach(({ kind, node }) => {
+        const entryType = node.LedgerEntryType;
+        const finalFields = node.FinalFields || {};
+        const previousFields = node.PreviousFields || {};
+        if (entryType === 'AccountRoot') {
+          if (finalFields.Account !== address && previousFields.Account !== address) return;
+          const finalValue = finiteNumber(finalFields.Balance, NaN);
+          const previousValue = finiteNumber(previousFields.Balance, NaN);
+          if (!Number.isFinite(finalValue)) return;
+          const previous = kind === 'created' ? 0 : (Number.isFinite(previousValue) ? previousValue : finalValue);
+          addDelta('XRP', kind === 'deleted' ? -finalValue : finalValue - previous, 1000000);
+        } else if (entryType === 'RippleState') {
+          const fields = Object.keys(finalFields).length ? finalFields : previousFields;
+          const lowIssuer = fields.LowLimit && String(fields.LowLimit.issuer) === address;
+          const highIssuer = fields.HighLimit && String(fields.HighLimit.issuer) === address;
+          if (!lowIssuer && !highIssuer) return;
+          const currency = rippleCurrencyCode(fields.Currency);
+          const issuer = lowIssuer ? fields.HighLimit && fields.HighLimit.issuer : fields.LowLimit && fields.LowLimit.issuer;
+          const knownStablecoin = STABLECOINS.includes(currency);
+          const finalValue = finiteNumber(fields.Balance, NaN);
+          const previousValue = finiteNumber(previousFields.Balance, NaN);
+          if (!Number.isFinite(finalValue)) return;
+          const previous = kind === 'created' ? 0
+            : (Number.isFinite(previousValue) ? previousValue
+              : (kind === 'modified' ? finalValue : 0));
+          const rawChange = kind === 'deleted' ? -finalValue : finalValue - previous;
+          addDelta(currency + (issuer ? '_' + String(issuer).slice(-4) : ''), lowIssuer ? rawChange : -rawChange, 0);
+        }
+      });
+
+      Object.keys(deltas).forEach(coin => {
+        pushWalletGroup(groups, timeMs, tx.hash, { coin, change:deltas[coin] });
+      });
+      eventCount++;
+    });
+
+    if (onProgress) onProgress(eventCount, eventCount + 200);
+    marker = result.marker;
+    if (!marker) break;
+  }
+
+  const events = assignWalletOperations(groups).flatMap(({ group, rows }) => rows);
+  return { events, partial:Boolean(marker) };
+}
+
+async function importWalletEvents(account, onProgress) {
+  const network = WALLET_NETWORKS.find(item => item.id === account.network);
+  if (!network) throw new Error('Unknown network');
+  if (network.kind === 'bitcoin') {
+    try {
+      return await fetchBitcoinTransactions(account.address, onProgress);
+    } catch (error) {
+      console.warn('Blockchain.info failed; using Blockstream', error);
+      return fetchBlockstreamTransactions(account.address, onProgress);
+    }
+  }
+  if (network.kind === 'evm') return fetchEvmTransactions(network, account.address, walletApiKeys.etherscan, onProgress);
+  if (network.kind === 'solana') return fetchSolanaTransactions(account.address, onProgress);
+  if (network.kind === 'cardano') return fetchCardanoTransactions(account.address, walletApiKeys.blockfrost, onProgress);
+  if (network.kind === 'ripple') return fetchRippleTransactions(account.address, onProgress);
+  throw new Error('Unsupported network');
+}
+
+/**
+ * A withdrawal in the Binance ledger and its later on-chain deposit describe one
+ * asset move, not a second acquisition. Removing both keeps the original FIFO lot.
+ */
+function reconcileInternalTransfers(rows) {
+  const excluded = new Set();
+  const isWallet = row => row._source === 'wallet';
+  const changeOf = row => finiteNumber(row['Change'], NaN);
+  const timeOf = row => Date.parse(String(row['Time'] || ''));
+
+  // Exchange withdrawal -> wallet receipt preserves the original FIFO lot.
+  // Wallet dispatch -> exchange deposit handles the return trip the same way.
+  const outboundExchange = rows.filter(row => !isWallet(row) && changeOf(row) < 0
+    && /withdraw/i.test(String(row['Operation'] || '')));
+  const inboundWallet = rows.filter(row => isWallet(row) && changeOf(row) > 0
+    && ['Deposit','Transaction Revenue','Transaction Buy'].includes(row['Operation']));
+  const outboundWallet = rows.filter(row => isWallet(row) && changeOf(row) < 0);
+  const inboundExchange = rows.filter(row => !isWallet(row) && changeOf(row) > 0
+    && /^Deposit$/i.test(String(row['Operation'] || '')));
+
+  // Two separately tracked wallets need special handling: remove both legs so
+  // the receiving side inherits the sending side's remaining FIFO cost context.
+  const outboundTrackedWallet = rows.filter(row => isWallet(row) && changeOf(row) < 0);
+  const inboundTrackedWallet = rows.filter(row => isWallet(row) && changeOf(row) > 0);
+
+  function consumeMatching(target, candidates, requireDifferentAccounts) {
+    target.forEach(departure => {
+      if (excluded.has(departure)) return;
+      const quantity = Math.abs(changeOf(departure));
+      const departureTime = timeOf(departure);
+      if (!Number.isFinite(quantity) || !Number.isFinite(departureTime)) return;
+      let best = null;
+      let bestGap = Infinity;
+      candidates.forEach(arrival => {
+        if (excluded.has(arrival) || arrival === departure) return;
+        if (arrival['Coin'] !== departure['Coin']) return;
+        if (requireDifferentAccounts && arrival._accountId === departure._accountId) return;
+        const gap = Math.abs(timeOf(arrival) - departureTime);
+        if (gap > 72 * 3600000 || gap >= bestGap) return;
+        const tolerance = Math.max(LOT_QTY_EPSILON, quantity * 0.002);
+        if (Math.abs(Math.abs(changeOf(arrival)) - quantity) <= tolerance) {
+          best = arrival;
+          bestGap = gap;
+        }
+      });
+      if (best) {
+        excluded.add(departure);
+        excluded.add(best);
+      }
+    });
+  }
+
+  consumeMatching(outboundExchange, inboundWallet, false);
+  consumeMatching(outboundWallet, inboundExchange, false);
+  consumeMatching(outboundTrackedWallet, inboundTrackedWallet, true);
+
+  return rows.filter(row => !excluded.has(row));
+}
+
+function renderWalletAccounts() {
+  const tbody = document.getElementById('walletAccountsBody');
+  const wrap = document.getElementById('walletTableWrap');
+  const refreshBtn = document.getElementById('refreshWalletsBtn');
+  if (!tbody || !wrap || !refreshBtn) return;
+  tbody.textContent = '';
+  wrap.style.display = walletAccounts.length ? 'block' : 'none';
+  refreshBtn.style.display = walletAccounts.length ? 'inline-flex' : 'none';
+
+  walletAccounts.forEach(account => {
+    const tr = document.createElement('tr');
+    [account.label || shortAddress(account.address), WALLET_NETWORKS.find(n => n.id === account.network)?.name || account.network]
+      .forEach(text => {
+        const td = document.createElement('td');
+        td.textContent = text;
+        tr.appendChild(td);
+      });
+    const addressTd = document.createElement('td');
+    addressTd.className = 'address-cell';
+    addressTd.title = account.address;
+    addressTd.textContent = account.address;
+    tr.appendChild(addressTd);
+
+    const countTd = document.createElement('td');
+    countTd.textContent = walletLedgerRows.filter(row => row._accountId === account.id).length.toLocaleString();
+    tr.appendChild(countTd);
+
+    const syncTd = document.createElement('td');
+    syncTd.textContent = account.lastSyncedAt ? new Date(account.lastSyncedAt).toLocaleString() : '-';
+    tr.appendChild(syncTd);
+
+    const actionTd = document.createElement('td');
+    actionTd.className = 'action-row';
+    const syncButton = document.createElement('button');
+    syncButton.type = 'button';
+    syncButton.className = 'btn btn-secondary';
+    syncButton.textContent = t('walletSync');
+    syncButton.addEventListener('click', () => syncWalletAccount(account));
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.className = 'btn btn-secondary';
+    removeButton.textContent = t('walletRemove');
+    removeButton.addEventListener('click', () => removeWalletAccount(account.id));
+    actionTd.append(syncButton, removeButton);
+    tr.appendChild(actionTd);
+    tbody.appendChild(tr);
+  });
+}
+
+function setWalletStatus(message, className = '') {
+  const node = document.getElementById('walletStatusMsg');
+  if (!node) return;
+  node.textContent = message;
+  node.className = 'status-msg ' + className;
+}
+
+async function syncWalletAccount(account) {
+  setWalletStatus(t('walletSyncing'), 'loading');
+  try {
+    const { events, partial } = await importWalletEvents(account, (done,total) => {
+      setWalletStatus(t('walletSyncing') + ' (' + done + '/' + total + ')', 'loading');
+    });
+    walletLedgerRows = walletLedgerRows.filter(row => row._accountId !== account.id);
+    events.forEach(event => {
+      walletLedgerRows.push(makeWalletRow(account, event.timeMs, event.coin, event.change, event.op, event.txid));
+    });
+    account.lastSyncedAt = Date.now();
+    account.rowCount = events.length;
+    account.partial = Boolean(partial);
+    renderWalletAccounts();
+    await processRows([], false, { preserveSources:true });
+    setWalletStatus(events.length === 0
+      ? t('walletNoEvents')
+      : t(partial ? (account.partialFailed ? 'walletPartialSynced' : 'walletLimitedSynced') : 'walletSynced', { n:events.length, network:networkLabel(account.network) }),
+      events.length === 0 ? '' : partial ? '' : 'success');
+  } catch (e) {
+    console.error('Wallet sync failed', e);
+    renderWalletAccounts();
+    setWalletStatus(t('walletSyncFailed', { message:e && e.message ? e.message : e }), 'error');
+  }
+}
+
+function networkLabel(networkId) {
+  const network = WALLET_NETWORKS.find(item => item.id === networkId);
+  return network ? network.name : networkId;
+}
+
+async function addWalletFromForm() {
+  const networkId = document.getElementById('walletNetwork').value;
+  const address = document.getElementById('walletAddress').value.trim();
+  const label = document.getElementById('walletLabel').value.trim().slice(0, 40);
+  const network = WALLET_NETWORKS.find(item => item.id === networkId);
+  setWalletStatus('', '');
+  if (!network || !address) { setWalletStatus(t('walletRequired'), 'error'); return; }
+  if (!validateWalletAddress(network, address)) { setWalletStatus(t('walletInvalidAddress'), 'error'); return; }
+  if (walletAccounts.some(a => a.network === networkId && a.address.toLowerCase() === address.toLowerCase())) {
+    setWalletStatus(t('walletDuplicate'), '');
+    return;
+  }
+  if (walletAccounts.length >= MAX_WALLET_ACCOUNTS) {
+    setWalletStatus(t('walletLimitReached', { n:MAX_WALLET_ACCOUNTS }), 'error');
+    return;
+  }
+  const account = {
+    id:(crypto.randomUUID ? crypto.randomUUID() : 'wallet-' + Date.now() + '-' + Math.random()),
+    network:networkId,
+    address,
+    label,
+    createdAt:Date.now(),
+    lastSyncedAt:0,
+    rowCount:0,
+    partial:false
+  };
+  walletAccounts.push(account);
+  renderWalletAccounts();
+  document.getElementById('walletAddress').value = '';
+  document.getElementById('walletLabel').value = '';
+  await syncWalletAccount(account);
+}
+
+async function refreshAllWalletAccounts() {
+  for (const account of [...walletAccounts]) await syncWalletAccount(account);
+}
+
+async function removeWalletAccount(accountId) {
+  walletAccounts = walletAccounts.filter(account => account.id !== accountId);
+  walletLedgerRows = walletLedgerRows.filter(row => row._accountId !== accountId);
+  renderWalletAccounts();
+  if (exchangeRows.length || walletLedgerRows.length) await processRows([], false, { preserveSources:true });
+  setWalletStatus(t('walletAccountRemoved'), 'success');
+}
+
+document.getElementById('addWalletBtn').addEventListener('click', addWalletFromForm);
+document.getElementById('refreshWalletsBtn').addEventListener('click', refreshAllWalletAccounts);
+document.getElementById('saveEtherscanKeyBtn').addEventListener('click', async () => {
+  const input = document.getElementById('etherscanKeyInput');
+  const blockfrostInput = document.getElementById('blockfrostKeyInput');
+  walletApiKeys.etherscan = input.value.trim().slice(0, 128);
+  walletApiKeys.blockfrost = blockfrostInput.value.trim().slice(0, 128);
+  await persistState();
+  setWalletStatus(t('walletKeySaved'), 'success');
+});
+
+function applyProxyUi() {
+  if (!PROXY_BASE) return;
+  ['etherscanKeyInput', 'blockfrostKeyInput', 'saveEtherscanKeyBtn'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = true;
+  });
+  const note = document.getElementById('walletProxyNote');
+  if (note) note.hidden = false;
+}
+applyProxyUi();
+
+function populateWalletNetworks() {
+  const select = document.getElementById('walletNetwork');
+  if (!select || select.options.length) return;
+  WALLET_NETWORKS.forEach(network => {
+    const option = document.createElement('option');
+    option.value = network.id;
+    option.textContent = network.name + ' · ' + network.nativeSymbol;
+    select.appendChild(option);
+  });
+}
 /**
  * Save raw rows, prices, and file hashes to localStorage. The value is
  * AES-GCM obfuscated with an origin-local key in IndexedDB; this is not
@@ -2032,7 +3168,7 @@ async function decryptPayload(b64) {
  */
 async function persistState() {
   try {
-    const payload = JSON.stringify({ rawRows: allRawRows, currentPrices, importedFileHashes, savedAt: Date.now() });
+    const payload = JSON.stringify({ rawRows: exchangeRows, currentPrices, importedFileHashes, walletAccounts, walletLedgerRows, walletApiKeys, savedAt: Date.now() });
     const encrypted = await encryptPayload(payload);
     localStorage.setItem(STORAGE_KEY, STORAGE_PREFIX + encrypted);
   } catch (e) { console.warn('persist failed', e); }
@@ -2057,10 +3193,27 @@ function sanitizeSavedState(saved) {
   const importedFileHashes = Array.isArray(saved.importedFileHashes)
     ? saved.importedFileHashes.filter(h => typeof h === 'string' && h.length > 0 && h.length <= 128)
     : [];
+  const walletAccounts = Array.isArray(saved.walletAccounts)
+    ? saved.walletAccounts.filter(a => a && typeof a.id === 'string' && typeof a.network === 'string'
+      && typeof a.address === 'string').slice(0, MAX_WALLET_ACCOUNTS)
+    : [];
+  const walletLedgerRows = Array.isArray(saved.walletLedgerRows)
+    ? saved.walletLedgerRows.filter(r => r && r._source === 'wallet' && r._accountId && r['Coin'] != null)
+      .slice(0, MAX_ROWS)
+    : [];
+  const walletApiKeys = saved.walletApiKeys && typeof saved.walletApiKeys === 'object'
+    ? {
+      etherscan:String(saved.walletApiKeys.etherscan || '').slice(0, 128),
+      blockfrost:String(saved.walletApiKeys.blockfrost || '').slice(0, 128)
+    }
+    : { etherscan:'' };
   return {
     rawRows: saved.rawRows,
     currentPrices,
     importedFileHashes,
+    walletAccounts,
+    walletLedgerRows,
+    walletApiKeys,
     savedAt: typeof saved.savedAt === 'number' && Number.isFinite(saved.savedAt) ? saved.savedAt : Date.now()
   };
 }
@@ -2124,14 +3277,16 @@ function clearStoredData() {
  * @param {Array<Object>} rows
  * @param {boolean} [isRestore]
  */
-async function processRows(rows, isRestore) {
-  rows = rows.map(r => {
+async function processRows(rows, isRestore, options = {}) {
+  if (!options.preserveSources) exchangeRows = rows;
+  const sourceRows = [...exchangeRows, ...walletLedgerRows];
+  const analysisRows = reconcileInternalTransfers(sourceRows.map(r => {
     if (!r || r['Coin'] == null) return r;
     const normalized = Object.assign({}, r);
     normalized['Coin'] = normalizeCoinSymbol(normalized['Coin']);
     return normalized;
-  });
-  allRawRows = rows;
+  }));
+  allRawRows = analysisRows;
   const { holdings, opsCount, fees, zeroCost, realized, realizedByYear } = analyzeData(allRawRows);
   holdingsData = holdings;
   operationCounts = opsCount;
@@ -2140,15 +3295,12 @@ async function processRows(rows, isRestore) {
   realizedPnl = realized;
   realizedPnlByYear = realizedByYear || {};
   growthTimeline = buildTimeline(allRawRows);
-  // Wipe historical price caches so the next chart rebuild fetches fresh data
   Object.keys(marketCache).forEach(k => delete marketCache[k]);
 
   const statusMsg = document.getElementById('statusMsg');
   const coins = Object.keys(holdings).filter(c => Math.abs(holdings[c].amount) > 0.0000001);
 
-  if (!isRestore) {
-    statusMsg.textContent = t('statusParsed', { n: allRawRows.length });
-  }
+  if (!isRestore) statusMsg.textContent = t('statusParsed', { n:allRawRows.length });
   const prices = await fetchPrices(coins);
   currentPrices = prices;
 
@@ -2156,7 +3308,7 @@ async function processRows(rows, isRestore) {
   await renderGrowthChart(currentRange);
 
   if (lastPriceFetchOk) {
-    statusMsg.textContent = t('statusDone', { n: allRawRows.length, c: coins.length });
+    statusMsg.textContent = t('statusDone', { n:allRawRows.length, c:coins.length });
     statusMsg.className = 'status-msg success';
   } else {
     statusMsg.textContent = buildPriceFailMessage(allRawRows.length);
@@ -2716,6 +3868,10 @@ document.getElementById('clearDataBtn').addEventListener('click', () => clearMod
 document.getElementById('clearCancelBtn').addEventListener('click', () => clearModal.classList.remove('open'));
 document.getElementById('clearConfirmBtn').addEventListener('click', async () => {
   importedFileHashes = [];
+  exchangeRows = [];
+  walletAccounts = [];
+  walletLedgerRows = [];
+  walletApiKeys = { etherscan:'', blockfrost:'' };
   clearModal.classList.remove('open');
   await clearStoredData();
   location.reload();
@@ -2759,7 +3915,7 @@ function enterApp(focusUpload) {
 document.querySelectorAll('[data-cta="enter"]').forEach(btn => {
   btn.addEventListener('click', async () => {
     let hasData = false;
-    try { const s = await loadPersistedState(); hasData = !!(s && s.rawRows && s.rawRows.length > 0); } catch (e) {}
+    try { const s = await loadPersistedState(); hasData = !!s && ((s.rawRows && s.rawRows.length > 0) || (Array.isArray(s.walletAccounts) && s.walletAccounts.length > 0) || (s.walletApiKeys && (s.walletApiKeys.etherscan || s.walletApiKeys.blockfrost))); } catch (e) {}
     enterApp(!hasData);
   });
 });
@@ -2774,12 +3930,14 @@ document.querySelectorAll('[data-scroll]').forEach(btn => {
 if (homeBtn) homeBtn.addEventListener('click', showLanding);
 
 // ==================== Bootstrap ====================
+populateWalletNetworks();
+renderWalletAccounts();
 (async function init() {
   applyTheme();
   applyLang();
   try {
     const saved = await loadPersistedState();
-    if (saved && saved.rawRows && saved.rawRows.length > 0) {
+    if (saved && ((saved.rawRows && saved.rawRows.length > 0) || (saved.walletAccounts && saved.walletAccounts.length > 0) || (saved.walletApiKeys && (saved.walletApiKeys.etherscan || saved.walletApiKeys.blockfrost)))) {
       enterApp(false);
       document.getElementById('savedBanner').style.display = 'flex';
       document.getElementById('savedTimestamp').textContent = new Date(saved.savedAt).toLocaleString();
@@ -2788,7 +3946,14 @@ if (homeBtn) homeBtn.addEventListener('click', showLanding);
         Object.keys(saved.currentPrices).forEach(k => { currentPrices[normalizeCoinSymbol(k)] = saved.currentPrices[k]; });
       }
       if (saved.importedFileHashes) importedFileHashes = saved.importedFileHashes;
-      await processRows(saved.rawRows, true);
+      exchangeRows = saved.rawRows;
+      walletAccounts = saved.walletAccounts || [];
+      walletLedgerRows = saved.walletLedgerRows || [];
+      walletApiKeys = saved.walletApiKeys || { etherscan:'' };
+      document.getElementById('etherscanKeyInput').value = walletApiKeys.etherscan || '';
+      document.getElementById('blockfrostKeyInput').value = walletApiKeys.blockfrost || '';
+      renderWalletAccounts();
+      await processRows([], true, { preserveSources:true });
       const statusMsg = document.getElementById('statusMsg');
       statusMsg.textContent = t('statusRestored');
       statusMsg.className = 'status-msg success';
