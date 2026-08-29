@@ -2721,7 +2721,16 @@ async function fetchCardanoTransactions(address, apiKey, onProgress) {
   const seenHashes = new Set();
 
   for (let page = 1; page <= 3; page++) {
-    const batch = await blockfrostGet('/addresses/' + encodeURIComponent(address) + '/transactions?order=asc&page=' + page + '&count=100', apiKey);
+    let batch;
+    try {
+      batch = await blockfrostGet('/addresses/' + encodeURIComponent(address) + '/transactions?order=asc&page=' + page + '&count=100', apiKey);
+    } catch (e) {
+      if (e && /HTTP 404/.test(e.message || '')) {
+        batch = [];
+      } else {
+        throw e;
+      }
+    }
     const rows = Array.isArray(batch) ? batch : [];
     rows.forEach(row => {
       const h = row.tx_hash || row.hash;
