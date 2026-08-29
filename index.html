@@ -2698,10 +2698,11 @@ async function fetchBlockstreamTransactions(address, onProgress) {
 
 
 // ==================== Cardano and XRP Ledger ====================
-async function koiosGet(path, params) {
-  const base = PROXY_BASE ? PROXY_BASE + '/cardano' : 'https://api.koios.rest/api/v1';
-  const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-  return walletFetchJson(base + path + qs, {}, 25000);
+async function blockfrostGet(path, apiKey) {
+  const base = PROXY_BASE ? PROXY_BASE + '/cardano' : 'https://cardano-mainnet.blockfrost.io/api/v0';
+  const headers = (!PROXY_BASE && apiKey) ? { project_id: apiKey } : {};
+  const opts = Object.keys(headers).length ? { headers } : {};
+  return walletFetchJson(base + path, opts, 25000);
 }
 
 function cardanoHexToText(hex) {
@@ -2715,17 +2716,23 @@ function cardanoHexToText(hex) {
 }
 
 async function fetchCardanoTransactions(address, apiKey, onProgress) {
-  if (!PROXY_BASE) throw new Error(t('walletCardanoKeyRequired'));
+  if (!PROXY_BASE && !apiKey) throw new Error(t('walletCardanoKeyRequired'));
   const txRows = [];
   const seenHashes = new Set();
 
-  const rows = await koiosGet('/address_txs', { _address:address });
-  (Array.isArray(rows) ? rows : []).forEach(row => {
-    if (row && row.tx_hash && !seenHashes.has(row.tx_hash)) {
-      seenHashes.add(row.tx_hash);
-      txRows.push(row);
-    }
-  });
+  for (let page = 1; page <= 3; page++) {
+    const batch = await blockfrostGet('/addresses/' + encodeURIComponent(address) + '/transactions?order=asc&page=' + page + '&count=100', apiKey);
+    const rows = Array.isArray(batch) ? batch : [];
+    rows.forEach(row => {
+      const h = row.tx_hash || row.hash;
+      if (h && !seenHashes.has(h)) {
+        seenHashes.add(h);
+        txRows.push({ tx_hash:h, block_time: row.block_time || 0, block_height: row.block_height || 0 });
+      }
+    });
+    if (rows.length < 100) break;
+    if (onProgress) onProgress(page * 100, 300);
+  }
 
   const selectedRows = txRows.slice(0, 300).sort((a,b) =>
     finiteNumber(a.block_time, 0) - finiteNumber(b.block_time, 0));
@@ -2736,8 +2743,8 @@ async function fetchCardanoTransactions(address, apiKey, onProgress) {
     const batch = selectedRows.slice(start, start + 6);
     const details = await Promise.all(batch.map(async row => {
       try {
-        const list = await koiosGet('/tx_info', { _tx_hash:row.tx_hash });
-        return Array.isArray(list) ? list[0] : null;
+        const data = await blockfrostGet('/txs/' + row.tx_hash + '/utxos', apiKey);
+        return data;
       } catch (error) {
         console.warn('Cardano transaction skipped', row.tx_hash, error);
         return null;
@@ -2745,44 +2752,53 @@ async function fetchCardanoTransactions(address, apiKey, onProgress) {
     }));
 
     batch.forEach((row, batchIndex) => {
-      const tx = details[batchIndex];
-      if (!tx) return;
+      const data = details[batchIndex];
+      if (!data) return;
       const timeMs = (finiteNumber(row.block_time, 0) || Math.floor(Date.now() / 1000)) * 1000;
       let adaDelta = 0;
       const assetDelta = Object.create(null);
-      const applyLeg = (leg, sign) => {
-        if (!leg || String(leg.address || '') !== address) return;
-        const lovelace = finiteNumber(leg.value, 0);
-        if (lovelace) adaDelta += sign * bigIntToAmount(String(lovelace), 6);
-        (Array.isArray(leg.asset_list) ? leg.asset_list : []).forEach(asset => {
-          const unit = String(asset.policy_id || '') + String(asset.asset_name || '');
-          const qty = finiteNumber(asset.quantity, 0);
-          if (unit) assetDelta[unit] = (assetDelta[unit] || 0) + sign * qty;
+      const applyAmounts = (amounts, sign) => {
+        (Array.isArray(amounts) ? amounts : []).forEach(entry => {
+          const unit = String(entry.unit || '');
+          const qty = entry.quantity;
+          if (unit === 'lovelace') {
+            const lovelace = finiteNumber(qty, 0);
+            if (lovelace) adaDelta += sign * bigIntToAmount(String(lovelace), 6);
+          } else {
+            const qtyNum = finiteNumber(qty, 0);
+            if (unit && Math.abs(qtyNum) >= LOT_QTY_EPSILON) assetDelta[unit] = (assetDelta[unit] || 0) + sign * qtyNum;
+          }
         });
       };
-      (Array.isArray(tx.inputs) ? tx.inputs : []).forEach(input => applyLeg(input, -1));
-      (Array.isArray(tx.outputs) ? tx.outputs : []).forEach(output => applyLeg(output, 1));
+      const applyLeg = (leg, sign) => {
+        if (!leg || String(leg.address || '') !== address) return;
+        applyAmounts(leg.amount, sign);
+      };
+      (Array.isArray(data.inputs) ? data.inputs : []).forEach(input => applyLeg(input, -1));
+      (Array.isArray(data.outputs) ? data.outputs : []).forEach(output => applyLeg(output, 1));
       if (Math.abs(adaDelta) >= LOT_QTY_EPSILON) pushWalletGroup(groups, timeMs, row.tx_hash, { coin:'ADA', change:adaDelta });
       Object.keys(assetDelta).forEach(unit => {
         if (Math.abs(assetDelta[unit]) >= LOT_QTY_EPSILON) {
-          assetUnits.add(unit);
-          pushWalletGroup(groups, timeMs, row.tx_hash, { coin:'CARDANO_UNIT:' + unit, change:assetDelta[unit] });
+          assetUnits.add(unit.toLowerCase());
+          pushWalletGroup(groups, timeMs, row.tx_hash, { coin:'CARDANO_UNIT:' + unit.toLowerCase(), change:assetDelta[unit] });
         }
       });
     });
     if (onProgress) onProgress(Math.min(start + 6, selectedRows.length), selectedRows.length);
   }
 
-  const unitInfo = Object.create(null);
   await Promise.all(Array.from(assetUnits).slice(0, 40).map(async unit => {
     try {
-      const policyId = unit.slice(0, 56);
-      const assetName = unit.slice(56);
-      const list = await koiosGet('/asset_metadata', { _asset_policy:policyId, _asset_name:assetName });
-      const meta = (Array.isArray(list) ? list[0] : null);
-      const reg = (meta && meta.token_registry_metadata) || {};
-      const label = reg.ticker || reg.name || cardanoHexToText(assetName);
+      const info = await blockfrostGet('/assets/' + unit, apiKey);
+      const meta = (info && info.metadata) || {};
+      const onchain = (info && info.onchain_metadata) || {};
+      const ticker = meta.ticker || onchain.ticker || meta.name || onchain.name;
+      const label = ticker || cardanoHexToText(unit.slice(56));
       if (label) walletTokenSymbols['cardano:' + unit] = normalizeCoinSymbol(label);
+      const decRaw = meta.decimals ?? onchain.decimals;
+      if (decRaw != null) {
+        // decimals are used only for display; keep symbol mapping
+      }
     } catch (error) { console.warn('Cardano asset metadata skipped', unit, error); }
   }));
   saveWalletTokenSymbols();
@@ -2794,7 +2810,7 @@ async function fetchCardanoTransactions(address, apiKey, onProgress) {
   }));
 
   const events = assignWalletOperations(groups).flatMap(({ group, rows }) => rows);
-  return { events, partial:txRows.length >= 500 };
+  return { events, partial:txRows.length >= 300 };
 }
 
 const XRPL_ENDPOINTS = [
