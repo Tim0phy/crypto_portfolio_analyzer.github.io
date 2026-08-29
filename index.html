@@ -777,7 +777,7 @@ let walletApiKeys = { etherscan:'', blockfrost:'' };
 // Set to '' to disable the proxy and use direct APIs with your own keys.
 // In the proxy-only setup (static site on GitHub Pages), this must be the
 // absolute worker URL, e.g. https://crypto-portfolio-proxy.<subdomain>.workers.dev/api
-const PROXY_BASE = 'crypto-portfolio-proxy.timophychanhy.workers.dev/api';
+const PROXY_BASE = 'https://crypto-portfolio-proxy.timophychanhy.workers.dev/api';
 
 let LANG = 'zh'; try { LANG = localStorage.getItem('portfolioLang') || 'zh'; } catch(e) {}
 let THEME = 'dark'; try { THEME = localStorage.getItem('portfolioTheme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); } catch(e) {}
