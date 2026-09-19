@@ -28,8 +28,13 @@ const EXPLORERS = {
 
 const BLOCKFROST = 'https://cardano-mainnet.blockfrost.io/api/v0';
 
-// TODO: Replace with your deployed site origin, e.g. https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO/
-// This origin lock returns 403 for any site not on your allowlist, so the public Worker URL cannot be abused.
+// Set this to your deployed site origin, e.g. https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO/
+// This returns 403 for any site not on your allowlist as a best-effort gate.
+// Origin/Referer are client-controlled and can be forged by server-side callers,
+// so rely on the allowlisted upstream hosts, param filtering, MAX_BODY_SIZE and
+// per-IP rate limiting as the hard limits. CORS is locked to ALLOWED_ORIGIN (not
+// '*') so browser third-party JS cannot read responses even if the header gate is
+// bypassed.
 const ALLOWED_ORIGIN = 'https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPO/';
 
 function isAllowedOrigin(request) {
@@ -54,9 +59,10 @@ const buckets = new Map();
 
 function corsHeaders() {
   return {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'content-type'
+    'Access-Control-Allow-Headers': 'content-type',
+    'Vary': 'Origin'
   };
 }
 

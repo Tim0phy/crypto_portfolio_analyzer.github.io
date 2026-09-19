@@ -135,6 +135,8 @@ a { color:var(--accent); }
 .form-field label { display:block; font-size:12px; font-weight:600; color:var(--text-2); margin-bottom:6px; }
 .form-field input, .form-field select { width:100%; background:var(--surface-2); border:1px solid var(--border-strong); color:var(--text); border-radius:8px; padding:9px 10px; font-size:13px; font-family:inherit; }
 .form-field input:focus, .form-field select:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--ring); }
+#costMethodCard .form-field { min-width:min(280px,100%); }
+#costMethodDesc { line-height:1.7; }
 .form-actions { display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
 .api-key-row { display:flex; gap:10px; align-items:center; margin-top:14px; }
 .api-key-input { flex:1 1 260px; background:var(--surface-2); border:1px solid var(--border-strong); color:var(--text); border-radius:8px; padding:9px 10px; font-size:13px; font-family:inherit; }
@@ -425,20 +427,23 @@ a { color:var(--accent); }
         <h3 class="card-title" data-i18n="walletTitle">鏈上錢包追蹤</h3>
         <p class="card-subtitle" data-i18n="walletSubtitle">加入公開錢包地址，讓轉出到自託管錢包的資產繼續進入同一個 Portfolio。</p>
       </div>
-      <button id="refreshWalletsBtn" class="btn btn-secondary" type="button" style="display:none;" data-i18n="refreshWallets">更新全部錢包</button>
+      <div class="action-row">
+        <button id="refreshLinkedBtn" class="btn btn-secondary" type="button" style="display:none;" data-i18n="refreshLinked">只更新已連結錢包</button>
+        <button id="refreshWalletsBtn" class="btn btn-secondary" type="button" style="display:none;" data-i18n="refreshWallets">更新全部錢包</button>
+      </div>
     </div>
 
     <div class="form-grid">
       <div class="form-field">
-        <label for="walletNetwork">網絡</label>
+        <label for="walletNetwork" data-i18n="walletNetworkLabel">網絡</label>
         <select id="walletNetwork"></select>
       </div>
       <div class="form-field">
-        <label for="walletAddress">錢包地址</label>
+        <label for="walletAddress" data-i18n="walletAddressLabel">錢包地址</label>
         <input id="walletAddress" type="text" autocomplete="off" spellcheck="false" placeholder="bc1... / 0x... / Solana address">
       </div>
       <div class="form-field">
-        <label for="walletLabel">名稱（選填）</label>
+        <label for="walletLabel" data-i18n="walletNameLabel">名稱（選填）</label>
         <input id="walletLabel" type="text" maxlength="40" autocomplete="off" placeholder="Ledger / Phantom">
       </div>
     </div>
@@ -479,7 +484,26 @@ a { color:var(--accent); }
       </table>
     </div>
 
-    <div class="footnote" data-i18n="walletFootnote">支援 Bitcoin、Ethereum、BNB Chain、Polygon、Arbitrum、Optimism、Base、Avalanche C-Chain、Solana、Cardano 及 XRP Ledger。鏈上買入/賣出、幣幣兌換、Gas 費與代幣轉帳會轉成 FIFO 帳本；若外部入帳沒有交易所紀錄或穩定幣支付配對，成本基礎會以 0 計算。與已匯入 Binance 提幣金額和時間相符的鏈上入帳會自動對沖，避免同一筆資產重複計算。</div>
+    <div class="table-wrap" id="linkTableWrap" style="display:none; margin-top:16px;">
+      <table>
+        <thead>
+          <tr>
+            <th data-i18n="linkColTime">提幣時間</th>
+            <th data-i18n="linkColCoin">幣種</th>
+            <th data-i18n="linkColQty">提幣數量</th>
+            <th data-i18n="linkColAddress">錢包地址</th>
+            <th data-i18n="linkColTxid">鏈上交易</th>
+            <th data-i18n="linkColGap">時差</th>
+            <th data-i18n="linkColDiff">數量差</th>
+            <th data-i18n="linkColStatus">狀態</th>
+          </tr>
+        </thead>
+        <tbody id="withdrawalLinksBody"></tbody>
+      </table>
+    </div>
+    <div class="footnote" id="linkEmptyNote" style="display:none;" data-i18n="linkEmpty">暫無已對帳的提幣。加入錢包地址並同步後，24 小時內、數量相差 0.2% 以內的提幣與鏈上入帳會自動連結並結轉成本。</div>
+
+    <div class="footnote" data-i18n="walletFootnote">支援 Bitcoin、Ethereum、BNB Chain、Polygon、Arbitrum、Optimism、Base、Avalanche C-Chain、Solana、Cardano 及 XRP Ledger。鏈上買入/賣出、幣幣兌換、手續費與代幣轉帳會轉成 FIFO 帳本；提幣後 24 小時內、數量相差 0.2% 以內的鏈上入帳會自動連結並結轉原有成本，之後鏈上賣出可計已實現盈虧；未連結的外部入帳成本基礎為 0。已連結錢包（★）會優先同步。</div>
   </div>
 
   <div id="resultsSection" style="display:none;">
@@ -505,6 +529,28 @@ a { color:var(--accent); }
         <button id="exportCsvBtn" class="btn btn-secondary" type="button" data-i18n="exportCsv">匯出 CSV</button>
         <button id="exportPngBtn" class="btn btn-secondary" type="button" data-i18n="exportPng">匯出 PNG 報告</button>
       </div>
+    </div>
+
+    <div class="card" id="costMethodCard">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title" data-i18n="costMethodTitle">成本基礎計法</h3>
+          <p class="card-subtitle" data-i18n="costMethodSubtitle">選擇賣出時用哪批買入成本計算盈虧（影響已實現盈虧與報稅數字）</p>
+        </div>
+        <div class="action-row">
+          <div class="form-field">
+            <label for="costMethodSelect" data-i18n="costMethodLabel">計法</label>
+            <select id="costMethodSelect">
+              <option value="ACB" data-i18n="costMethodName_ACB">平均成本法 (ACB)</option>
+              <option value="FIFO" data-i18n="costMethodName_FIFO">先進先出 (FIFO)</option>
+              <option value="LIFO" data-i18n="costMethodName_LIFO">後進先出 (LIFO)</option>
+              <option value="HIFO" data-i18n="costMethodName_HIFO">最高成本優先 (HIFO)</option>
+              <option value="SECTION104" data-i18n="costMethodName_SECTION104">共享資金池 (UK Section 104)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="footnote" id="costMethodDesc" data-i18n="costMethodDesc_ACB" style="margin-top:0;"></div>
     </div>
 
     <div class="card">
@@ -771,6 +817,22 @@ let exchangeRows = [];
 let walletAccounts = [];
 let walletLedgerRows = [];
 let walletApiKeys = { etherscan:'', blockfrost:'' };
+let withdrawalLinks = [];
+// Auto-link policy (user-confirmed): 24h forward window + 0.2% quantity tolerance.
+const WITHDRAW_LINK_WINDOW_MS = 24 * 3600000;
+const WITHDRAW_LINK_TOLERANCE = 0.002;
+
+// Cost-basis methods selectable by the user (selector lives in the card above
+// the yearly realized P/L table). ACB is the default; SECTION104 is the UK
+// HMRC shared-pool method with same-day + 30-day matching.
+const COST_METHODS = ['ACB','FIFO','LIFO','HIFO','SECTION104'];
+const COST_METHOD_STORAGE_KEY = 'portfolioCostMethod';
+let currentCostMethod = 'ACB';
+try {
+    const savedCostMethod = localStorage.getItem(COST_METHOD_STORAGE_KEY);
+    if (COST_METHODS.includes(savedCostMethod)) currentCostMethod = savedCostMethod;
+} catch (e) {}
+function costMethodName(method) { return t('costMethodName_' + method); }
 
 // Base path for the cloud proxy (Cloudflare Worker). When set, EVM and Cardano
 // are fetched through it (keyless: Blockscout for EVM, Koios for Cardano).
@@ -805,21 +867,34 @@ const I18N = {
     summaryRealizedLabel:'累計已實現盈虧', summaryTotalLabel:'總盈虧',
     yearlyPnlTitle:'年度已實現盈虧（報稅參考）', colYear:'年份', colRealizedYear:'已實現盈虧 (USD)',
     yearSubtotal:'{year} 小計', yearGrandTotal:'累計', yearlyPnlEmpty:'目前沒有可顯示的已實現盈虧紀錄（未偵測到 Transaction Sold 事件）。',
-    yearlyPnlNote:'以 FIFO 先進先出法計算每次賣出的已實現盈虧，並按賣出年份分組；每年小計與累計總額可作報稅參考。',
+    yearlyPnlNote:'按上方所選成本計法計算每次賣出的已實現盈虧，並按賣出年份分組；每年小計與累計總額可作報稅參考。',
+    costMethodTitle:'成本基礎計法', costMethodSubtitle:'選擇賣出時用哪批買入成本計算盈虧（影響已實現盈虧與報稅數字）', costMethodLabel:'計法',
+    costMethodName_ACB:'平均成本法 (ACB)', costMethodName_FIFO:'先進先出 (FIFO)', costMethodName_LIFO:'後進先出 (LIFO)', costMethodName_HIFO:'最高成本優先 (HIFO)', costMethodName_SECTION104:'共享資金池 (UK Section 104)',
+    costMethodDesc_ACB:'平均成本法：同一資產所有買入成本加總除以總持有數量；每次再買入重算均值，賣出本身不改變均值。加拿大 CRA 強制方法，也是最簡化的算法。',
+    costMethodDesc_FIFO:'先進先出：假設最早買入的最先賣出。牛市中已實現利得通常偏高；為美國預設及多數司法管轄區常用方法。',
+    costMethodDesc_LIFO:'後進先出：假設最近買入的最先賣出。幣價上漲時已實現利得較小、可遞延稅款，但帳上會留下最早的低成本批次，日後利得更大。',
+    costMethodDesc_HIFO:'最高成本優先：不論時間、優先賣出成本最高的批次，把已實現利得壓到最低；屬於稅務優化選項，但部分稅務機關（如英國 HMRC）不承認。',
+    costMethodDesc_SECTION104:'共享資金池（英國 HMRC 強制）：同種代幣成本併入單一資金池按加權平均計價；處置先配對同日買賣，再配對賣出後 30 天內回購，剩餘才用池均值。日期以 UTC 日曆日劃分。',
+    costMethodRecalculated:'已按 {method} 重新計算，共 {n} 筆交易。',
     reportHoldingsTitle:'持倉明細', reportFooter:'資料來源：CoinGecko · 本報告由 Crypto Portfolio Analyzer 產生',
     costLabel:'累計成本基礎', valueLabel:'市值',
     eventsBuyLabel:'買入事件', eventsSellLabel:'賣出事件', tooltipEventBuy:'買入', tooltipEventSell:'賣出', perCoinCostLabel:'{coin} 成本',
-    footnote:'說明：持倉數量 = 該幣種所有紀錄變動量加總（含買入、賣出、手續費、空投、獎勵等），與交易所實際餘額應一致。成本基礎採用時間排序的 FIFO 帳本：同一秒內的 Transaction Buy 與穩定幣 Transaction Spend 互相配對，賣出、提幣或幣幣轉換會扣減剩餘成本；穩定幣存款視為現金本金，成本基礎為面額，非穩定幣單純存入或空投成本基礎為 0。已實現盈虧以 FIFO 淨收入減去被消耗批次的成本計算。重複上載完全相同的檔案會被自動偵測並略過（採用整份檔案內容比對，而非逐行比對）。若市價更新失敗且該幣種沒有任何先前成功抓取的快取價格，畫面會以 ⚠ 標示並顯示「(N/A)」，代表該筆市值暫時以 $0 計算，並非真實市值。此工具所有計算均在您的瀏覽器本機完成；除了向 CoinGecko 查詢公開幣價（只傳送幣種代號）外，不會上傳任何資料；分析結果會儲存在本機瀏覽器（localStorage）方便下次開啟直接查看。',
+    footnote:'說明：持倉數量 = 該幣種所有紀錄變動量加總（含買入、賣出、手續費、空投、獎勵等），與交易所實際餘額應一致。成本基礎按上方所選計法（平均成本 / FIFO / LIFO / HIFO / 英國 Section 104）計算：同一秒內的 Transaction Buy 與穩定幣 Transaction Spend 互相配對，賣出、提幣或幣幣轉換會扣減剩餘成本；穩定幣存款視為現金本金，成本基礎為面額，非穩定幣單純存入或空投成本基礎為 0。已實現盈虧以所選計法的淨收入減去被消耗批次的成本計算。重複上載完全相同的檔案會被自動偵測並略過（採用整份檔案內容比對，而非逐行比對）。若市價更新失敗且該幣種沒有任何先前成功抓取的快取價格，畫面會以 ⚠ 標示並顯示「(N/A)」，代表該筆市值暫時以 $0 計算，並非真實市值。此工具所有計算均在您的瀏覽器本機完成；除了向 CoinGecko 查詢公開幣價（只傳送幣種代號）外，不會上傳任何資料；分析結果會儲存在本機瀏覽器（localStorage）方便下次開啟直接查看。',
     statusParsing:'正在解析檔案...', statusParsed:'已解析 {n} 筆交易，正在讀取即時市價...',
     statusUpdating:'正在更新市價...', statusDone:'完成！共分析 {n} 筆交易，涵蓋 {c} 種幣種。',
     statusPriceFail:'已分析 {n} 筆交易，但市價更新失敗，使用先前的價格。', statusPricesUpdated:'市價已更新。', statusPricesFail:'市價更新失敗，使用先前的價格。',
     statusLoadingChart:'正在計算歷史走勢...', statusChartUpdated:'走勢圖已更新。',
     statusMerged:'已合併 {n} 個新檔案，共 {r} 筆交易。', statusRestored:'已從本機儲存中還原分析結果。',
     walletTitle:'鏈上錢包追蹤', walletSubtitle:'加入公開錢包地址，讓轉出到自託管錢包的資產繼續進入同一個 Portfolio。',
-    refreshWallets:'更新全部錢包', saveKey:'儲存', addWallet:'加入並同步',
+    refreshWallets:'更新全部錢包', refreshLinked:'只更新已連結錢包', saveKey:'儲存', addWallet:'加入並同步',
+    linkedBadge:'已連結提幣對帳，優先同步', linkStatusAuto:'自動連結',
+    linkColTime:'提幣時間', linkColCoin:'幣種', linkColQty:'提幣數量', linkColAddress:'錢包地址',
+    linkColTxid:'鏈上交易', linkColGap:'時差', linkColDiff:'數量差', linkColStatus:'狀態',
+    linkEmpty:'暫無已對帳的提幣。加入錢包地址並同步後，24 小時內、數量相差 0.2% 以內的提幣與鏈上入帳會自動連結並結轉成本。',
     walletApiKeyTitle:'EVM / Cardano API 金鑰', walletApiKeyHint:'部署雲端 proxy（Cloudflare Worker）後，EVM 經 Blockscout、Cardano 經 Koios 查詢，均無需 API key。若未部署 proxy，可自行輸入 Etherscan key 作備用。', walletProxyNote:'已連接雲端 proxy：EVM / Cardano 直接查詢，無須輸入 API key。',
     walletCardanoKeyRequired:'Cardano 需要透過雲端 proxy（Cloudflare Worker）讀取 Koios 數據；請部署 proxy 後使用。',
     walletColName:'名稱', walletColNetwork:'網絡', walletColAddress:'地址', walletColEvents:'事件數', walletColSynced:'最後同步',
+    walletNetworkLabel:'網絡', walletAddressLabel:'錢包地址', walletNameLabel:'名稱（選填）',
     walletRemove:'移除', walletSync:'同步', walletRequired:'請選擇網絡並輸入錢包地址。', walletInvalidAddress:'地址格式與所選網絡不符。',
     walletDuplicate:'這個地址已在追蹤清單中。', walletLimitReached:'最多可追蹤 {n} 個錢包地址。',
     walletEvmKeyRequired:'EVM 網絡需要免費 Etherscan API 金鑰。請展開「EVM / Cardano API 金鑰」後輸入。',
@@ -828,7 +903,7 @@ const I18N = {
     walletLimitedSynced:'已同步 {n} 筆可取得的鏈上事件；此資料來源目前只回傳部分歷史。',
     walletSyncFailed:'錢包同步失敗：{message}', walletNoEvents:'此地址沒有找到可分析的鏈上事件。',
     walletKeySaved:'API 金鑰已儲存在本機加密狀態中。', walletAccountRemoved:'已移除錢包並重新計算 Portfolio。',
-    walletFootnote:'支援 Bitcoin、Ethereum、BNB Chain、Polygon、Arbitrum、Optimism、Base、Avalanche C-Chain、Solana、Cardano 及 XRP Ledger。鏈上買入/賣出、幣幣兌換、手續費與代幣轉帳會轉成 FIFO 帳本；若外部入帳沒有交易所紀錄或支付配對，成本基礎會以 0 計算。與已匯入 Binance 提幣金額和時間相符的鏈上入帳會自動對沖，避免重複計算。',
+    walletFootnote:'支援 Bitcoin、Ethereum、BNB Chain、Polygon、Arbitrum、Optimism、Base、Avalanche C-Chain、Solana、Cardano 及 XRP Ledger。鏈上買入/賣出、幣幣兌換、手續費與代幣轉帳會轉成所選成本計法的帳本；提幣後 24 小時內、數量相差 0.2% 以內的鏈上入帳會自動連結並結轉原有成本，之後鏈上賣出可計已實現盈虧；未連結的外部入帳成本基礎為 0。已連結錢包（★）會優先同步。',
     statusExported:'已匯出 CSV 檔案。', statusPngExported:'已匯出 PNG 報告。',
     statusFileTooLarge:'檔案過大：{name}（上限 50 MB）', statusTotalTooLarge:'檔案總大小過大（上限 200 MB）', statusTooManyFiles:'一次最多上載 {n} 個檔案', statusTooManyRows:'交易筆數過多（上限 {n} 筆），請分批上載或縮小範圍',
     home:'首頁',
@@ -836,7 +911,7 @@ const I18N = {
     landingTitleA:'你的幣安交易紀錄，', landingTitleB:'一頁清晰持倉。',
     landingSub:'把 Binance 匯出的交易紀錄 CSV 拖入瀏覽器，即時重構持倉、成本基礎與盈虧——所有計算 100% 在您的瀏覽器本機完成，資料不會上傳（僅向 CoinGecko 查詢公開幣價）。',
     landingCtaStart:'開始分析', landingCtaMore:'了解更多',
-    landingStripLocal:'100% 本機運算', landingStripMerge:'多檔案自動合併', landingStripPnl:'FIFO 已實現盈虧',
+    landingStripLocal:'100% 本機運算', landingStripMerge:'多檔案自動合併', landingStripPnl:'已實現盈虧',
     landingPreviewTitle:'持倉總覽',
     landingStatValue:'總市值', landingStatCost:'總成本基礎', landingStatPnl:'未實現盈虧', landingStatRealized:'累計已實現盈虧',
     landingFeaturesTitle:'為什麼用 Crypto Portfolio Analyzer？',
@@ -845,7 +920,7 @@ const I18N = {
     featHoldingsTitle:'準確持倉計算', featHoldingsDesc:'將每筆 Change 加總，與交易所真實餘額對齊，手續費、空投與獎勵全部計入。',
     featCostTitle:'成本基礎配對', featCostDesc:'同一秒內的 Buy 與 Spend 自動配對並按比例分攤成本，避免第三方工具誤判 Launchpool 等交易。',
     featChartTitle:'實時市價與圖表', featChartDesc:'CoinGecko 現價，配合成本基礎 vs 市值增長圖與持倉分佈圖，走勢一目了然。',
-    featPnlTitle:'已實現盈虧與年度總結', featPnlDesc:'以 FIFO 計算每次賣出的已實現盈虧，並按年份分組，方便報稅參考。',
+    featPnlTitle:'已實現盈虧與年度總結', featPnlDesc:'以自選成本計法計算每次賣出的已實現盈虧，並按年份分組，方便報稅參考。',
     featPrivacyTitle:'私隱至上，無需註冊', featPrivacyDesc:'全部在本機瀏覽器運算；除向 CoinGecko 查詢公開幣價（只傳送幣種代號）外，不會上傳任何資料；結果存入本機儲存，下次自動還原。',
     landingStepsTitle:'三步開始', landingStepsSub:'從 Binance 匯出到完整分析，只需幾分鐘。',
     step1Title:'匯出交易紀錄', step1Desc:'在 Binance「訂單 → 資產記錄 → 交易記錄」匯出 CSV 檔案。',
@@ -882,21 +957,34 @@ const I18N = {
     summaryRealizedLabel:'Cumulative Realized P/L', summaryTotalLabel:'Total P/L',
     yearlyPnlTitle:'Realized P/L by Year (Tax Reference)', colYear:'Year', colRealizedYear:'Realized P/L (USD)',
     yearSubtotal:'{year} Subtotal', yearGrandTotal:'Total', yearlyPnlEmpty:'No realized P/L records to show (no Transaction Sold events detected).',
-    yearlyPnlNote:'FIFO realized P/L on every sale, grouped by the sale year; yearly subtotals and the cumulative total are provided for tax reference.',
+    yearlyPnlNote:'Realized P/L on every sale under the cost method selected above, grouped by the sale year; yearly subtotals and the cumulative total are provided for tax reference.',
+    costMethodTitle:'Cost Basis Method', costMethodSubtitle:'Choose which purchase lots fund each disposal (affects realized P/L and tax figures)', costMethodLabel:'Method',
+    costMethodName_ACB:'Average Cost (ACB)', costMethodName_FIFO:'First-In, First-Out (FIFO)', costMethodName_LIFO:'Last-In, First-Out (LIFO)', costMethodName_HIFO:'Highest-In, First-Out (HIFO)', costMethodName_SECTION104:'Shared Pool (UK Section 104)',
+    costMethodDesc_ACB:'Average cost: all purchase costs of an asset are pooled into one average unit cost, re-averaged on each buy; selling never changes the average. Mandatory under Canada CRA and the simplest method.',
+    costMethodDesc_FIFO:'First-in, first-out: the oldest lots sell first. Gains are usually higher in rising markets; the US default and widely used.',
+    costMethodDesc_LIFO:'Last-in, first-out: the newest lots sell first. Defers tax in rising markets but leaves the oldest low-cost lots on the books, enlarging later gains.',
+    costMethodDesc_HIFO:'Highest-in, first-out: always sells the highest-cost lots first to minimize gains; a tax-optimization pick that some authorities (e.g. UK HMRC) do not recognize.',
+    costMethodDesc_SECTION104:'Shared pool (UK HMRC mandatory): same-token costs merge into one pool at weighted-average cost; disposals match same-day buys first, then repurchases within 30 days after the sale, then the pool average. Days are UTC calendar days.',
+    costMethodRecalculated:'Recalculated with {method}: {n} transactions.',
     reportHoldingsTitle:'Holdings', reportFooter:'Data source: CoinGecko · Generated by Crypto Portfolio Analyzer',
     costLabel:'Cumulative Cost Basis', valueLabel:'Market Value',
     eventsBuyLabel:'Buy events', eventsSellLabel:'Sell events', tooltipEventBuy:'Buy', tooltipEventSell:'Sell', perCoinCostLabel:'{coin} cost',
-    footnote:'Note: Amount = sum of all recorded changes for a coin (buys, sells, fees, airdrops, rewards, etc.), should match your exchange balance. Cost basis uses chronological FIFO lots: same-second Transaction Buy rows pair with stablecoin Transaction Spend rows, and sales, withdrawals, or crypto swaps reduce remaining cost. Stablecoin deposits are cash principal at face value; non-stablecoin deposits and airdrops have no purchase cost, so their cost basis is 0. Realized P/L is net FIFO proceeds minus consumed lot cost; third-asset fees use the fee asset\'s FIFO cost. Re-uploading the exact same file is auto-detected and skipped (by whole-file content hash, not row-by-row). If a price update fails and a coin has no previously cached price at all, it is flagged with ⚠ and shown as "(N/A)" — meaning its market value is temporarily $0, not a real value. All calculations run locally in your browser; apart from public CoinGecko price lookups (which transmit coin symbols only), nothing is uploaded. Results are saved to your browser (localStorage) for next time.',
+    footnote:'Note: Amount = sum of all recorded changes for a coin (buys, sells, fees, airdrops, rewards, etc.), should match your exchange balance. Cost basis follows the method selected above (Average Cost / FIFO / LIFO / HIFO / UK Section 104): same-second Transaction Buy rows pair with stablecoin Transaction Spend rows, and sales, withdrawals, or crypto swaps reduce remaining cost. Stablecoin deposits are cash principal at face value; non-stablecoin deposits and airdrops have no purchase cost, so their cost basis is 0. Realized P/L is net proceeds minus consumed lot cost under the selected method; third-asset fees use the fee asset\'s cost under the selected method. Re-uploading the exact same file is auto-detected and skipped (by whole-file content hash, not row-by-row). If a price update fails and a coin has no previously cached price at all, it is flagged with ⚠ and shown as "(N/A)" — meaning its market value is temporarily $0, not a real value. All calculations run locally in your browser; apart from public CoinGecko price lookups (which transmit coin symbols only), nothing is uploaded. Results are saved to your browser (localStorage) for next time.',
     statusParsing:'Parsing file...', statusParsed:'Parsed {n} transactions, fetching live prices...',
     statusUpdating:'Updating prices...', statusDone:'Done! Analyzed {n} transactions across {c} coins.',
     statusPriceFail:'Analyzed {n} transactions, but price update failed — using previous prices.', statusPricesUpdated:'Prices updated.', statusPricesFail:'Price update failed — using previous prices.',
     statusLoadingChart:'Loading historical prices to build the growth chart...', statusChartUpdated:'Growth chart updated.',
     statusMerged:'Merged {n} new file(s), {r} transactions total.', statusRestored:'Restored analysis from local storage.',
     walletTitle:'On-chain wallets', walletSubtitle:'Add public wallet addresses so self-custody assets remain part of the same portfolio.',
-    refreshWallets:'Refresh all wallets', saveKey:'Save', addWallet:'Add & sync',
+    refreshWallets:'Refresh all wallets', refreshLinked:'Refresh linked wallets only', saveKey:'Save', addWallet:'Add & sync',
+    linkedBadge:'Linked to a reconciled withdrawal; synced first', linkStatusAuto:'Auto-linked',
+    linkColTime:'Withdrawal time', linkColCoin:'Coin', linkColQty:'Withdrawal qty', linkColAddress:'Wallet address',
+    linkColTxid:'On-chain tx', linkColGap:'Time gap', linkColDiff:'Qty diff', linkColStatus:'Status',
+    linkEmpty:'No reconciled withdrawals yet. After adding and syncing a wallet, withdrawals matched with an on-chain receipt within 24h and 0.2% quantity tolerance are auto-linked with cost carryover.',
     walletApiKeyTitle:'EVM / Cardano API key', walletApiKeyHint:'With the cloud proxy (Cloudflare Worker), EVM uses Blockscout and Cardano uses Koios — no API key needed. Without the proxy you may paste an Etherscan key as fallback.', walletProxyNote:'Cloud proxy active: EVM/Cardano are queried directly, no API key required.',
     walletCardanoKeyRequired:'Cardano reads Koios through the cloud proxy (Cloudflare Worker). Deploy the proxy to use it.',
     walletColName:'Name', walletColNetwork:'Network', walletColAddress:'Address', walletColEvents:'Events', walletColSynced:'Last synced',
+    walletNetworkLabel:'Network', walletAddressLabel:'Wallet address', walletNameLabel:'Name (optional)',
     walletRemove:'Remove', walletSync:'Sync', walletRequired:'Select a network and enter a wallet address.', walletInvalidAddress:'The address format does not match the selected network.',
     walletDuplicate:'This address is already being tracked.', walletLimitReached:'A maximum of {n} wallets can be tracked.',
     walletEvmKeyRequired:'EVM networks require a free Etherscan API key. Expand "EVM / Cardano API key" and paste it.',
@@ -905,7 +993,7 @@ const I18N = {
     walletLimitedSynced:'Synced {n} available on-chain events; this data source currently returns only part of the history.',
     walletSyncFailed:'Wallet sync failed: {message}', walletNoEvents:'No analyzable on-chain events were found for this address.',
     walletKeySaved:'API key saved in encrypted local state.', walletAccountRemoved:'Wallet removed and portfolio recalculated.',
-    walletFootnote:'Supports Bitcoin, Ethereum, BNB Chain, Polygon, Arbitrum, Optimism, Base, Avalanche C-Chain, Solana, Cardano, and the XRP Ledger. On-chain buys, sells, swaps, fees, and token transfers enter the same FIFO ledger; external inflows without an exchange record or payment leg have zero cost. Matching Binance withdrawals and on-chain receipts are reconciled to avoid double counting.',
+    walletFootnote:'Supports Bitcoin, Ethereum, BNB Chain, Polygon, Arbitrum, Optimism, Base, Avalanche C-Chain, Solana, Cardano, and the XRP Ledger. On-chain buys, sells, swaps, fees, and token transfers enter the same cost-basis ledger using the selected method; on-chain receipts within 24h and 0.2% of a Binance withdrawal are auto-linked with cost carryover so later on-chain sales keep realized P/L; unlinked external inflows have zero cost. Linked wallets (★) sync first.',
     statusExported:'CSV exported.', statusPngExported:'PNG report exported.',
     statusFileTooLarge:'File too large: {name} (limit 50 MB)', statusTotalTooLarge:'Total file size too large (limit 200 MB)', statusTooManyFiles:'Upload at most {n} files at once', statusTooManyRows:'Too many transactions (limit {n}), please split into smaller files',
     home:'Home',
@@ -913,7 +1001,7 @@ const I18N = {
     landingTitleA:'Turn your Binance history into', landingTitleB:'a clear portfolio view.',
     landingSub:'Drop in your Binance transaction CSV and instantly reconstruct holdings, cost basis, and realized & unrealized P/L — all computed 100% locally in your browser. Nothing is uploaded except public price lookups to CoinGecko.',
     landingCtaStart:'Start Analyzing', landingCtaMore:'Learn More',
-    landingStripLocal:'100% local', landingStripMerge:'Multi-file auto-merge', landingStripPnl:'FIFO realized P/L',
+    landingStripLocal:'100% local', landingStripMerge:'Multi-file auto-merge', landingStripPnl:'Realized P/L',
     landingPreviewTitle:'Portfolio Overview',
     landingStatValue:'Market Value', landingStatCost:'Cost Basis', landingStatPnl:'Unrealized P/L', landingStatRealized:'Realized P/L',
     landingFeaturesTitle:'Why Crypto Portfolio Analyzer?',
@@ -922,7 +1010,7 @@ const I18N = {
     featHoldingsTitle:'Accurate holdings', featHoldingsDesc:'Sums every Change per coin to match your real exchange balance — fees, airdrops, and rewards included.',
     featCostTitle:'Cost basis pairing', featCostDesc:'Same-second Buy and Spend events are paired and allocated proportionally, avoiding third-party misclassification of Launchpool trades.',
     featChartTitle:'Live prices & charts', featChartDesc:'Current prices from CoinGecko, plus cost-basis vs. market-value growth and allocation charts at a glance.',
-    featPnlTitle:'Realized P/L by year', featPnlDesc:'FIFO realized P/L on every sale, grouped by year for easy tax reference.',
+    featPnlTitle:'Realized P/L by year', featPnlDesc:'Realized P/L on every sale under your chosen cost method, grouped by year for easy tax reference.',
     featPrivacyTitle:'Privacy-first, no sign-up', featPrivacyDesc:'Everything runs locally in your browser; apart from CoinGecko price lookups (which transmit coin symbols only), nothing is uploaded. Results are saved locally and restored on your next visit.',
     landingStepsTitle:'Get started in three steps', landingStepsSub:'From Binance export to full analysis in minutes.',
     step1Title:'Export your records', step1Desc:'Export the transaction history CSV from Binance (Orders → Assets History → Transaction History).',
@@ -1057,31 +1145,265 @@ function consumeFifoLots(lots, coin, quantity) {
   return costRemoved;
 }
 
+function isPoolMethod(method) { return method === 'ACB' || method === 'SECTION104'; }
+
 /**
- * Apply one timestamp group to holdings, FIFO lots, and realized P/L.
+ * Get (creating when missing) the average-cost pool entry for a coin.
+ * Pools back ACB and the Section 104 shared pool: { qty, cost }.
+ */
+function getPool(pools, coin) {
+    if (!pools[coin]) pools[coin] = { qty:0, cost:0 };
+    return pools[coin];
+}
+
+function poolAdd(pools, coin, qty, cost) {
+    const p = getPool(pools, coin);
+    p.qty += qty;
+    p.cost += cost;
+}
+
+function poolAvg(pools, coin) {
+    const p = pools ? pools[coin] : null;
+    if (!p || p.qty <= LOT_QTY_EPSILON) return 0;
+    return p.cost / p.qty;
+}
+
+/**
+ * Consume quantity from an average-cost pool (pro-rata). Mirrors the FIFO
+ * lot semantics for shortfalls: only held quantity carries cost away, the
+ * excess is costless, and dust below LOT_QTY_EPSILON is dropped.
+ */
+function poolConsume(pools, coin, quantity) {
+    if (!(Math.abs(quantity) > LOT_QTY_EPSILON)) return 0;
+    const p = pools ? pools[coin] : null;
+    if (!p || p.qty <= LOT_QTY_EPSILON) return 0;
+    const avg = p.cost / p.qty;
+    const take = Math.min(p.qty, Math.abs(quantity));
+    const removed = take * avg;
+    p.qty -= take;
+    p.cost -= removed;
+    if (p.qty <= LOT_QTY_EPSILON) { p.qty = 0; p.cost = 0; }
+    return removed;
+}
+
+function consumeLifoLots(lots, coin, quantity) {
+    if (!lots[coin]) lots[coin] = [];
+    let remaining = Math.abs(quantity);
+    let costRemoved = 0;
+    while (remaining > LOT_QTY_EPSILON && lots[coin].length > 0) {
+        const lot = lots[coin][lots[coin].length - 1];
+        const take = Math.min(lot.qty, remaining);
+        costRemoved += take * lot.unitCost;
+        lot.qty -= take;
+        remaining -= take;
+        if (lot.qty <= LOT_QTY_EPSILON) lots[coin].pop();
+    }
+    return costRemoved;
+}
+
+function consumeHifoLots(lots, coin, quantity) {
+    if (!lots[coin]) lots[coin] = [];
+    let remaining = Math.abs(quantity);
+    let costRemoved = 0;
+    let guard = lots[coin].length + 1;
+    while (remaining > LOT_QTY_EPSILON && lots[coin].length > 0 && guard-- > 0) {
+        let best = -1;
+        for (let i = 0; i < lots[coin].length; i++) {
+            if (lots[coin][i].qty > LOT_QTY_EPSILON
+                && (best < 0 || lots[coin][i].unitCost > lots[coin][best].unitCost)) best = i;
+        }
+        if (best < 0) break;
+        const lot = lots[coin][best];
+        const take = Math.min(lot.qty, remaining);
+        costRemoved += take * lot.unitCost;
+        lot.qty -= take;
+        remaining -= take;
+        if (lot.qty <= LOT_QTY_EPSILON) lots[coin].splice(best, 1);
+    }
+    return costRemoved;
+}
+
+/**
+ * Method-aware lot/pool consumption shared by sales, swaps, withdrawals and
+ * third-asset fees. FIFO keeps the legacy consumeFifoLots path untouched.
+ */
+function consumeLots(lots, pools, coin, quantity, method) {
+    if (method === 'LIFO') return consumeLifoLots(lots, coin, quantity);
+    if (method === 'HIFO') return consumeHifoLots(lots, coin, quantity);
+    if (isPoolMethod(method)) return poolConsume(pools, coin, quantity);
+    return consumeFifoLots(lots, coin, quantity);
+}
+
+/**
+ * Method-aware peek of the unit cost a departure would consume, without
+ * mutating state. Used to carry cost from a withdrawal to its linked
+ * on-chain receipt.
+ */
+function peekUnitCost(lots, pools, coin, quantity, method) {
+    if (method === 'LIFO') {
+        const stack = lots[coin] || [];
+        let remaining = Math.abs(quantity);
+        let cost = 0, taken = 0;
+        for (let i = stack.length - 1; i >= 0 && remaining > LOT_QTY_EPSILON; i--) {
+            const take = Math.min(stack[i].qty, remaining);
+            cost += take * stack[i].unitCost;
+            taken += take;
+            remaining -= take;
+        }
+        return taken > LOT_QTY_EPSILON ? cost / taken : 0;
+    }
+    if (method === 'HIFO') {
+        const sorted = (lots[coin] || []).filter(l => l.qty > LOT_QTY_EPSILON)
+            .slice().sort((a, b) => b.unitCost - a.unitCost);
+        let remaining = Math.abs(quantity);
+        let cost = 0, taken = 0;
+        for (let i = 0; i < sorted.length && remaining > LOT_QTY_EPSILON; i++) {
+            const take = Math.min(sorted[i].qty, remaining);
+            cost += take * sorted[i].unitCost;
+            taken += take;
+            remaining -= take;
+        }
+        return taken > LOT_QTY_EPSILON ? cost / taken : 0;
+    }
+    if (isPoolMethod(method)) return poolAvg(pools, coin);
+    return peekFifoUnitCost(lots, coin, quantity);
+}
+
+/**
+ * Method-independent pairing for one timestamp group: any non-stable inflow
+ * + any stable outflow in the same second is a buy; extracted verbatim from
+ * applyLedgerEvent so the single-pass engine and the Section 104 planner
+ * share one pairing implementation.
+ */
+function describeLedgerGroup(event) {
+    const items = event.items;
+    const isFeeItem = item => item.op === 'Fee' || /fee/i.test(item.op || '');
+    const buys = items.filter(item => !STABLECOINS.includes(item.coin) && item.change > 0 && !isFeeItem(item));
+    const quoteSpends = items.filter(item => STABLECOINS.includes(item.coin) && item.change < 0 && !isFeeItem(item));
+    const stableFees = items.filter(item => STABLECOINS.includes(item.coin) && isFeeItem(item));
+    const hasQuotePair = buys.length > 0 && quoteSpends.length > 0;
+    const totalBuyUnits = buys.reduce((sum, item) => sum + item.change, 0);
+    const purchaseSpend = quoteSpends.reduce((sum, item) => sum + Math.abs(item.change), 0)
+        + stableFees.reduce((sum, item) => sum + Math.abs(item.change), 0);
+    return { items, isFeeItem, buys, quoteSpends, stableFees, hasQuotePair, totalBuyUnits, purchaseSpend };
+}
+
+/**
+ * Method-independent sale/swap classification for one timestamp group.
+ */
+function describeSaleGroup(event, items, isFeeItem) {
+    const saleRevenues = items.filter(item => STABLECOINS.includes(item.coin) && item.change > 0 && !isFeeItem(item));
+    const disposalRows = items.filter(item => !STABLECOINS.includes(item.coin) && item.change < 0 && !isFeeItem(item));
+    const isSale = disposalRows.length > 0 && saleRevenues.length > 0;
+    const isCryptoSwap = !isSale && disposalRows.length > 0
+        && items.some(item => !STABLECOINS.includes(item.coin) && item.change > 0 && !isFeeItem(item));
+    return { saleRevenues, disposalRows, isSale, isCryptoSwap };
+}
+
+/**
+ * In-kind fee (paid in the sold asset) attributable to one disposal row.
+ */
+function saleInKindFee(items, disposalRows, row) {
+    const sameCoinUnits = disposalRows
+        .filter(disposal => disposal.coin === row.coin)
+        .reduce((sum, disposal) => sum + Math.abs(disposal.change), 0);
+    return sameCoinUnits > 0
+        ? feeQuantityForCoin(items, row.coin) * (Math.abs(row.change) / sameCoinUnits)
+        : 0;
+}
+
+/**
+ * Method-independent sale economics: net stablecoin proceeds spread
+ * pro-rata over the disposed quantity (including in-kind fee quantity).
+ */
+function describeSaleEconomics(items, disposalRows, saleRevenues, stableFees) {
+    const totalRevenue = saleRevenues.reduce((sum, item) => sum + item.change, 0);
+    const stableFee = stableFees.reduce((sum, item) => sum + Math.abs(item.change), 0);
+    const netProceeds = Math.max(0, totalRevenue - stableFee);
+    const totalDisposalUnits = disposalRows.reduce((sum, row) => sum + Math.abs(row.change) + saleInKindFee(items, disposalRows, row), 0);
+    const proceedsPerUnit = totalDisposalUnits > 0 ? netProceeds / totalDisposalUnits : 0;
+    return { totalRevenue, stableFee, netProceeds, totalDisposalUnits, proceedsPerUnit };
+}
+
+/**
+ * Attribute an extra acquisition cost (third-asset fee share or swap-rolled
+ * cost handled by callers) to freshly acquired units: lots get a unit-cost
+ * bump, pools get a cost addition.
+ */
+function addCostToAcquisition(newLotsByCoin, pools, coin, allocatedCost, usePools) {
+    if (usePools) {
+        if (allocatedCost > 0) poolAdd(pools, coin, 0, allocatedCost);
+        return;
+    }
+    const coinLots = newLotsByCoin[coin] || [];
+    const lotQuantity = coinLots.reduce((sum, lot) => sum + lot.qty, 0);
+    if (lotQuantity > LOT_QTY_EPSILON) {
+        const unitCostIncrease = allocatedCost / lotQuantity;
+        coinLots.forEach(lot => { lot.unitCost += unitCostIncrease; });
+    }
+}
+
+function makeBuyChartEvent(time, desc) {
+    if (!(desc.hasQuotePair && desc.purchaseSpend > 0 && desc.totalBuyUnits > LOT_QTY_EPSILON)) return null;
+    return {
+        side:'buy',
+        time:time,
+        total:desc.purchaseSpend,
+        records:desc.buys.map(item => ({
+            coin:item.coin,
+            amount:item.change,
+            valueUsd:(item.change / desc.totalBuyUnits) * desc.purchaseSpend
+        }))
+    };
+}
+
+function makeSellChartEvent(time, sale) {
+    if (!(sale.saleRevenues.length > 0 && sale.disposalRows.length > 0)) return null;
+    const totalDisposal = sale.disposalRows.reduce((s, r) => s + Math.abs(r.change), 0);
+    const totalRev = sale.saleRevenues.reduce((s, r) => s + r.change, 0);
+    return {
+        side:'sell',
+        time:time,
+        total:totalRev,
+        records:sale.disposalRows.map(r => ({
+            coin:r.coin,
+            amount:r.change,
+            valueUsd:totalDisposal > 0 ? (Math.abs(r.change) / totalDisposal) * totalRev : 0
+        }))
+    };
+}
+
+/**
+ * Apply one timestamp group to holdings, lots/pools, and realized P/L.
  *
  * Buy fees paid in the acquired asset reduce the lot quantity to the amount
  * retained. Sale fees paid in the sold asset are disposed of together with the
  * sale quantity, so remaining cost and per-unit proceeds stay consistent.
+ * The active cost method arrives via ledgerCtx ({ method, pools }); when it
+ * is omitted the legacy FIFO behavior is preserved.
  */
-function applyLedgerEvent(event, holdings, lots, realized, realizedByYear, collectChartEvents) {
+function applyLedgerEvent(event, holdings, lots, realized, realizedByYear, collectChartEvents, ledgerCtx) {
+  const method = (ledgerCtx && ledgerCtx.method) || 'FIFO';
+  const pools = (ledgerCtx && ledgerCtx.pools) || Object.create(null);
+  const usePools = method === 'ACB';
   const items = event.items;
   const getHolding = coin => {
     if (!holdings[coin]) holdings[coin] = { amount:0, costBasis:0 };
     return holdings[coin];
   };
-  const isFeeItem = item => item.op === 'Fee' || /fee/i.test(item.op || '');
   // Broad pairing: any non-stable inflow + any stable outflow in the same second is treated as a buy,
   // and any non-stable outflow + stable inflow as a sell. This covers Binance operation label
   // variations (Transaction Spend / Sold / Revenue) that would otherwise leave buys at zero cost
   // and make realized P/L disappear, which is the root cause of the ~$338 cost-basis gap.
-  const buys = items.filter(item => !STABLECOINS.includes(item.coin) && item.change > 0 && !isFeeItem(item));
-  const quoteSpends = items.filter(item => STABLECOINS.includes(item.coin) && item.change < 0 && !isFeeItem(item));
-  const stableFees = items.filter(item => STABLECOINS.includes(item.coin) && isFeeItem(item));
-  const hasQuotePair = buys.length > 0 && quoteSpends.length > 0;
-  const totalBuyUnits = buys.reduce((sum, item) => sum + item.change, 0);
-  const purchaseSpend = quoteSpends.reduce((sum, item) => sum + Math.abs(item.change), 0)
-    + stableFees.reduce((sum, item) => sum + Math.abs(item.change), 0);
+  // (Shared with the Section 104 planner via describeLedgerGroup.)
+  const desc = describeLedgerGroup(event);
+  const isFeeItem = desc.isFeeItem;
+  const buys = desc.buys;
+  const quoteSpends = desc.quoteSpends;
+  const stableFees = desc.stableFees;
+  const hasQuotePair = desc.hasQuotePair;
+  const totalBuyUnits = desc.totalBuyUnits;
+  const purchaseSpend = desc.purchaseSpend;
 
   const inKindBuyFeeCoins = new Set(hasQuotePair ? buys.map(item => item.coin) : []);
   const chartEvents = [];
@@ -1090,9 +1412,13 @@ function applyLedgerEvent(event, holdings, lots, realized, realizedByYear, colle
 
   items.filter(item => item.change > 0).forEach(item => {
     let quantity = item.change;
-    // Stablecoin inflows are cash principal, not zero-cost income. Keeping their
-    // USD cost prevents deposited USDT/USDC from appearing as unrealized gain.
+    // Linked on-chain receipts inherit the departure FIFO unit cost (cost-carry
+    // for internal moves). Stablecoin inflows without a link stay at face value.
+    const carriedUnitCost = finiteNumber(item.carryUnitCost, null);
     let cost = STABLECOINS.includes(item.coin) ? item.change : 0;
+    if (carriedUnitCost !== null && carriedUnitCost > 0) {
+      cost = carriedUnitCost * item.change;
+    }
     if (hasQuotePair && buys.includes(item) && totalBuyUnits > LOT_QTY_EPSILON) {
       const sameCoinBuys = buys.filter(buy => buy.coin === item.coin);
       const sameCoinUnits = sameCoinBuys.reduce((sum, buy) => sum + buy.change, 0);
@@ -1105,6 +1431,10 @@ function applyLedgerEvent(event, holdings, lots, realized, realizedByYear, colle
     }
     getHolding(item.coin).costBasis += cost;
     if (quantity <= LOT_QTY_EPSILON) return;
+    if (usePools) {
+      poolAdd(pools, item.coin, quantity, cost);
+      return;
+    }
     const lot = { qty:quantity, unitCost:cost / quantity };
     if (!lots[item.coin]) lots[item.coin] = [];
     lots[item.coin].push(lot);
@@ -1112,40 +1442,26 @@ function applyLedgerEvent(event, holdings, lots, realized, realizedByYear, colle
     newLotsByCoin[item.coin].push(lot);
   });
 
-  if (hasQuotePair && collectChartEvents && purchaseSpend > 0 && totalBuyUnits > LOT_QTY_EPSILON) {
-    chartEvents.push({
-      side:'buy',
-      time:event.time,
-      total:purchaseSpend,
-      records:buys.map(item => ({
-        coin:item.coin,
-        amount:item.change,
-        valueUsd:(item.change / totalBuyUnits) * purchaseSpend
-      }))
-    });
+  if (hasQuotePair && collectChartEvents) {
+    const buyEvent = makeBuyChartEvent(event.time, desc);
+    if (buyEvent) chartEvents.push(buyEvent);
   }
 
-  const saleRevenues = items.filter(item => STABLECOINS.includes(item.coin) && item.change > 0 && !isFeeItem(item));
-  const disposalRows = items.filter(item => !STABLECOINS.includes(item.coin) && item.change < 0 && !isFeeItem(item));
-  const isSale = disposalRows.length > 0 && saleRevenues.length > 0;
-  const isCryptoSwap = !isSale && disposalRows.length > 0
-    && items.some(item => !STABLECOINS.includes(item.coin) && item.change > 0 && !isFeeItem(item));
+  const sale = describeSaleGroup(event, items, isFeeItem);
+  const saleRevenues = sale.saleRevenues;
+  const disposalRows = sale.disposalRows;
+  const isSale = sale.isSale;
+  const isCryptoSwap = sale.isCryptoSwap;
   const inKindSaleFeeCoins = new Set((isSale || isCryptoSwap) ? disposalRows.map(item => item.coin) : []);
 
   if ((isSale || isCryptoSwap) && disposalRows.length > 0) {
-    const totalRevenue = saleRevenues.reduce((sum, item) => sum + item.change, 0);
-    const stableFee = stableFees.reduce((sum, item) => sum + Math.abs(item.change), 0);
-    const netProceeds = Math.max(0, totalRevenue - stableFee);
-    const inKindFeeForDisposal = row => {
-      const sameCoinUnits = disposalRows
-        .filter(disposal => disposal.coin === row.coin)
-        .reduce((sum, disposal) => sum + Math.abs(disposal.change), 0);
-      return sameCoinUnits > 0
-        ? feeQuantityForCoin(items, row.coin) * (Math.abs(row.change) / sameCoinUnits)
-        : 0;
-    };
-    const totalDisposalUnits = disposalRows.reduce((sum, row) => sum + Math.abs(row.change) + inKindFeeForDisposal(row), 0);
-    const proceedsPerUnit = totalDisposalUnits > 0 ? netProceeds / totalDisposalUnits : 0;
+    const econ = describeSaleEconomics(items, disposalRows, saleRevenues, stableFees);
+    const totalRevenue = econ.totalRevenue;
+    const stableFee = econ.stableFee;
+    const netProceeds = econ.netProceeds;
+    const inKindFeeForDisposal = row => saleInKindFee(items, disposalRows, row);
+    const totalDisposalUnits = econ.totalDisposalUnits;
+    const proceedsPerUnit = econ.proceedsPerUnit;
     const year = new Date(event.time).getFullYear();
     if (!realizedByYear[year]) realizedByYear[year] = Object.create(null);
     let totalCostRemoved = 0;
@@ -1154,7 +1470,7 @@ function applyLedgerEvent(event, holdings, lots, realized, realizedByYear, colle
       const inKindFee = inKindFeeForDisposal(row);
       const quantity = Math.abs(row.change) + inKindFee;
       const proceeds = quantity * proceedsPerUnit;
-      const costRemoved = consumeFifoLots(lots, row.coin, quantity);
+      const costRemoved = consumeLots(lots, pools, row.coin, quantity, method);
       totalCostRemoved += costRemoved;
       getHolding(row.coin).costBasis = Math.max(0, getHolding(row.coin).costBasis - costRemoved);
 
@@ -1172,32 +1488,26 @@ function applyLedgerEvent(event, holdings, lots, realized, realizedByYear, colle
       swapTargets.forEach(target => {
         const rolledCost = targetUnits > 0 ? totalCostRemoved * (target.change / targetUnits) : 0;
         getHolding(target.coin).costBasis += rolledCost;
+        if (usePools) {
+          if (rolledCost > 0) poolAdd(pools, target.coin, 0, rolledCost);
+          return;
+        }
         const targetLots = newLotsByCoin[target.coin] || [];
         if (targetLots.length > 0) {
           const costPerUnit = rolledCost / target.change;
           targetLots.forEach(lot => { lot.unitCost = costPerUnit; });
         }
       });
-    } else {
+    } else if (!usePools) {
       saleRevenues.forEach(revenue => {
         (newLotsByCoin[revenue.coin] || []).forEach(lot => {
           lot.unitCost = revenue.change > 0 ? 1 : 0;
         });
       });
     }
-    if (isSale && collectChartEvents && saleRevenues.length > 0 && disposalRows.length > 0) {
-      const totalDisposal = disposalRows.reduce((s, r) => s + Math.abs(r.change), 0);
-      const totalRev = saleRevenues.reduce((s, r) => s + r.change, 0);
-      chartEvents.push({
-        side:'sell',
-        time:event.time,
-        total: totalRev,
-        records: disposalRows.map(r => ({
-          coin: r.coin,
-          amount: r.change,
-          valueUsd: totalDisposal > 0 ? (Math.abs(r.change) / totalDisposal) * totalRev : 0
-        }))
-      });
+    if (isSale && collectChartEvents) {
+      const sellEvent = makeSellChartEvent(event.time, sale);
+      if (sellEvent) chartEvents.push(sellEvent);
     }
   }
 
@@ -1213,19 +1523,14 @@ function applyLedgerEvent(event, holdings, lots, realized, realizedByYear, colle
     // or capitalize it into crypto-swap targets instead of losing it silently.
     if (isFee && !STABLECOINS.includes(item.coin)
       && ((hasQuotePair && !inKindBuyFeeCoins.has(item.coin)) || (isSale || isCryptoSwap))) {
-      const feeCost = consumeFifoLots(lots, item.coin, Math.abs(item.change));
+      const feeCost = consumeLots(lots, pools, item.coin, Math.abs(item.change), method);
       getHolding(item.coin).costBasis = Math.max(0, getHolding(item.coin).costBasis - feeCost);
 
       if (hasQuotePair && totalBuyUnits > LOT_QTY_EPSILON) {
         buys.forEach(buy => {
           const allocatedFeeCost = feeCost * (buy.change / totalBuyUnits);
           getHolding(buy.coin).costBasis += allocatedFeeCost;
-          const buyLots = newLotsByCoin[buy.coin] || [];
-          const buyLotQuantity = buyLots.reduce((sum, lot) => sum + lot.qty, 0);
-          if (buyLotQuantity > LOT_QTY_EPSILON) {
-            const unitCostIncrease = allocatedFeeCost / buyLotQuantity;
-            buyLots.forEach(lot => { lot.unitCost += unitCostIncrease; });
-          }
+          addCostToAcquisition(newLotsByCoin, pools, buy.coin, allocatedFeeCost, usePools);
         });
         return;
       }
@@ -1248,18 +1553,13 @@ function applyLedgerEvent(event, holdings, lots, realized, realizedByYear, colle
         swapTargets.forEach(target => {
           const allocatedFeeCost = targetUnits > 0 ? feeCost * (target.change / targetUnits) : 0;
           getHolding(target.coin).costBasis += allocatedFeeCost;
-          const targetLots = newLotsByCoin[target.coin] || [];
-          const targetLotQuantity = targetLots.reduce((sum, lot) => sum + lot.qty, 0);
-          if (targetLotQuantity > LOT_QTY_EPSILON) {
-            const unitCostIncrease = allocatedFeeCost / targetLotQuantity;
-            targetLots.forEach(lot => { lot.unitCost += unitCostIncrease; });
-          }
+          addCostToAcquisition(newLotsByCoin, pools, target.coin, allocatedFeeCost, usePools);
         });
       }
       return;
     }
 
-    const costRemoved = consumeFifoLots(lots, item.coin, Math.abs(item.change));
+    const costRemoved = consumeLots(lots, pools, item.coin, Math.abs(item.change), method);
     getHolding(item.coin).costBasis = Math.max(0, getHolding(item.coin).costBasis - costRemoved);
   });
 
@@ -1267,18 +1567,18 @@ function applyLedgerEvent(event, holdings, lots, realized, realizedByYear, colle
 }
 
 /**
- * Core analysis: aggregates holdings, counts operations, applies FIFO lots
- * chronologically, and flags zero-cost inflows.
+ * Method-independent first pass over raw rows: holding amounts, operation
+ * counts, fee totals, zero-cost flags, and chronological time groups.
+ * Shared by the single-pass engine (FIFO/LIFO/HIFO/ACB) and Section 104.
  */
-function analyzeData(rows) {
+function collectLedgerBase(rows) {
   const holdings = Object.create(null);
   const opsCount = Object.create(null);
-  const timeGroups = Object.create(null);
+  const grouped = Object.create(null);
   const fees = Object.create(null);
   const zeroCost = [];
-  const lots = Object.create(null);
-  const realized = Object.create(null);
-  const realizedByYear = Object.create(null);
+  const linkById = Object.create(null);
+  (withdrawalLinks || []).forEach(link => { if (link && link.id) linkById[link.id] = link; });
 
   rows.forEach(row => {
     const coin = row['Coin'];
@@ -1298,22 +1598,405 @@ function analyzeData(rows) {
 
     const parsedTime = Date.parse(String(time || '').replace(' ', 'T'));
     if (!Number.isFinite(parsedTime)) return;
-    if (!timeGroups[parsedTime]) timeGroups[parsedTime] = [];
-    timeGroups[parsedTime].push({ coin, change, op, time });
+    if (!grouped[parsedTime]) grouped[parsedTime] = [];
+    grouped[parsedTime].push({
+      coin, change, op, time,
+      _linkArrival: (row && row._linkArrival) || null,
+      _linkDeparture: (row && row._linkDeparture) || null,
+      carryUnitCost: row ? finiteNumber(row._resolvedCarryUnitCost, null) : null,
+      _rowRef: row || null
+    });
   });
 
-  Object.keys(timeGroups).map(Number).sort((a,b) => a-b).forEach(time => {
+  const timeGroups = Object.keys(grouped).map(Number).sort((a,b) => a-b)
+    .map(time => ({ time:time, items:grouped[time] }));
+  return { holdings, opsCount, timeGroups, fees, zeroCost, linkById };
+}
+
+/**
+ * Core analysis: aggregates holdings, counts operations, applies the active
+ * cost-basis method chronologically, and flags zero-cost inflows.
+ */
+function analyzeData(rows, method) {
+  const activeMethod = COST_METHODS.includes(method) ? method : currentCostMethod;
+  const base = collectLedgerBase(rows);
+  if (activeMethod === 'SECTION104') return runSection104(base);
+  const holdings = base.holdings;
+  const opsCount = base.opsCount;
+  const timeGroups = base.timeGroups;
+  const fees = base.fees;
+  const zeroCost = base.zeroCost;
+  const linkById = base.linkById;
+  const lots = Object.create(null);
+  const pools = activeMethod === 'ACB' ? Object.create(null) : null;
+  const ledgerCtx = { method:activeMethod, pools:pools };
+  const realized = Object.create(null);
+  const realizedByYear = Object.create(null);
+  const carryByLink = Object.create(null);
+
+  timeGroups.forEach(group => {
+    const time = group.time;
+    const items = group.items;
+    // Departures first: peek the unit cost before the group consumes it.
+    items.forEach(item => {
+      if (item._linkDeparture && carryByLink[item._linkDeparture] == null) {
+        const unitCost = peekUnitCost(lots, pools, item.coin, Math.abs(item.change), activeMethod);
+        carryByLink[item._linkDeparture] = unitCost;
+        const link = linkById[item._linkDeparture];
+        if (link) link.carryUnitCost = unitCost;
+      }
+    });
+    // Arrivals inherit the carried unit cost resolved above (or from a prior group).
+    items.forEach(item => {
+      if (item._linkArrival && item.carryUnitCost == null && carryByLink[item._linkArrival] != null) {
+        item.carryUnitCost = carryByLink[item._linkArrival];
+      }
+    });
     applyLedgerEvent(
-      { time, items:timeGroups[time] },
+      { time:time, items:items },
       holdings,
       lots,
       realized,
       realizedByYear,
-      false
+      false,
+      ledgerCtx
     );
+    // Persist resolved carry on the arrival row so the growth-chart timeline
+    // (rebuilt from the same row objects) reuses it without re-peeking.
+    items.forEach(item => {
+      if (item._linkArrival && item._rowRef && carryByLink[item._linkArrival] != null) {
+        item._rowRef._resolvedCarryUnitCost = carryByLink[item._linkArrival];
+      }
+    });
   });
 
   return { holdings, opsCount, fees, zeroCost, realized, realizedByYear };
+}
+
+// ==================== UK HMRC Section 104 shared pool ====================
+const S104_DAY_MS = 86400000;
+function s104DayStart(timeMs) {
+    const d = new Date(timeMs);
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+}
+
+/**
+ * Describe one timestamp group for Section 104: acquisition records with
+ * frozen (method-independent) costs plus disposal/outflow records.
+ * Cash-buy costs from same-second spend pairing never depend on pool state,
+ * so they are frozen here; pool-average-dependent values resolve in replay.
+ */
+function describeS104Group(group) {
+    const desc = describeLedgerGroup(group);
+    const sale = describeSaleGroup(group, desc.items, desc.isFeeItem);
+    const econ = ((sale.isSale || sale.isCryptoSwap) && sale.disposalRows.length > 0)
+        ? describeSaleEconomics(desc.items, sale.disposalRows, sale.saleRevenues, desc.stableFees)
+        : null;
+    const inKindBuyFeeCoins = new Set(desc.hasQuotePair ? desc.buys.map(item => item.coin) : []);
+    const inKindSaleFeeCoins = new Set((sale.isSale || sale.isCryptoSwap) ? sale.disposalRows.map(item => item.coin) : []);
+    const rec = {
+        time:group.time,
+        items:desc.items,
+        desc:desc,
+        sale:sale,
+        econ:econ,
+        year:new Date(group.time).getFullYear(),
+        inKindBuyFeeCoins:inKindBuyFeeCoins,
+        inKindSaleFeeCoins:inKindSaleFeeCoins,
+        acquisitions:[],
+        saleDisposals:[],
+        swapDisposals:[],
+        otherOutflows:[],
+        thirdAssetFees:[],
+        buyEvent:makeBuyChartEvent(group.time, desc),
+        sellEvent:sale.isSale ? makeSellChartEvent(group.time, sale) : null
+    };
+
+    desc.items.filter(item => item.change > 0).forEach(item => {
+        let quantity = item.change;
+        const carriedUnitCost = finiteNumber(item.carryUnitCost, null);
+        let cost = STABLECOINS.includes(item.coin) ? item.change : 0;
+        let cashBuy = false;
+        if (carriedUnitCost !== null && carriedUnitCost > 0) {
+            cost = carriedUnitCost * item.change;
+        }
+        if (desc.hasQuotePair && desc.buys.includes(item) && desc.totalBuyUnits > LOT_QTY_EPSILON) {
+            const sameCoinBuys = desc.buys.filter(buy => buy.coin === item.coin);
+            const sameCoinUnits = sameCoinBuys.reduce((sum, buy) => sum + buy.change, 0);
+            const inKindFeeShare = sameCoinUnits > 0
+                ? feeQuantityForCoin(desc.items, item.coin) * (item.change / sameCoinUnits)
+                : 0;
+            const spendShare = (item.change / desc.totalBuyUnits) * desc.purchaseSpend;
+            quantity = Math.max(0, item.change - inKindFeeShare);
+            cost = spendShare;
+            cashBuy = true;
+        }
+        const stable = STABLECOINS.includes(item.coin);
+        const linked = !cashBuy && !!item._linkArrival;
+        const swapReceipt = !stable && !linked && !cashBuy && sale.isCryptoSwap;
+        rec.acquisitions.push({
+            item:item, coin:item.coin, qty:quantity, cost:cost,
+            unitCost:quantity > LOT_QTY_EPSILON ? cost / quantity : 0,
+            time:group.time, stable:stable, linked:linked, cashBuy:cashBuy,
+            swapReceipt:swapReceipt, allocated:0
+        });
+    });
+
+    if ((sale.isSale || sale.isCryptoSwap) && sale.disposalRows.length > 0) {
+        sale.disposalRows.forEach(row => {
+            const inKindFee = saleInKindFee(desc.items, sale.disposalRows, row);
+            const quantity = Math.abs(row.change) + inKindFee;
+            if (sale.isSale) {
+                rec.saleDisposals.push({
+                    row:row, coin:row.coin, qty:quantity,
+                    proceeds:quantity * econ.proceedsPerUnit, year:rec.year,
+                    matches:[], remainderQty:quantity
+                });
+            } else {
+                rec.swapDisposals.push({ row:row, coin:row.coin, qty:quantity });
+            }
+        });
+    }
+
+    desc.items.filter(item => item.change < 0).forEach(item => {
+        const isSaleDisposal = (sale.isSale || sale.isCryptoSwap) && sale.disposalRows.includes(item);
+        const isFee = item.op === 'Fee' || /fee/i.test(item.op);
+        const isAccountedInKindFee = isFee
+            && ((desc.hasQuotePair && inKindBuyFeeCoins.has(item.coin)) || inKindSaleFeeCoins.has(item.coin));
+        if (isSaleDisposal || isAccountedInKindFee) return;
+        if (isFee && !STABLECOINS.includes(item.coin)
+            && ((desc.hasQuotePair && !inKindBuyFeeCoins.has(item.coin)) || sale.isSale || sale.isCryptoSwap)) {
+            rec.thirdAssetFees.push({ item:item, coin:item.coin, qty:Math.abs(item.change) });
+            return;
+        }
+        rec.otherOutflows.push({ item:item, coin:item.coin, qty:Math.abs(item.change) });
+    });
+
+    return rec;
+}
+
+/**
+ * HMRC quantity allocation (planning sweep): each cash-sale disposal first
+ * matches same-day (UTC) acquisitions of the same token, then acquisitions
+ * in the following 30 days (FIFO), with the remainder falling into the
+ * Section 104 pool. Linked internal transfers, swap receipts and stablecoin
+ * legs never enter the matchable schedule.
+ */
+function allocateSection104(records) {
+    const schedByCoin = Object.create(null);
+    records.forEach(rec => {
+        rec.acquisitions.forEach(acq => {
+            if (acq.stable || acq.linked || acq.swapReceipt || acq.qty <= LOT_QTY_EPSILON) return;
+            if (!schedByCoin[acq.coin]) schedByCoin[acq.coin] = [];
+            schedByCoin[acq.coin].push(acq);
+        });
+    });
+    Object.keys(schedByCoin).forEach(coin => {
+        schedByCoin[coin].sort((a, b) => a.time - b.time);
+    });
+    const takeFrom = (sched, pred, disposal, remaining) => {
+        let left = remaining;
+        for (let i = 0; i < sched.length && left > LOT_QTY_EPSILON; i++) {
+            const acq = sched[i];
+            if (!pred(acq)) continue;
+            const avail = acq.qty - acq.allocated;
+            if (avail <= LOT_QTY_EPSILON) continue;
+            const take = Math.min(avail, left);
+            acq.allocated += take;
+            left -= take;
+            disposal.matches.push({ acq:acq, qty:take });
+        }
+        return left;
+    };
+    records.forEach(rec => {
+        rec.saleDisposals.forEach(d => {
+            const sched = schedByCoin[d.coin] || [];
+            const day = s104DayStart(rec.time);
+            const dayOf = acq => s104DayStart(acq.time);
+            let remaining = d.qty;
+            remaining = takeFrom(sched, acq => dayOf(acq) === day, d, remaining);
+            if (remaining > LOT_QTY_EPSILON) {
+                remaining = takeFrom(sched, acq => {
+                    const ad = dayOf(acq);
+                    return ad > day && ad <= day + 30 * S104_DAY_MS;
+                }, d, remaining);
+            }
+            d.remainderQty = Math.max(0, remaining);
+        });
+    });
+}
+
+/**
+ * Replay one Section 104 group record against pool state.
+ * Mode 'planning' runs a provisional ACB-style replay that fixes
+ * third-asset buy-fee bumps on acquisition records; mode 'final' applies the
+ * frozen allocation (matched portions bypass the pool). Swaps roll
+ * pool-average cost into their targets in both modes (gain stays deferred).
+ * Returns buy/sell chart events when st.collectEvents is set.
+ */
+function replayS104Record(rec, st, mode) {
+    const events = [];
+    // Carry first, mirroring analyzeData: departures peek, arrivals inherit.
+    rec.items.forEach(item => {
+        if (item._linkDeparture && st.carryByLink[item._linkDeparture] == null) {
+            const unitCost = poolAvg(st.pools, item.coin);
+            st.carryByLink[item._linkDeparture] = unitCost;
+            const link = st.linkById[item._linkDeparture];
+            if (link) link.carryUnitCost = unitCost;
+        }
+    });
+    rec.items.forEach(item => {
+        if (item._linkArrival && item.carryUnitCost == null && st.carryByLink[item._linkArrival] != null) {
+            item.carryUnitCost = st.carryByLink[item._linkArrival];
+        }
+    });
+    if (st.persistCarry) {
+        rec.items.forEach(item => {
+            if (item._linkArrival && item._rowRef && st.carryByLink[item._linkArrival] != null) {
+                item._rowRef._resolvedCarryUnitCost = st.carryByLink[item._linkArrival];
+            }
+        });
+    }
+    if (rec.buyEvent && st.collectEvents) events.push(rec.buyEvent);
+
+    // (a) Inflows. Swap receipts are skipped here and enter with rolled cost in (b).
+    rec.acquisitions.forEach(acq => {
+        if (acq.swapReceipt) return;
+        if (acq.linked) {
+            const carry = finiteNumber(acq.item.carryUnitCost, null);
+            const cost = (carry !== null && carry > 0) ? carry * acq.item.change : 0;
+            if (acq.qty > LOT_QTY_EPSILON || cost > 0) poolAdd(st.pools, acq.coin, acq.qty, cost);
+            return;
+        }
+        if (mode === 'planning') {
+            if (acq.qty > LOT_QTY_EPSILON || acq.cost > 0) poolAdd(st.pools, acq.coin, acq.qty, acq.cost);
+            return;
+        }
+        const unallocatedQty = Math.max(0, acq.qty - acq.allocated);
+        const unallocatedCost = acq.qty > LOT_QTY_EPSILON ? unallocatedQty * acq.unitCost : acq.cost;
+        if (unallocatedQty > LOT_QTY_EPSILON || unallocatedCost > 0) {
+            poolAdd(st.pools, acq.coin, unallocatedQty, unallocatedCost);
+        }
+    });
+
+    // (b) Disposals.
+    let totalCostRemoved = 0;
+    const disposalResults = [];
+    rec.saleDisposals.forEach(d => {
+        let matchedCost = 0;
+        let remainderQty = d.qty;
+        if (mode !== 'planning') {
+            d.matches.forEach(m => { matchedCost += m.qty * m.acq.unitCost; });
+            remainderQty = d.remainderQty;
+        }
+        const remainderCost = poolConsume(st.pools, d.coin, remainderQty);
+        const costRemoved = matchedCost + remainderCost;
+        totalCostRemoved += costRemoved;
+        if (mode !== 'planning' && rec.sale.isSale && st.realized) {
+            if (!st.realizedByYear[d.year]) st.realizedByYear[d.year] = Object.create(null);
+            const pnl = d.proceeds - costRemoved;
+            st.realized[d.coin] = (st.realized[d.coin] || 0) + pnl;
+            st.realizedByYear[d.year][d.coin] = (st.realizedByYear[d.year][d.coin] || 0) + pnl;
+            disposalResults.push({ coin:d.coin, pnl:pnl, proceeds:d.proceeds, year:d.year });
+        }
+    });
+    rec.swapDisposals.forEach(d => {
+        totalCostRemoved += poolConsume(st.pools, d.coin, d.qty);
+    });
+    if (rec.sale.isCryptoSwap) {
+        const swapTargets = rec.acquisitions.filter(a => a.swapReceipt);
+        const targetUnits = swapTargets.reduce((sum, a) => sum + a.item.change, 0);
+        swapTargets.forEach(target => {
+            const rolledCost = targetUnits > 0 ? totalCostRemoved * (target.item.change / targetUnits) : 0;
+            if (target.item.change > LOT_QTY_EPSILON || rolledCost > 0) {
+                poolAdd(st.pools, target.coin, target.item.change, rolledCost);
+            }
+        });
+    } else if (rec.sellEvent && st.collectEvents) {
+        events.push(rec.sellEvent);
+    }
+
+    // (c) Other outflows and third-asset fees.
+    rec.otherOutflows.forEach(o => { poolConsume(st.pools, o.coin, o.qty); });
+    rec.thirdAssetFees.forEach(f => {
+        const feeCost = poolConsume(st.pools, f.coin, f.qty);
+        if (rec.desc.hasQuotePair && rec.desc.totalBuyUnits > LOT_QTY_EPSILON) {
+            rec.desc.buys.forEach(buy => {
+                const share = feeCost * (buy.change / rec.desc.totalBuyUnits);
+                if (share <= 0) return;
+                if (mode === 'planning') {
+                    const acq = rec.acquisitions.find(a => a.item === buy);
+                    if (acq && !acq.linked && !acq.stable && !acq.swapReceipt) {
+                        acq.cost += share;
+                        acq.unitCost = acq.qty > LOT_QTY_EPSILON ? acq.cost / acq.qty : 0;
+                    }
+                    poolAdd(st.pools, buy.coin, 0, share);
+                }
+                // Final mode: the bump is already frozen into acquisition costs.
+            });
+            return;
+        }
+        if (rec.sale.isSale && disposalResults.length > 0 && mode !== 'planning' && st.realized) {
+            const totalProceeds = disposalResults.reduce((sum, r) => sum + r.proceeds, 0);
+            disposalResults.forEach(result => {
+                const share = totalProceeds > 0
+                    ? feeCost * (result.proceeds / totalProceeds)
+                    : feeCost / disposalResults.length;
+                st.realized[result.coin] -= share;
+                st.realizedByYear[result.year][result.coin] -= share;
+            });
+            return;
+        }
+        if (rec.sale.isCryptoSwap) {
+            const swapTargets = rec.acquisitions.filter(a => a.swapReceipt);
+            const targetUnits = swapTargets.reduce((sum, a) => sum + a.item.change, 0);
+            swapTargets.forEach(target => {
+                const share = targetUnits > 0 ? feeCost * (target.item.change / targetUnits) : 0;
+                if (share > 0) poolAdd(st.pools, target.coin, 0, share);
+            });
+        }
+    });
+
+    return events;
+}
+
+function replayS104Records(records, st, mode) {
+    const events = [];
+    records.forEach(rec => {
+        replayS104Record(rec, st, mode).forEach(e => events.push(e));
+    });
+    return events;
+}
+
+/**
+ * Full Section 104 analysis: planning replay, HMRC allocation, final replay.
+ * Holdings cost basis is the final shared-pool cost per coin.
+ */
+function runSection104(base) {
+    const records = base.timeGroups.map(group => describeS104Group(group));
+    const planningState = {
+        pools:Object.create(null), realized:null, realizedByYear:null,
+        linkById:base.linkById, carryByLink:Object.create(null),
+        persistCarry:false, collectEvents:false
+    };
+    replayS104Records(records, planningState, 'planning');
+    allocateSection104(records);
+    const pools = Object.create(null);
+    const realized = Object.create(null);
+    const realizedByYear = Object.create(null);
+    const finalState = {
+        pools:pools, realized:realized, realizedByYear:realizedByYear,
+        linkById:base.linkById, carryByLink:Object.create(null),
+        persistCarry:true, collectEvents:false
+    };
+    replayS104Records(records, finalState, 'final');
+    Object.keys(base.holdings).forEach(coin => {
+        base.holdings[coin].costBasis = Math.max(0, pools[coin] ? pools[coin].cost : 0);
+    });
+    return {
+        holdings:base.holdings, opsCount:base.opsCount, fees:base.fees,
+        zeroCost:base.zeroCost, realized:realized, realizedByYear:realizedByYear
+    };
 }
 
 /**
@@ -1506,7 +2189,12 @@ function buildTimeline(rows) {
     const tms = Date.parse(time.replace(' ','T'));
     if (isNaN(tms)) return;
     if (!groups[tms]) groups[tms] = [];
-    groups[tms].push({ coin, change, op });
+    groups[tms].push({
+      coin, change, op,
+      _linkArrival: (r && r._linkArrival) || null,
+      _linkDeparture: (r && r._linkDeparture) || null,
+      carryUnitCost: r ? finiteNumber(r._resolvedCarryUnitCost, null) : null
+    });
   });
   return Object.keys(groups).map(Number).sort((a,b)=>a-b).map(t => ({ time:t, items:groups[t] }));
 }
@@ -1519,7 +2207,7 @@ function buildTimeline(rows) {
  * @param {Object<string, Array<{qty:number, unitCost:number}>>} lots Persistent FIFO lots
  * @returns {Array<Object>} Buy/sell events for chart tooltips
  */
-function applyTransactionGroup(event, holdings, costBasis, lots) {
+function applyTransactionGroup(event, holdings, costBasis, lots, ledgerCtx) {
   event.items.forEach(item => {
     holdings[item.coin] = (holdings[item.coin] || 0) + item.change;
   });
@@ -1527,7 +2215,7 @@ function applyTransactionGroup(event, holdings, costBasis, lots) {
   Object.keys(holdings).forEach(coin => {
     ledgerHoldings[coin] = { amount: holdings[coin], costBasis: costBasis[coin] || 0 };
   });
-  const events = applyLedgerEvent(event, ledgerHoldings, lots, Object.create(null), Object.create(null), true);
+  const events = applyLedgerEvent(event, ledgerHoldings, lots, Object.create(null), Object.create(null), true, ledgerCtx);
   Object.keys(ledgerHoldings).forEach(coin => {
     holdings[coin] = ledgerHoldings[coin].amount;
     costBasis[coin] = ledgerHoldings[coin].costBasis;
@@ -1573,13 +2261,62 @@ function buildBuckets(rangeKey, stepMs) {
  * @param {Function} priceFn
  * @returns {Array<Object>}
  */
-function computeDailySeries(timeline, buckets, priceFn) {
+function computeDailySeries(timeline, buckets, priceFn, method) {
+  const activeMethod = COST_METHODS.includes(method) ? method : currentCostMethod;
   const holdings = Object.create(null), costBasis = Object.create(null), lots = Object.create(null), points = [];
+  const pools = (activeMethod === 'ACB' || activeMethod === 'SECTION104') ? Object.create(null) : null;
+  const ledgerCtx = { method:activeMethod, pools:pools };
+  const carryByLink = Object.create(null);
+  // Section 104 needs the full timeline up front (30-day forward matching),
+  // so plan once and replay incrementally per bucket.
+  let s104 = null;
+  if (activeMethod === 'SECTION104') {
+    const linkById = Object.create(null);
+    (withdrawalLinks || []).forEach(link => { if (link && link.id) linkById[link.id] = link; });
+    const records = timeline.map(group => describeS104Group(group));
+    replayS104Records(records, {
+      pools:Object.create(null), realized:null, realizedByYear:null,
+      linkById:linkById, carryByLink:Object.create(null),
+      persistCarry:false, collectEvents:false
+    }, 'planning');
+    allocateSection104(records);
+    s104 = {
+      records:records, recIdx:0,
+      state:{
+        pools:pools, realized:null, realizedByYear:null,
+        linkById:linkById, carryByLink:carryByLink,
+        persistCarry:false, collectEvents:true
+      }
+    };
+  }
   let eventIdx = 0;
   buckets.forEach(bt => {
     const bucketEvents = [];
-    while (eventIdx < timeline.length && timeline[eventIdx].time <= bt) {
-      const evs = applyTransactionGroup(timeline[eventIdx], holdings, costBasis, lots);
+    if (s104) {
+      while (s104.recIdx < s104.records.length && timeline[s104.recIdx].time <= bt) {
+        const group = timeline[s104.recIdx];
+        group.items.forEach(item => {
+          holdings[item.coin] = (holdings[item.coin] || 0) + item.change;
+        });
+        const evs = replayS104Record(s104.records[s104.recIdx], s104.state, 'final');
+        evs.forEach(e => bucketEvents.push(e));
+        s104.recIdx++;
+      }
+      Object.keys(pools).forEach(coin => { costBasis[coin] = Math.max(0, pools[coin].cost); });
+    } else while (eventIdx < timeline.length && timeline[eventIdx].time <= bt) {
+      const group = timeline[eventIdx];
+      // Mirror analyzeData: departures peek first, arrivals inherit carry.
+      group.items.forEach(item => {
+        if (item._linkDeparture && carryByLink[item._linkDeparture] == null) {
+          carryByLink[item._linkDeparture] = peekUnitCost(lots, pools, item.coin, Math.abs(item.change), activeMethod);
+        }
+      });
+      group.items.forEach(item => {
+        if (item._linkArrival && item.carryUnitCost == null && carryByLink[item._linkArrival] != null) {
+          item.carryUnitCost = carryByLink[item._linkArrival];
+        }
+      });
+      const evs = applyTransactionGroup(group, holdings, costBasis, lots, ledgerCtx);
       evs.forEach(e => bucketEvents.push(e));
       eventIdx++;
     }
@@ -1788,7 +2525,7 @@ async function renderGrowthChart(rangeKey) {
   };
 
   const buckets = buildBuckets(rangeKey, stepForRange(rangeKey));
-  const points = computeDailySeries(growthTimeline, buckets, priceFn);
+  const points = computeDailySeries(growthTimeline, buckets, priceFn, currentCostMethod);
   lastGrowthPoints = points;
 
   if (typeof Chart === 'undefined' || points.length === 0) return;
@@ -2964,62 +3701,205 @@ async function importWalletEvents(account, onProgress) {
 }
 
 /**
- * A withdrawal in the Binance ledger and its later on-chain deposit describe one
- * asset move, not a second acquisition. Removing both keeps the original FIFO lot.
+ * Peek the FIFO unit cost that a departure of `quantity` would consume, without
+ * mutating the lots. Used to carry cost from a Binance withdrawal to its linked
+ * on-chain receipt so the same asset is not counted twice and later on-chain
+ * disposals keep the original cost basis.
+ * @param {Object} lots
+ * @param {string} coin
+ * @param {number} quantity
+ * @returns {number}
  */
-function reconcileInternalTransfers(rows) {
-  const excluded = new Set();
-  const isWallet = row => row._source === 'wallet';
+function peekFifoUnitCost(lots, coin, quantity) {
+  const stack = lots[coin] || [];
+  let remaining = Math.abs(quantity);
+  let cost = 0;
+  let taken = 0;
+  for (let i = 0; i < stack.length && remaining > LOT_QTY_EPSILON; i++) {
+    const lot = stack[i];
+    const take = Math.min(lot.qty, remaining);
+    cost += take * lot.unitCost;
+    taken += take;
+    remaining -= take;
+  }
+  return taken > LOT_QTY_EPSILON ? cost / taken : 0;
+}
+
+/**
+ * Fully automatic pairing of internal moves (user-confirmed policy: 24h forward
+ * window + 0.2% quantity tolerance, one-to-one, smallest time gap wins).
+ * Returns link records; arrival/departure row objects are annotated in place
+ * with _linkArrival / _linkDeparture so FIFO can carry cost over.
+ * @param {Array<Object>} rows normalized source rows (exchange + wallet)
+ * @returns {Array<Object>} links
+ */
+function autoLinkWithdrawals(rows) {
+  const links = [];
+  const usedArrival = new Set();
+  const isWallet = row => row && row._source === 'wallet';
   const changeOf = row => finiteNumber(row['Change'], NaN);
   const timeOf = row => Date.parse(String(row['Time'] || ''));
+  const coinOf = row => normalizeCoinSymbol(row['Coin']);
 
-  // Exchange withdrawal -> wallet receipt preserves the original FIFO lot.
-  // Wallet dispatch -> exchange deposit handles the return trip the same way.
-  const outboundExchange = rows.filter(row => !isWallet(row) && changeOf(row) < 0
-    && /withdraw/i.test(String(row['Operation'] || '')));
-  const inboundWallet = rows.filter(row => isWallet(row) && changeOf(row) > 0
-    && ['Deposit','Transaction Revenue','Transaction Buy'].includes(row['Operation']));
-  const outboundWallet = rows.filter(row => isWallet(row) && changeOf(row) < 0);
-  const inboundExchange = rows.filter(row => !isWallet(row) && changeOf(row) > 0
-    && /^Deposit$/i.test(String(row['Operation'] || '')));
+  function makeLinkId() {
+    try {
+      if (crypto.randomUUID) return 'link-' + crypto.randomUUID();
+    } catch (e) {}
+    return 'link-' + Date.now() + '-' + Math.floor(Math.random() * 1e9);
+  }
 
-  // Two separately tracked wallets need special handling: remove both legs so
-  // the receiving side inherits the sending side's remaining FIFO cost context.
-  const outboundTrackedWallet = rows.filter(row => isWallet(row) && changeOf(row) < 0);
-  const inboundTrackedWallet = rows.filter(row => isWallet(row) && changeOf(row) > 0);
-
-  function consumeMatching(target, candidates, requireDifferentAccounts) {
-    target.forEach(departure => {
-      if (excluded.has(departure)) return;
+  function pairLegs(departures, arrivals, type, requireDifferentAccounts) {
+    departures.forEach(departure => {
+      if (departure._linkDeparture) return;
       const quantity = Math.abs(changeOf(departure));
       const departureTime = timeOf(departure);
-      if (!Number.isFinite(quantity) || !Number.isFinite(departureTime)) return;
+      if (!Number.isFinite(quantity) || quantity <= 0 || !Number.isFinite(departureTime)) return;
       let best = null;
       let bestGap = Infinity;
-      candidates.forEach(arrival => {
-        if (excluded.has(arrival) || arrival === departure) return;
-        if (arrival['Coin'] !== departure['Coin']) return;
+      let bestDiff = Infinity;
+      arrivals.forEach(arrival => {
+        if (arrival === departure || usedArrival.has(arrival) || arrival._linkArrival) return;
+        if (coinOf(arrival) !== coinOf(departure)) return;
         if (requireDifferentAccounts && arrival._accountId === departure._accountId) return;
-        const gap = Math.abs(timeOf(arrival) - departureTime);
-        if (gap > 72 * 3600000 || gap >= bestGap) return;
-        const tolerance = Math.max(LOT_QTY_EPSILON, quantity * 0.002);
-        if (Math.abs(Math.abs(changeOf(arrival)) - quantity) <= tolerance) {
-          best = arrival;
-          bestGap = gap;
-        }
+        const arrivalTime = timeOf(arrival);
+        if (!Number.isFinite(arrivalTime)) return;
+        const gap = arrivalTime - departureTime;
+        if (gap < 0 || gap > WITHDRAW_LINK_WINDOW_MS || gap > bestGap) return;
+        const diff = Math.abs(Math.abs(changeOf(arrival)) - quantity);
+        if (diff > Math.max(LOT_QTY_EPSILON, quantity * WITHDRAW_LINK_TOLERANCE)) return;
+        if (gap === bestGap && diff >= bestDiff) return;
+        best = arrival;
+        bestGap = gap;
+        bestDiff = diff;
       });
       if (best) {
-        excluded.add(departure);
-        excluded.add(best);
+        const arrivalQty = Math.abs(changeOf(best));
+        const link = {
+          id: makeLinkId(),
+          type,
+          coin: coinOf(departure),
+          withdrawQty: quantity,
+          arrivalQty,
+          withdrawTime: departureTime,
+          arrivalTime: timeOf(best),
+          timeGapMs: bestGap,
+          qtyDiffPct: quantity > 0 ? (bestDiff / quantity) * 100 : 0,
+          status: 'auto',
+          carryUnitCost: 0,
+          createdAt: Date.now(),
+          accountId: best._accountId || departure._accountId || '',
+          network: best._network || '',
+          address: '',
+          walletTxid: best._txid || '',
+          _departureRow: departure,
+          _arrivalRow: best
+        };
+        departure._linkDeparture = link.id;
+        best._linkArrival = link.id;
+        usedArrival.add(best);
+        links.push(link);
       }
     });
   }
 
-  consumeMatching(outboundExchange, inboundWallet, false);
-  consumeMatching(outboundWallet, inboundExchange, false);
-  consumeMatching(outboundTrackedWallet, inboundTrackedWallet, true);
+  const outboundExchange = rows.filter(row => !isWallet(row) && changeOf(row) < 0
+    && /withdraw/i.test(String(row['Operation'] || '')));
+  const inboundWallet = rows.filter(row => isWallet(row) && changeOf(row) > 0
+    && ['Deposit','Transaction Revenue','Transaction Buy'].includes(row['Operation']));
+  // Return trip: self-custody -> exchange deposit.
+  const outboundWallet = rows.filter(row => isWallet(row) && changeOf(row) < 0);
+  const inboundExchange = rows.filter(row => !isWallet(row) && changeOf(row) > 0
+    && /^Deposit$/i.test(String(row['Operation'] || '')));
+  // Two separately tracked wallets: same cost-carry treatment.
+  const inboundTrackedWallet = rows.filter(row => isWallet(row) && changeOf(row) > 0);
 
-  return rows.filter(row => !excluded.has(row));
+  pairLegs(outboundExchange, inboundWallet, 'withdraw', false);
+  pairLegs(outboundWallet, inboundExchange, 'deposit', false);
+  const freeOutboundWallet = outboundWallet.filter(row => !row._linkDeparture);
+  const freeInboundWallet = inboundTrackedWallet.filter(row => !usedArrival.has(row) && !row._linkArrival);
+  pairLegs(freeOutboundWallet, freeInboundWallet, 'internal', true);
+
+  return links;
+}
+
+/**
+ * A withdrawal in the Binance ledger and its later on-chain deposit describe one
+ * asset move, not a second acquisition. Linked legs are both kept and the FIFO
+ * cost is carried from the departure lot to the arrival lot (see analyzeData),
+ * so totals match the old exclusion math while later on-chain disposals keep
+ * the original cost basis for realized P/L.
+ */
+function reconcileInternalTransfers(rows) {
+  // Cost-carry mode: keep both legs, link them via autoLinkWithdrawals, and let
+  // analyzeData carry the FIFO unit cost from departure to arrival. Unlinked
+  // legs keep the legacy semantics (unknown-destination outflow consumes cost,
+  // external inflow stays zero-cost).
+  withdrawalLinks = autoLinkWithdrawals(rows);
+  return rows;
+}
+
+/**
+ * Account IDs that have at least one auto-linked internal move. Used for the
+ * hybrid sync policy (linked wallets first) and the ★ marker in the table.
+ * @returns {Set<string>}
+ */
+function linkedAccountIds() {
+  const ids = new Set();
+  (withdrawalLinks || []).forEach(link => {
+    if (link && link.accountId) ids.add(link.accountId);
+  });
+  return ids;
+}
+
+function formatLinkGap(ms) {
+  const totalMinutes = Math.max(0, Math.round(finiteNumber(ms, 0) / 60000));
+  if (totalMinutes < 60) return totalMinutes + 'm';
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return minutes ? hours + 'h ' + minutes + 'm' : hours + 'h';
+}
+
+/**
+ * Render the withdrawal ↔ on-chain reconciliation table. Links are fully
+ * automatic (24h forward window + 0.2% tolerance); the table is the audit trail.
+ */
+function renderWithdrawalLinks() {
+  const tbody = document.getElementById('withdrawalLinksBody');
+  const wrap = document.getElementById('linkTableWrap');
+  const emptyNote = document.getElementById('linkEmptyNote');
+  if (!tbody || !wrap) return;
+  const links = [...(withdrawalLinks || [])].sort((a, b) => (a.withdrawTime || 0) - (b.withdrawTime || 0));
+  tbody.textContent = '';
+  wrap.style.display = links.length ? 'block' : 'none';
+  if (emptyNote) emptyNote.style.display = links.length ? 'none' : 'block';
+  const accountById = Object.create(null);
+  (walletAccounts || []).forEach(account => { accountById[account.id] = account; });
+  links.forEach(link => {
+    const tr = document.createElement('tr');
+    const account = accountById[link.accountId];
+    const address = account ? account.address : (link.address || '');
+    const cells = [
+      new Date(link.withdrawTime).toLocaleString(),
+      link.coin,
+      Math.abs(finiteNumber(link.withdrawQty, 0)).toFixed(8),
+      address ? shortAddress(address) : '-',
+      link.walletTxid ? String(link.walletTxid).slice(0, 12) + '…' : '-',
+      formatLinkGap(link.timeGapMs),
+      finiteNumber(link.qtyDiffPct, 0).toFixed(3) + '%',
+      t('linkStatusAuto')
+    ];
+    cells.forEach((text, idx) => {
+      const td = document.createElement('td');
+      td.textContent = text;
+      if (idx === 3 && address) td.title = address;
+      if (idx === 4 && link.walletTxid) td.title = link.walletTxid;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  // Refresh the ★ markers without recursing (renderWalletAccounts calls this).
+  const linkedBtn = document.getElementById('refreshLinkedBtn');
+  if (linkedBtn) linkedBtn.style.display = links.length ? 'inline-flex' : 'none';
 }
 
 function renderWalletAccounts() {
@@ -3030,13 +3910,16 @@ function renderWalletAccounts() {
   tbody.textContent = '';
   wrap.style.display = walletAccounts.length ? 'block' : 'none';
   refreshBtn.style.display = walletAccounts.length ? 'inline-flex' : 'none';
+  const linked = linkedAccountIds();
 
   walletAccounts.forEach(account => {
     const tr = document.createElement('tr');
-    [account.label || shortAddress(account.address), WALLET_NETWORKS.find(n => n.id === account.network)?.name || account.network]
+    const nameCell = (account.label || shortAddress(account.address)) + (linked.has(account.id) ? ' ★' : '');
+    [nameCell, WALLET_NETWORKS.find(n => n.id === account.network)?.name || account.network]
       .forEach(text => {
         const td = document.createElement('td');
         td.textContent = text;
+        if (linked.has(account.id) && text === nameCell) td.title = t('linkedBadge');
         tr.appendChild(td);
       });
     const addressTd = document.createElement('td');
@@ -3143,7 +4026,19 @@ async function addWalletFromForm() {
 }
 
 async function refreshAllWalletAccounts() {
-  for (const account of [...walletAccounts]) await syncWalletAccount(account);
+  // Hybrid policy: linked wallets (with reconciled withdrawals) sync first so
+  // the tracked portfolio refreshes even if later calls hit rate limits.
+  const linked = linkedAccountIds();
+  const ordered = [...walletAccounts].sort((a, b) =>
+    (linked.has(b.id) ? 1 : 0) - (linked.has(a.id) ? 1 : 0));
+  for (const account of ordered) await syncWalletAccount(account);
+}
+
+async function refreshLinkedWalletAccounts() {
+  const linked = linkedAccountIds();
+  const targets = walletAccounts.filter(account => linked.has(account.id));
+  if (!targets.length) return;
+  for (const account of targets) await syncWalletAccount(account);
 }
 
 async function removeWalletAccount(accountId) {
@@ -3156,6 +4051,7 @@ async function removeWalletAccount(accountId) {
 
 document.getElementById('addWalletBtn').addEventListener('click', addWalletFromForm);
 document.getElementById('refreshWalletsBtn').addEventListener('click', refreshAllWalletAccounts);
+document.getElementById('refreshLinkedBtn').addEventListener('click', refreshLinkedWalletAccounts);
 document.getElementById('saveEtherscanKeyBtn').addEventListener('click', async () => {
   const input = document.getElementById('etherscanKeyInput');
   const blockfrostInput = document.getElementById('blockfrostKeyInput');
@@ -3191,9 +4087,34 @@ function populateWalletNetworks() {
  * AES-GCM obfuscated with an origin-local key in IndexedDB; this is not
  * real at-rest encryption because the key lives next to the ciphertext.
  */
+/**
+ * Serialize withdrawal links without live row references.
+ * @returns {Array<Object>}
+ */
+function serializeWithdrawalLinks() {
+  return (withdrawalLinks || []).slice(0, MAX_ROWS).map(link => ({
+    id: String(link.id || '').slice(0, 64),
+    type: String(link.type || 'withdraw').slice(0, 16),
+    coin: normalizeCoinSymbol(link.coin),
+    withdrawQty: finiteNumber(link.withdrawQty, 0),
+    arrivalQty: finiteNumber(link.arrivalQty, 0),
+    withdrawTime: finiteNumber(link.withdrawTime, 0),
+    arrivalTime: finiteNumber(link.arrivalTime, 0),
+    timeGapMs: finiteNumber(link.timeGapMs, 0),
+    qtyDiffPct: finiteNumber(link.qtyDiffPct, 0),
+    status: 'auto',
+    carryUnitCost: finiteNumber(link.carryUnitCost, 0),
+    createdAt: finiteNumber(link.createdAt, Date.now()),
+    accountId: String(link.accountId || '').slice(0, 64),
+    network: String(link.network || '').slice(0, 32),
+    address: String(link.address || '').slice(0, 128),
+    walletTxid: String(link.walletTxid || '').slice(0, 128)
+  }));
+}
+
 async function persistState() {
   try {
-    const payload = JSON.stringify({ rawRows: exchangeRows, currentPrices, importedFileHashes, walletAccounts, walletLedgerRows, walletApiKeys, savedAt: Date.now() });
+    const payload = JSON.stringify({ rawRows: exchangeRows, currentPrices, importedFileHashes, walletAccounts, walletLedgerRows, walletApiKeys, withdrawalLinks: serializeWithdrawalLinks(), costMethod: currentCostMethod, savedAt: Date.now() });
     const encrypted = await encryptPayload(payload);
     localStorage.setItem(STORAGE_KEY, STORAGE_PREFIX + encrypted);
   } catch (e) { console.warn('persist failed', e); }
@@ -3232,6 +4153,27 @@ function sanitizeSavedState(saved) {
       blockfrost:String(saved.walletApiKeys.blockfrost || '').slice(0, 128)
     }
     : { etherscan:'' };
+  const withdrawalLinks = Array.isArray(saved.withdrawalLinks)
+    ? saved.withdrawalLinks.filter(l => l && typeof l.id === 'string' && l.withdrawTime != null)
+      .slice(0, MAX_ROWS).map(l => ({
+        id: String(l.id).slice(0, 64),
+        type: String(l.type || 'withdraw').slice(0, 16),
+        coin: normalizeCoinSymbol(l.coin),
+        withdrawQty: finiteNumber(l.withdrawQty, 0),
+        arrivalQty: finiteNumber(l.arrivalQty, 0),
+        withdrawTime: finiteNumber(l.withdrawTime, 0),
+        arrivalTime: finiteNumber(l.arrivalTime, 0),
+        timeGapMs: finiteNumber(l.timeGapMs, 0),
+        qtyDiffPct: finiteNumber(l.qtyDiffPct, 0),
+        status: 'auto',
+        carryUnitCost: finiteNumber(l.carryUnitCost, 0),
+        createdAt: finiteNumber(l.createdAt, Date.now()),
+        accountId: String(l.accountId || '').slice(0, 64),
+        network: String(l.network || '').slice(0, 32),
+        address: String(l.address || '').slice(0, 128),
+        walletTxid: String(l.walletTxid || '').slice(0, 128)
+      }))
+    : [];
   return {
     rawRows: saved.rawRows,
     currentPrices,
@@ -3239,6 +4181,8 @@ function sanitizeSavedState(saved) {
     walletAccounts,
     walletLedgerRows,
     walletApiKeys,
+    withdrawalLinks,
+    costMethod: COST_METHODS.includes(saved.costMethod) ? saved.costMethod : 'ACB',
     savedAt: typeof saved.savedAt === 'number' && Number.isFinite(saved.savedAt) ? saved.savedAt : Date.now()
   };
 }
@@ -3298,21 +4242,92 @@ function clearStoredData() {
 }
 
 /**
+ * Rebuild normalized analysis rows from the stored sources (exchange CSV rows
+ * + wallet ledger rows), dropping stale link annotations so internal moves
+ * are re-linked from time + quantity on every run.
+ * @returns {Array<Object>}
+ */
+function buildAnalysisRows() {
+  const sourceRows = [...exchangeRows, ...walletLedgerRows];
+  return reconcileInternalTransfers(sourceRows.map(r => {
+    if (!r || r['Coin'] == null) return r;
+    const normalized = Object.assign({}, r);
+    normalized['Coin'] = normalizeCoinSymbol(normalized['Coin']);
+    // Stale link annotations from a previous persisted state must not block
+    // fresh auto-linking; links are recomputed from time + quantity every run.
+    delete normalized._linkArrival;
+    delete normalized._linkDeparture;
+    delete normalized._resolvedCarryUnitCost;
+    return normalized;
+  }));
+}
+
+/**
+ * Sync the cost-method selector and its description with currentCostMethod.
+ */
+function refreshCostMethodUi() {
+  const select = document.getElementById('costMethodSelect');
+  if (select) select.value = currentCostMethod;
+  const desc = document.getElementById('costMethodDesc');
+  if (desc) {
+    desc.dataset.i18n = 'costMethodDesc_' + currentCostMethod;
+    desc.textContent = t(desc.dataset.i18n);
+  }
+}
+
+/**
+ * Re-run the full analysis with the already-fetched prices (no CoinGecko
+ * refetch): holdings, realized P/L, growth chart, and persisted state.
+ */
+async function recomputeWithMethod() {
+  if (!allRawRows.length && !exchangeRows.length && !walletLedgerRows.length) {
+    await persistState();
+    return;
+  }
+  const analysisRows = buildAnalysisRows();
+  allRawRows = analysisRows;
+  const result = analyzeData(allRawRows, currentCostMethod);
+  holdingsData = result.holdings;
+  operationCounts = result.opsCount;
+  feeTotals = result.fees;
+  zeroCostAssets = result.zeroCost;
+  realizedPnl = result.realized;
+  realizedPnlByYear = result.realizedByYear || {};
+  growthTimeline = buildTimeline(allRawRows);
+  renderResults(holdingsData, operationCounts, currentPrices, realizedPnl, realizedPnlByYear);
+  renderWithdrawalLinks();
+  await renderGrowthChart(currentRange);
+  const statusMsg = document.getElementById('statusMsg');
+  statusMsg.textContent = t('costMethodRecalculated', { method:costMethodName(currentCostMethod), n:allRawRows.length });
+  statusMsg.className = 'status-msg success';
+  await persistState();
+}
+
+async function setCostMethod(method) {
+  if (!COST_METHODS.includes(method)) {
+    refreshCostMethodUi();
+    return;
+  }
+  if (method === currentCostMethod) {
+    refreshCostMethodUi();
+    return;
+  }
+  currentCostMethod = method;
+  try { localStorage.setItem(COST_METHOD_STORAGE_KEY, method); } catch (e) {}
+  refreshCostMethodUi();
+  await recomputeWithMethod();
+}
+
+/**
  * Main orchestrator: dedupe rows, analyze data, fetch prices, and render everything.
  * @param {Array<Object>} rows
  * @param {boolean} [isRestore]
  */
 async function processRows(rows, isRestore, options = {}) {
   if (!options.preserveSources) exchangeRows = rows;
-  const sourceRows = [...exchangeRows, ...walletLedgerRows];
-  const analysisRows = reconcileInternalTransfers(sourceRows.map(r => {
-    if (!r || r['Coin'] == null) return r;
-    const normalized = Object.assign({}, r);
-    normalized['Coin'] = normalizeCoinSymbol(normalized['Coin']);
-    return normalized;
-  }));
+  const analysisRows = buildAnalysisRows();
   allRawRows = analysisRows;
-  const { holdings, opsCount, fees, zeroCost, realized, realizedByYear } = analyzeData(allRawRows);
+  const { holdings, opsCount, fees, zeroCost, realized, realizedByYear } = analyzeData(allRawRows, currentCostMethod);
   holdingsData = holdings;
   operationCounts = opsCount;
   feeTotals = fees;
@@ -3330,6 +4345,7 @@ async function processRows(rows, isRestore, options = {}) {
   currentPrices = prices;
 
   renderResults(holdings, opsCount, prices, realized, realizedByYear);
+  renderWithdrawalLinks();
   await renderGrowthChart(currentRange);
 
   if (lastPriceFetchOk) {
@@ -3456,8 +4472,11 @@ document.querySelectorAll('#pieModeTabs .range-btn').forEach(btn => {
   });
 });
 
+document.getElementById('costMethodSelect').addEventListener('change', e => { setCostMethod(e.target.value); });
+refreshCostMethodUi();
+
 document.getElementById('exportCsvBtn').addEventListener('click', () => {
-  const rows = [['Coin','Amount','CostBasis_USDT','AvgCost','Price_USD','MarketValue_USD','UnrealizedPL_USD','RealizedPL_USD','Return_%','PriceDataMissing']];
+  const rows = [[escapeCsvCell('CostMethod'), escapeCsvCell(currentCostMethod)], ['Coin','Amount','CostBasis_USDT','AvgCost','Price_USD','MarketValue_USD','UnrealizedPL_USD','RealizedPL_USD','Return_%','PriceDataMissing']];
   Object.entries(holdingsData).filter(([c,d]) => Math.abs(d.amount) > 0.0000001).forEach(([coin,d]) => {
     const price = currentPrices[coin] || 0;
     const mv = d.amount * price;
@@ -3477,7 +4496,7 @@ document.getElementById('exportCsvBtn').addEventListener('click', () => {
   const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url; a.download = 'portfolio_holdings_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.href = url; a.download = 'portfolio_holdings_' + currentCostMethod.toLowerCase() + '_' + new Date().toISOString().slice(0,10) + '.csv';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
   const statusMsg = document.getElementById('statusMsg');
@@ -3764,7 +4783,7 @@ document.getElementById('exportPngBtn').addEventListener('click', async () => {
   });
 
   const yearlyY = tableY + tableH + 24;
-  drawPanel(ctx, padding, yearlyY, width - padding * 2, yearlyTableH, 12, t('yearlyPnlTitle'));
+  drawPanel(ctx, padding, yearlyY, width - padding * 2, yearlyTableH, 12, t('yearlyPnlTitle') + ' · ' + costMethodName(currentCostMethod));
 
   const yCols = [
     { label: t('colYear'), width: 120, align: 'left' },
@@ -3861,6 +4880,8 @@ document.getElementById('langToggle').addEventListener('click', () => {
     renderResults(holdingsData, operationCounts, currentPrices, realizedPnl, realizedPnlByYear);
     renderFeeAndZeroCost(feeTotals, zeroCostAssets, currentPrices);
   }
+  renderWalletAccounts();
+  renderWithdrawalLinks();
   renderGrowthChart(currentRange);
   renderPieChart(holdingsData, currentPrices, currentPieMode);
 });
@@ -3897,6 +4918,7 @@ document.getElementById('clearConfirmBtn').addEventListener('click', async () =>
   walletAccounts = [];
   walletLedgerRows = [];
   walletApiKeys = { etherscan:'', blockfrost:'' };
+  withdrawalLinks = [];
   clearModal.classList.remove('open');
   await clearStoredData();
   location.reload();
@@ -3975,6 +4997,12 @@ renderWalletAccounts();
       walletAccounts = saved.walletAccounts || [];
       walletLedgerRows = saved.walletLedgerRows || [];
       walletApiKeys = saved.walletApiKeys || { etherscan:'' };
+      withdrawalLinks = saved.withdrawalLinks || [];
+      if (COST_METHODS.includes(saved.costMethod)) {
+        currentCostMethod = saved.costMethod;
+        try { localStorage.setItem(COST_METHOD_STORAGE_KEY, currentCostMethod); } catch (e) {}
+      }
+      refreshCostMethodUi();
       document.getElementById('etherscanKeyInput').value = walletApiKeys.etherscan || '';
       document.getElementById('blockfrostKeyInput').value = walletApiKeys.blockfrost || '';
       renderWalletAccounts();
